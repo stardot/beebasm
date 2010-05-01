@@ -1,0 +1,485 @@
+*******************************************************************************
+*                                                                             *
+*                                   BeebAsm                                   *
+*                                                                             *
+*             A portable 6502 assembler with BBC Micro style syntax           *
+*                                                                             *
+*                   Rich Talbot-Watkins <rich_tw@hotmail.com>                 *
+*                                                                             *
+*******************************************************************************
+
+
+CONTENTS
+
+ 1. ABOUT BEEBASM
+ 2. BEEBASM 'PHILOSOPHY'
+ 3. EXAMPLE
+ 4. COMMAND LINE OPTIONS
+ 5. SOURCE FILE SYNTAX
+ 6. ASSEMBLER DIRECTIVES
+ 7. TIPS AND TRICKS
+ 8. DEMO
+ 9. VERSION HISTORY
+10. REPORTING BUGS
+
+
+
+1. ABOUT BEEBASM
+
+BeebAsm is a 6502 assembler designed specially for developing assembler
+programs for the BBC Micro.  It uses syntax reminiscent of BBC BASIC's built-in
+assembler, and is able to output its object code directly into emulator-ready
+DFS disc images.
+
+Many of the luxuries which come from assembling within the BBC BASIC
+environment on a real BBC Micro are also available here, including FOR...NEXT
+loops, conditional assembly (IF...ELSE...ENDIF), and all of BASIC's numerical
+functions, including SIN, COS and SQR - very useful for building lookup tables
+directly within a source file.
+
+BeebAsm is distributed with source code, and should be easily portable to any
+platform you wish.
+
+
+
+
+2. BEEBASM 'PHILOSOPHY'
+
+BeebAsm is not like most modern assemblers, in that it doesn't just accept a
+source file, and output the corresponding object code file - after all, what
+use is a raw 6502 executable file on a PC, outside of an emulated BBC Micro
+environment?
+
+Although BeebAsm *is* able to do this, this isn't the way it was intended to be
+used.  Instead, BeebAsm can be pointed at a BBC Micro DFS disc image (.ssd or
+.dsd file), and can save blocks of assembled object code directly onto the
+'disc', as many or as few as you wish.  It is up to the source code to specify
+which blocks of assembled code to save, and with which name, just as if you
+were assembling from within BBC BASIC itself.
+
+
+
+
+3. EXAMPLE
+
+Rather than trying to explain anything about BeebAsm now, let's leap straight
+into an example, as it can probably illustrate more about how BeebAsm should
+be used than a thousand lines of text.
+
+Take the following highly contrived source file: simple.asm
+
+-------------------------------------------------------------------------------
+\ Simple example illustrating use of BeebAsm
+
+oswrch = &FFEE
+osasci = &FFE3
+addr = &70
+
+ORG &2000         ; code origin (like P%=&2000)
+
+.start
+    LDA #22:JSR oswrch
+    LDA #7:JSR oswrch
+    LDX #mytext MOD 256:STA addr
+    LDY #mytext DIV 256:STA addr+1
+    LDY #0
+.loop
+    LDA (addr),Y
+    BEQ finished
+    JSR osasci
+    INY
+    BNE loop
+.finished
+    RTS
+
+.mytext EQUS "Hello world!", 13, 0
+.end
+
+SAVE "MyCode", start, end
+-------------------------------------------------------------------------------
+
+...and then build it with the following command:
+
+beebasm -i simple.asm -do test.ssd -boot MyCode -v
+
+This will do the following:
+
+* create a new disc image called test.ssd, set to *OPT 4,3
+* assemble the 6502 code and create an executable on the disc called 'MyCode'
+* create a !Boot file containing '*RUN MyCode'
+* output a listing of the assembled code
+
+Note how the syntax in the source file is very much like BBC BASIC, with a few
+small differences which we'll look at in detail later.
+
+Note also that the source code tells the assembler what should be saved - in
+this example, all of the assembled code (from .start to .end), with the
+filename 'MyCode'.  This might at first seem strange, but it's actually very
+simple and powerful: you have absolute control over what gets saved.  If we
+wished, we could assemble more code elsewhere and save it as a separate file,
+whilst all the defined labels remained visible to both chunks of code.
+
+
+
+
+4. COMMAND LINE OPTIONS
+
+At its very most basic, you need know only one command line option:
+
+-i <filename>
+
+This specifies the name of the source file for BeebAsm to process.  In the
+absence of any switches specifying disc image filenames, SAVE commands in the
+source code will write out object files directly to the current directory.
+
+-do <filename>
+
+This specifies the name of a new disc image to be created.  All object code
+files will be saved to within this disc image.
+
+-boot <DFS filename>
+
+If specifed, BeebAsm will create a !Boot file on the new disc image, containing
+the command '*RUN <DFS filename>'.  The new disc image will already be set to
+*OPT 4,3 (*EXEC !Boot).
+
+-di <filename>
+
+If specified, BeebAsm will use this disc image as a template for the new disc
+image, rather than creating a new blank one.  This is useful if you have a
+BASIC loader which you want to run before your executable.  Note this cannot be
+the same as the -do filename!
+
+-v
+
+Verbose output.  Assembled code will be output to the screen.
+
+
+
+
+5. SOURCE FILE SYNTAX
+
+Assembler instructions are written with the standard 6502 syntax.
+
+A label is defined by preceding it with a ".", as per the BBC Micro assembler,
+e.g.  .loop
+
+Instructions can be written one-per-line, or many on one line, separated by
+colons.  A label need not be followed by a colon.
+
+Comments are introduced by a semicolon or backslash.  Unlike the BBC Micro
+assembler, these continue to the end of the line, and are not terminated by a
+colon (because this BBC Micro feature is horrible!).
+
+Numeric literals are in decimal by default, and can be integers or reals.
+Hex literals are prefixed with "&".
+A character in single quotes (e.g. 'A') returns its ASCII code.
+
+BeebAsm can accept complex expressions, using a wide variety of operators and
+functions.  Here's a summary:
+
++ - * /            Addition, subtraction, multiplication, division.
+<<                 Arithmetic shift left; same precedence as multiplication
+>>                 Arithmetic shift right; same precedence as division
+^                  Raise to the power of.
+() or []           Bracketed expression.  Use [] to avoid confusion with
+                   6502 indirect instructions.
+= or ==            Test equality.  Returns 0 or -1.
+<> or !=           Test non-equality.  Returns 0 or -1.
+< > <= >=          Other comparisons.  Returns 0 or -1.
+AND                Bitwise AND.
+OR                 Bitwise OR.
+EOR                Bitwise EOR.
+DIV                Integer division.
+MOD                Integer modulus.
+
+LO(val) or <val    Return lsb of 16-bit expression (like 'val MOD 256')
+HI(val) or >val    Return msb of 16-bit expression (like 'val DIV 256')
+-                  Negate (unary minus)
+SQR(val)           Return square root of val
+SIN(val)           Return sine of val
+COS(val)           Return cosine of val
+TAN(val)           Return tangent of val
+ASN(val)           Return arc-sine of val
+ACS(val)           Return arc-cosine of val
+ATN(val)           Return arc-tangent of val
+RAD(val)           Convert degrees to radians
+DEG(val)           Convert radians to degrees
+INT(val)           Round to integer (towards zero)
+ABS(val)           Take the absolute value
+SGN(val)           Return -1, 0 or 1, depending on the sign of the argument
+RND(val)           RND(1) returns a random number between 0 and 1
+                   RND(n) returns an integer between 0 and n-1
+
+Also, some constants are defined:
+
+PI                 The value of PI (3.1415927...)
+FALSE              Returns 0
+TRUE               Returns -1
+* or P%            A special symbol which returns the current address being
+                   assembled at.
+
+Variables can be defined at any point using the BASIC syntax, i.e.
+addr = &70.
+
+Note that it is not possible to reassign variables once defined.
+However FOR...NEXT blocks have their own scope (more on this later).
+
+
+
+
+6. ASSEMBLER DIRECTIVES
+
+These are keywords which control the assembly of the source file.
+Here's a summary:
+
+ORG <addr>
+
+Set the address to be assembled from.  This can be changed multiple times
+during a source file if you wish (for example) to assemble two separate blocks
+of code at different addresses, but share the labels between both blocks.
+This is exactly equivalent to BBC BASIC's 'P%=<addr>'.
+
+
+SKIP <bytes>
+
+Moves the address pointer on by the specified number of bytes.  Use this to
+reserve a space of a fixed size in the code.
+
+
+ALIGN <alignment>
+
+Used to align the address pointer to the next boundary, e.g. use ALIGN &100 to
+move to the next page (useful perhaps for positioning a table at a page
+boundary so that index accesses don't incur a "page crossed" penalty.
+
+
+INCLUDE "filename"
+
+Includes the specified source file in the code at this point.
+
+
+EQUB a [, b, c, ...]
+
+Insert the specified byte(s) into the code.  Note, unlike BBC BASIC, that a
+comma-separated sequence can be inserted.
+
+
+EQUW a [, b, c, ...]
+
+Insert the specified 16-bit word(s) into the code.
+
+
+EQUS "string" [, "string", byte, ...]
+
+Inserts the specified string into the code.  Note that this can take a comma-
+separated list of parameters which may also include bytes.  So, to zero-
+terminate a string, you can write:
+
+            EQUS "My string", 0
+
+In fact, under the surface, there is no difference between EQUS and EQUB,
+which is also able to take strings!
+
+
+GUARD <addr>
+
+Puts a 'guard' on the specified address which will cause an error if you
+attempt to assemble code over this address.
+
+
+CLEAR <start>, <end>
+
+Clears all guards between the <start> and <end> addresses specified.  This can
+also be used to reset a section of memory which has had code assembled in it
+previously.  BeebAsm will complain if you attempt to assemble code over
+previously assembled code at the same address without having saved the previous
+code.
+
+
+SAVE "filename", start, end [, exec]
+
+Saves out object code to either a DFS disc image (if one has been specified),
+or to the current directory as a standalone file.  'exec' specifies the
+execution address of the file when saved to a disc image.  A source file must
+have at least one SAVE statement in it, otherwise nothing will be output.
+BeebAsm will warn if this is the case.
+
+
+PRINT
+
+Displays some text.  PRINT takes a comma-separated list of strings or values.
+To print a value in hex, prefix the expression with a '~' character.
+Examples:
+
+            PRINT "Value of label 'start' =", ~start
+            PRINT "numdots =", numdots, "dottable size =", dotend-dotstart
+
+
+FOR <var>, start, end [, step] ... NEXT
+
+I wanted this to have exactly the same syntax as BASIC, but I couldn't without
+rewriting my expression parser, so we're stuck with this for now.
+
+It works exactly like BASIC's FOR...NEXT.  For example:
+
+            FOR n, 0, 10, 2    ; loop with n = 0, 2, 4, 6, 8, 10
+              PRINT n
+              LDA #0:STA &900+n
+              LDA #n:STA &901+n
+            NEXT
+
+The variable n only exists for the scope of the FOR...NEXT loop.
+Also, any labels or variables defined within the loop are only visible within
+it.  However, unlike BBC BASIC, forward references to labels inside the loop
+will work properly, so, for example, this little multiply routine is perfectly
+ok:
+            .multiply
+            \\ multiplies A*X, puts result in product/product+1
+            CPX #0:BEQ zero
+            DEX:STX product+1
+            LSR A:STA product:LDA #0
+            FOR n, 0, 7
+              BCC skip:ADC product+1:.skip   \\ would break BBC BASIC!
+              ROR A:ROR product
+            NEXT
+            STA product+1:RTS
+            .zero
+            STX product:STX product+1:RTS
+
+
+IF...ELSE...ENDIF
+
+Use to assemble conditionally.  Like anything else in BeebAsm, these statements
+can be placed on one line, separated by colons, but even if they are, ENDIF
+must be present to denote the end of the IF block (unlike BBC BASIC).
+
+Examples of use:
+
+            \\ build a rather strange table
+            FOR n, 0, 9
+              IF (n AND 1) = 0
+                a = n*n
+              ELSE
+                a = -n*n
+              ENDIF
+              EQUB a
+            NEXT
+
+            IF debugraster:LDA #3:STA &FE21:ENDIF
+
+
+
+
+7. TIPS AND TRICKS
+
+BeebAsm's approach of treating memory as a canvas which can be written to,
+saved, and rewritten if desired makes it very easy to create certain types of
+applications.
+
+Imagine wanting to create a program which used the BBC Micro's main RAM, plus
+2 sideways RAM banks.  If there was executable code in main RAM and in both
+banks, it's quite likely that you'd want to share label names amongst all of
+these blocks of code, so that main RAM routines could page in the appropriate
+RAM bank and call a routine in it, and likewise sideways RAM banks could call
+routines in main RAM.
+
+Here's one way you could do that in BeebAsm:
+
+
+    \\ Declare origin of main RAM code
+    ORG &1100
+
+    \\ Put a guard at the start of screen
+    GUARD &5800
+
+    .mainstart
+      LDA #5:STA &FE30   ; page in RAM bank 2
+      JSR bank2routine
+      ...
+    .mainroutine
+      ...
+    .mainend
+
+    SAVE "Main", mainstart, mainend, mainentry
+
+
+    \\ Declare origin of bank 1 code
+    ORG &8000
+
+    \\ Put a guard after the RAM bank so we don't stray over our boundary
+    GUARD &C000
+
+    .bank1start
+      ...
+      JSR mainroutine
+      ...
+    .bank1end
+
+    SAVE "Bank1", bank1start, bank1end
+
+
+    \\ Clear memory used by previous bank
+    CLEAR &8000, &C000
+
+    \\ Declare origin of bank 2 code
+    ORG &8000
+
+    \\ Put a guard after the RAM bank so we don't stray over our boundary
+    GUARD &C000
+
+    .bank2start
+      ...
+    .bank2routine
+      RTS
+      ...
+    .bank2end
+
+    SAVE "Bank2", bank2start, bank2end
+
+
+Because all of this code is assembled in one session, label and variable names
+persist across the assembly of all blocks of code.
+
+For tidiness, you could move the source code for each block of code into a
+different file, and then just INCLUDE these in your main source file:
+
+    INCLUDE "main.asm"
+    INCLUDE "bank1.asm"
+    INCLUDE "bank2.asm"
+
+
+
+
+8. DEMO
+
+There's a little assembler demo included called "demo.asm".
+Build it with something like:
+
+      beebasm -i demo.asm -do demo.ssd -boot Code -v
+
+and it will create a bootable disc image.
+
+As well as demonstrating some of the features of BeebAsm (including building
+lookup tables), it's also a fairly good demo of pushing the hardware to its
+limits, in terms of creating a flicker-free animation, updating at 50Hz.
+(This is not to say that it's particularly impressive, but nonetheless, it
+really is pushing the hardware!!)
+
+
+
+
+9. VERSION HISTORY
+
+16/12/2007  0.01  First released version.
+
+
+
+
+10. REPORTING BUGS
+
+There are bound to be loads.  I wrote it quickly!  Please help me zap all the
+problems by reporting any bugs to me, Rich Talbot-Watkins, at
+rich_tw@hotmail.com
+
+Thank you!
