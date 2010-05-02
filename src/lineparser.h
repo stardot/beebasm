@@ -89,6 +89,7 @@ private:
 	bool			AdvanceAndCheckEndOfStatement();
 	bool			AdvanceAndCheckEndOfSubStatement();
 	void			SkipStatement();
+	void			SkipExpression( int bracketCount, bool bAllowOneMismatchedCloseBracket );
 	std::string		GetSymbolName();
 
 	// assembler generating methods

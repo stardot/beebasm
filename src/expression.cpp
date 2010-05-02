@@ -206,6 +206,10 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 	m_valueStackPtr = 0;
 	m_operatorStackPtr = 0;
 
+	// Count brackets
+
+	int bracketCount = 0;
+
 	TYPE expected = VALUE_OR_UNARY;
 
 	// Iterate through the expression
@@ -257,12 +261,9 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 					if ( GlobalData::Instance().IsFirstPass() )
 					{
 						// On first pass, we have to continue gracefully.
-						// This loop moves the string pointer to beyond the expression
+						// This moves the string pointer to beyond the expression
 
-						while ( AdvanceAndCheckEndOfSubStatement() )
-						{
-							m_column++;
-						}
+						SkipExpression( bracketCount, bAllowOneMismatchedCloseBracket );
 					}
 
 					// Whatever happens, we throw the exception
@@ -292,6 +293,10 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 
 						( this->*opHandler )();
 					}
+				}
+				else
+				{
+					bracketCount++;
 				}
 
 				if ( m_operatorStackPtr == MAX_OPERATORS )
@@ -361,6 +366,8 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 			else
 			{
 				// is a close bracket
+
+				bracketCount--;
 
 				bool bFoundMatchingBracket = false;
 

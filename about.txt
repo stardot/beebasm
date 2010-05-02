@@ -1,6 +1,6 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V0.05                                 *
+*                               BeebAsm V0.06                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
@@ -552,6 +552,8 @@ really is pushing the hardware!!)
 
 9. VERSION HISTORY
 
+22/01/2008  0.06  Fixed bug with forward-referenced labels in indirect
+                  instructions.
 09/01/2008  0.05  Added MAPCHAR.  Fixed SKIPTO (see, told you I was doing
                   it quickly!).  Enforce '%' as an end-of-symbol
                   character.  Fixed bug in overlayed assembly.  Warns if

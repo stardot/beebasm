@@ -64,7 +64,7 @@ ECHO			:=		@@C:/Cygwin/bin/echo -e
 
 # Declare default number of CPUs
 
-CPUS			?=		1
+CPUS			?=		2
 
 
 # Set variables according to VERBOSE

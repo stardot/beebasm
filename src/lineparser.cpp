@@ -192,6 +192,40 @@ void LineParser::SkipStatement()
 
 /*************************************************************************************************/
 /**
+	LineParser::SkipExpression()
+
+	Moves past the current expression to the next
+*/
+/*************************************************************************************************/
+void LineParser::SkipExpression( int bracketCount, bool bAllowOneMismatchedCloseBracket )
+{
+	while ( AdvanceAndCheckEndOfSubStatement() )
+	{
+		if ( bAllowOneMismatchedCloseBracket )
+		{
+			if ( m_line[ m_column ] == '(' )
+			{
+				bracketCount++;
+			}
+			else if ( m_line[ m_column ] == ')' )
+			{
+				bracketCount--;
+
+				if ( bracketCount < 0 )
+				{
+					break;
+				}
+			}
+		}
+
+		m_column++;
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
 	LineParser::HandleToken()
 
 	Calls the handler for the specified token
