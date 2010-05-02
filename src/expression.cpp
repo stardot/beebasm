@@ -78,8 +78,8 @@ LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	{ "+",		8,	&LineParser::EvalPosate },
 	{ "HI",		10,	&LineParser::EvalHi },
 	{ "LO",		10,	&LineParser::EvalLo },
-	{ "<",		10,	&LineParser::EvalHi },
-	{ ">",		10,	&LineParser::EvalLo },
+	{ ">",		10,	&LineParser::EvalHi },
+	{ "<",		10,	&LineParser::EvalLo },
 	{ "SIN",	10, &LineParser::EvalSin },
 	{ "COS",	10, &LineParser::EvalCos },
 	{ "TAN",	10, &LineParser::EvalTan },
@@ -127,7 +127,7 @@ double LineParser::GetValue()
 		str >> value;
 		m_column = str.tellg();
 	}
-	else if ( m_line[ m_column ] == '&' )
+	else if ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' )
 	{
 		// get a hex digit
 
@@ -150,6 +150,33 @@ double LineParser::GetValue()
 			m_column = str.tellg();
 
 			value = static_cast< double >( hexValue );
+		}
+	}
+	else if ( m_line[ m_column ] == '%' )
+	{
+		// get binary
+
+		m_column++;
+
+		if ( m_line[ m_column ] != '0' && m_line[ m_column ] != '1' )
+		{
+			// badly formed bin literal
+			throw AsmException_SyntaxError_BadBin( m_line, m_column );
+		}
+		else
+		{
+			// parse binary number
+
+			int binValue = 0;
+
+			do
+			{
+				binValue = ( binValue * 2 ) + ( m_line[ m_column ] - '0' );
+				m_column++;
+			}
+			while ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' );
+
+			value = static_cast< double >( binValue );
 		}
 	}
 	else if ( m_line[ m_column ] == '*' )

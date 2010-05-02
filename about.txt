@@ -368,10 +368,10 @@ SAVE "filename", start, end [, exec [, reload] ]
   specified), or to the current directory as a standalone file.  A
   source file must have at least one SAVE statement in it, otherwise nothing
   will be output.  BeebAsm will warn if this is the case.
-  
+
   'exec' can be optionally specified as the execution address of the file when
   saved to a disc image.
-  
+
   'reload' can additionally be specified to save the file on the disc image to
   a different address to that which it was saved from.  Use this to assemble
   code at its 'native' address,  but which loads at a DFS-friendly address,
@@ -583,6 +583,10 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
+27/07/2009  1.03  Bugfix: Corrected the unary < and > operators to
+                  correspond to HI and LO as appropriate.
+                  Added '$' as a valid hex literal prefix.
+                  Added '%' as a binary literal prefix.
 06/11/2008  1.02  Bugfix: now it's possible to save location &FFFF.
                   Added 'reload address' parameter to SAVE.
                   Properly integrated the GPL License text into the

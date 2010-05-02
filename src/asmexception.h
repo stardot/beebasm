@@ -170,6 +170,7 @@ DEFINE_SYNTAX_EXCEPTION( UnrecognisedToken, "Unrecognised token." );
 DEFINE_SYNTAX_EXCEPTION( NumberTooBig, "Number too big." );
 DEFINE_SYNTAX_EXCEPTION( SymbolNotDefined, "Symbol not defined." );
 DEFINE_SYNTAX_EXCEPTION( BadHex, "Bad hex." );
+DEFINE_SYNTAX_EXCEPTION( BadBin, "Bad binary expression." );
 DEFINE_SYNTAX_EXCEPTION( MissingValue, "Missing value in expression." );
 DEFINE_SYNTAX_EXCEPTION( InvalidCharacter, "Bad expression." );
 DEFINE_SYNTAX_EXCEPTION( ExpressionTooComplex, "Expression too complex." );
