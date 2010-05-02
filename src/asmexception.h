@@ -175,6 +175,7 @@ DEFINE_SYNTAX_EXCEPTION( NotZeroPage, "Address is not in zero-page." );
 DEFINE_SYNTAX_EXCEPTION( BranchOutOfRange, "Branch out of range." );
 DEFINE_SYNTAX_EXCEPTION( NoAbsolute, "Absolute addressing mode not allowed for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( BadAbsolute, "Syntax error in absolute instruction." );
+DEFINE_SYNTAX_EXCEPTION( BadAddress, "Out of range address." );
 DEFINE_SYNTAX_EXCEPTION( BadIndexed, "Syntax error in indexed instruction." );
 DEFINE_SYNTAX_EXCEPTION( NoIndexedX, "X indexed mode does not exist for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( NoIndexedY, "Y indexed mode does not exist for this instruction." );
@@ -186,14 +187,16 @@ DEFINE_SYNTAX_EXCEPTION( SecondPassProblem, "Fatal error: the second assembler p
 DEFINE_SYNTAX_EXCEPTION( NextWithoutFor, "NEXT without FOR." );
 DEFINE_SYNTAX_EXCEPTION( ForWithoutNext, "FOR without NEXT." );
 DEFINE_SYNTAX_EXCEPTION( BadStep, "Step value cannot be zero." );
-DEFINE_SYNTAX_EXCEPTION( TooManyFORs, "Too many nested FORs." );
-DEFINE_SYNTAX_EXCEPTION( CantInclude, "Cannot include a source file within a FOR loop." );
+DEFINE_SYNTAX_EXCEPTION( TooManyFORs, "Too many nested FORs or braces." );
+DEFINE_SYNTAX_EXCEPTION( MismatchedBraces, "Mismatched braces." );
+DEFINE_SYNTAX_EXCEPTION( CantInclude, "Cannot include a source file within a FOR loop or braced block." );
 DEFINE_SYNTAX_EXCEPTION( ElseWithoutIf, "ELSE without IF." );
 DEFINE_SYNTAX_EXCEPTION( EndifWithoutIf, "ENDIF without IF." );
 DEFINE_SYNTAX_EXCEPTION( IfWithoutEndif, "IF without ENDIF." );
 DEFINE_SYNTAX_EXCEPTION( TooManyIFs, "Too many nested IFs." );
 DEFINE_SYNTAX_EXCEPTION( BadAlignment, "Bad alignment." );
 DEFINE_SYNTAX_EXCEPTION( OutOfRange, "Out of range." );
+DEFINE_SYNTAX_EXCEPTION( BackwardsSkip, "Attempted to skip backwards to an address." );
 
 
 
@@ -236,6 +239,7 @@ DEFINE_ASSEMBLE_EXCEPTION( OutOfMemory, "Out of memory." );
 DEFINE_ASSEMBLE_EXCEPTION( GuardHit, "Guard point hit." );
 DEFINE_ASSEMBLE_EXCEPTION( Overlap, "Trying to assemble over existing code." );
 DEFINE_ASSEMBLE_EXCEPTION( InconsistentCode, "Assembled object code has changed between 1st and 2nd pass. Has a zero-page symbol been forward-declared?" );
-
+DEFINE_ASSEMBLE_EXCEPTION( FileOpen, "Error opening file." );
+DEFINE_ASSEMBLE_EXCEPTION( FileRead, "Error reading file." );
 
 #endif // ASMEXCEPTION_H_

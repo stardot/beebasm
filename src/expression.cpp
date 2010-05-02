@@ -75,7 +75,11 @@ LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	{ "INT",	10,	&LineParser::EvalInt },
 	{ "ABS",	10, &LineParser::EvalAbs },
 	{ "SGN",	10, &LineParser::EvalSgn },
-	{ "RND",	10,	&LineParser::EvalRnd }
+	{ "RND",	10,	&LineParser::EvalRnd },
+	{ "NOT",	10, &LineParser::EvalNot },
+	{ "LOG",	10, &LineParser::EvalLog },
+	{ "LN",		10,	&LineParser::EvalLn },
+	{ "EXP",	10,	&LineParser::EvalExp }
 };
 
 
@@ -841,6 +845,23 @@ void LineParser::EvalNegate()
 
 /*************************************************************************************************/
 /**
+	LineParser::EvalNot()
+*/
+/*************************************************************************************************/
+void LineParser::EvalNot()
+{
+	if ( m_valueStackPtr < 1 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(
+		~static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) );
+}
+
+
+
+/*************************************************************************************************/
+/**
 	LineParser::EvalPosate()
 */
 /*************************************************************************************************/
@@ -993,6 +1014,69 @@ void LineParser::EvalArcTan()
 	m_valueStack[ m_valueStackPtr - 1 ] = atan( m_valueStack[ m_valueStackPtr - 1 ] );
 
 	if ( errno == EDOM )
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column - 1 );
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLog()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLog()
+{
+	if ( m_valueStackPtr < 1 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	m_valueStack[ m_valueStackPtr - 1 ] = log10( m_valueStack[ m_valueStackPtr - 1 ] );
+
+	if ( errno == EDOM || errno == ERANGE )
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column - 1 );
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLn()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLn()
+{
+	if ( m_valueStackPtr < 1 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	m_valueStack[ m_valueStackPtr - 1 ] = log( m_valueStack[ m_valueStackPtr - 1 ] );
+
+	if ( errno == EDOM || errno == ERANGE )
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column - 1 );
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalExp()
+*/
+/*************************************************************************************************/
+void LineParser::EvalExp()
+{
+	if ( m_valueStackPtr < 1 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	m_valueStack[ m_valueStackPtr - 1 ] = exp( m_valueStack[ m_valueStackPtr - 1 ] );
+
+	if ( errno == ERANGE )
 	{
 		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column - 1 );
 	}

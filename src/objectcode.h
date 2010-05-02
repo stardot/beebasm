@@ -28,6 +28,7 @@ public:
 	void Assemble1( unsigned int opcode );
 	void Assemble2( unsigned int opcode, unsigned int val );
 	void Assemble3( unsigned int opcode, unsigned int addr );
+	void IncBin( const char* filename );
 
 	void SetGuard( int i );
 	void Clear( int start, int end, bool bAll = true );

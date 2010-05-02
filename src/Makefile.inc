@@ -21,7 +21,7 @@
 #		CPUS			The number of CPUs on this machine
 #		VERBOSE			Echoes all commands launched by make
 #
-#	@author camrtw
+#	@author RTW
 #
 #**************************************************************************************************
 
@@ -57,9 +57,9 @@ DEPS			:=		$(OBJS:.o=.d)
 CC				:=		C:/MinGW/bin/gcc
 CXX				:=		C:/MinGW/bin/gcc
 LD				:=		C:/MinGW/bin/gcc
-MKDIR			:=		C:/Cygwin/bin/mkdir -p
-RM				:=		C:/Cygwin/bin/rm -f
-ECHO			:=		@@C:/Cygwin/bin/echo -e
+MKDIR			:=		C:/Utilities/mkdir -p
+RM				:=		C:/Utilities/rm -f
+ECHO			:=		@@C:/Utilities/echo -e
 
 
 # Declare default number of CPUs

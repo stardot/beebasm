@@ -34,8 +34,8 @@ public:
 
 	// For loop / if related stuff
 
-	#define MAX_FOR_LEVELS	16
-	#define MAX_IF_LEVELS	16
+	#define MAX_FOR_LEVELS	32
+	#define MAX_IF_LEVELS	32
 
 private:
 
@@ -68,6 +68,9 @@ private:
 	If						m_ifStack[ MAX_IF_LEVELS ];
 
 public:
+
+	void					OpenBrace( std::string line, int column );
+	void					CloseBrace( std::string line, int column );
 
 	void					AddFor( std::string varName,
 									double start,

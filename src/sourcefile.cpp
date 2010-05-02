@@ -125,16 +125,26 @@ void SourceFile::Process()
 		throw AsmException_FileError_ReadSourceFile( m_pFilename );
 	}
 
-	// Check that we have no FOR mismatch
+	// Check that we have no FOR / braces mismatch
 
 	if ( m_forStackPtr > 0 )
 	{
 		For& mismatchedFor = m_forStack[ m_forStackPtr - 1 ];
 
-		AsmException_SyntaxError_ForWithoutNext e( mismatchedFor.m_line, mismatchedFor.m_column );
-		e.SetFilename( m_pFilename );
-		e.SetLineNumber( mismatchedFor.m_lineNumber );
-		throw e;
+		if ( mismatchedFor.m_step == 0.0 )
+		{
+			AsmException_SyntaxError_MismatchedBraces e( mismatchedFor.m_line, mismatchedFor.m_column );
+			e.SetFilename( m_pFilename );
+			e.SetLineNumber( mismatchedFor.m_lineNumber );
+			throw e;
+		}
+		else
+		{
+			AsmException_SyntaxError_ForWithoutNext e( mismatchedFor.m_line, mismatchedFor.m_column );
+			e.SetFilename( m_pFilename );
+			e.SetLineNumber( mismatchedFor.m_lineNumber );
+			throw e;
+		}
 	}
 
 	// Check that we have no IF mismatch
@@ -153,7 +163,7 @@ void SourceFile::Process()
 
 	if ( GlobalData::Instance().IsFirstPass() )
 	{
-		cout << "Processed file '" << m_pFilename << "' ok" << endl << endl;
+		cerr << "Processed file '" << m_pFilename << "' ok" << endl << endl;
 	}
 }
 
@@ -201,6 +211,38 @@ void SourceFile::AddFor( string varName,
 
 /*************************************************************************************************/
 /**
+	SourceFile::OpenBrace()
+
+	Braces for scoping variables are just FORs in disguise...
+*/
+/*************************************************************************************************/
+void SourceFile::OpenBrace( string line, int column )
+{
+	if ( m_forStackPtr == MAX_FOR_LEVELS )
+	{
+		throw AsmException_SyntaxError_TooManyFORs( line, column );
+	}
+
+	// Fill in FOR block
+
+	m_forStack[ m_forStackPtr ].m_varName		= "";
+	m_forStack[ m_forStackPtr ].m_current		= 1.0;
+	m_forStack[ m_forStackPtr ].m_end			= 0.0;
+	m_forStack[ m_forStackPtr ].m_step			= 0.0;
+	m_forStack[ m_forStackPtr ].m_filePtr		= 0;
+	m_forStack[ m_forStackPtr ].m_id			= GlobalData::Instance().GetNextForId();
+	m_forStack[ m_forStackPtr ].m_count			= 0;
+	m_forStack[ m_forStackPtr ].m_line			= line;
+	m_forStack[ m_forStackPtr ].m_column		= column;
+	m_forStack[ m_forStackPtr ].m_lineNumber	= m_lineNumber;
+
+	m_forStackPtr++;
+}
+
+
+
+/*************************************************************************************************/
+/**
 	SourceFile::UpdateFor()
 */
 /*************************************************************************************************/
@@ -212,6 +254,13 @@ void SourceFile::UpdateFor( string line, int column )
 	}
 
 	For& thisFor = m_forStack[ m_forStackPtr - 1 ];
+
+	// step of 0.0 here means that the 'for' is in fact an open brace, so throw an error
+
+	if ( thisFor.m_step == 0.0 )
+	{
+		throw AsmException_SyntaxError_NextWithoutFor( line, column );
+	}
 
 	thisFor.m_current += thisFor.m_step;
 
@@ -230,6 +279,34 @@ void SourceFile::UpdateFor( string line, int column )
 		thisFor.m_count++;
 		m_lineNumber = thisFor.m_lineNumber - 1;
 	}
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SourceFile::CloseBrace()
+
+	Braces for scoping variables are just FORs in disguise...
+*/
+/*************************************************************************************************/
+void SourceFile::CloseBrace( string line, int column )
+{
+	if ( m_forStackPtr == 0 )
+	{
+		throw AsmException_SyntaxError_MismatchedBraces( line, column );
+	}
+
+	For& thisFor = m_forStack[ m_forStackPtr - 1 ];
+
+	// step of non-0.0 here means that this a real 'for', so throw an error
+
+	if ( thisFor.m_step != 0.0 )
+	{
+		throw AsmException_SyntaxError_MismatchedBraces( line, column );
+	}
+
+	m_forStackPtr--;
 }
 
 

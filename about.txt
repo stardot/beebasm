@@ -1,6 +1,6 @@
 *******************************************************************************
 *                                                                             *
-*                                   BeebAsm                                   *
+*                               BeebAsm V0.04                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
@@ -154,6 +154,10 @@ the same as the -do filename!
 
 Verbose output.  Assembled code will be output to the screen.
 
+-d
+
+Dumps all symbols in Swift-compatible format after assembly
+
 
 
 
@@ -210,6 +214,10 @@ ABS(val)           Take the absolute value
 SGN(val)           Return -1, 0 or 1, depending on the sign of the argument
 RND(val)           RND(1) returns a random number between 0 and 1
                    RND(n) returns an integer between 0 and n-1
+NOT(val)           Return the bitwise 1's complement of val
+LOG(val)           Return the base 10 log of val
+LN(val)            Return the natural log of val
+EXP(val)           Return e raised to the power of val
 
 Also, some constants are defined:
 
@@ -247,6 +255,12 @@ Moves the address pointer on by the specified number of bytes.  Use this to
 reserve a space of a fixed size in the code.
 
 
+SKIPTO <addr>
+
+Moves the address pointer to the specified address.  An error is generated if
+this address is behind the current address pointer.
+
+
 ALIGN <alignment>
 
 Used to align the address pointer to the next boundary, e.g. use ALIGN &100 to
@@ -257,6 +271,11 @@ boundary so that index accesses don't incur a "page crossed" penalty.
 INCLUDE "filename"
 
 Includes the specified source file in the code at this point.
+
+
+INCBIN "filename"
+
+Includes the specified binary file in the object code at this point.
 
 
 EQUB a [, b, c, ...]
@@ -369,6 +388,39 @@ Examples of use:
             IF debugraster:LDA #3:STA &FE21:ENDIF
 
 
+{ ... }
+
+Curly braces can be used to specify a block of code in which all symbols and
+labels defined will exist only within this block.  Effectively, this is a
+mechanism for providing 'local labels' without the slightly cumbersome syntax
+demanded by some other assemblers.  These can be nested.  Any symbols defined
+within a block will override any of the same name outside of the block, exactly
+like C/C++ - not sure if I like this behaviour, but for now it will stay.
+
+Example of use:
+
+    .initialise
+    {
+        LDY #31
+        LDA #0
+    .loop                ; label visible only within the braces
+        STA buffer,Y
+        DEY
+        BPL loop
+        RTS
+    }
+
+    .copy
+    {
+        LDY #31
+    .loop                ; perfectly ok to define .loop again in a new block
+        LDA source,Y
+        STA dest,Y
+        DEY
+        BPL loop
+        RTS
+    }
+
 
 
 7. TIPS AND TRICKS
@@ -471,6 +523,11 @@ really is pushing the hardware!!)
 
 9. VERSION HISTORY
 
+06/01/2008  0.04  Added braces for scoping labels.  Added INCBIN, SKIPTO.
+                  Added some missing functions (NOT, LOG, LN, EXP).
+                  Tightened up error checking on assembling out of range
+                  addresses (negative, or greater than &FFFF).
+05/01/2008  0.03  Added symbol dump for use with Swift.
 20/12/2007  0.02  Fixed small bug which withheld filename and line number
                   display in error messages.
 16/12/2007  0.01  First released version.

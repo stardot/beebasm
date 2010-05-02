@@ -108,16 +108,20 @@ private:
 	void			HandlePrint();
 	void			HandleOrg();
 	void			HandleInclude();
+	void			HandleIncBin();
 	void			HandleEqub();
 	void			HandleEquw();
 	void			HandleSave();
 	void			HandleFor();
 	void			HandleNext();
+	void			HandleOpenBrace();
+	void			HandleCloseBrace();
 	void			HandleIf();
 	void			HandleElse();
 	void			HandleEndif();
 	void			HandleAlign();
 	void			HandleSkip();
+	void			HandleSkipTo();
 	void			HandleGuard();
 	void			HandleClear();
 
@@ -163,6 +167,10 @@ private:
 	void			EvalAbs();
 	void			EvalSgn();
 	void			EvalRnd();
+	void			EvalNot();
+	void			EvalLog();
+	void			EvalLn();
+	void			EvalExp();
 
 
 	SourceFile*				m_sourceFile;

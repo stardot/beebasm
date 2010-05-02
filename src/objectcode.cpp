@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <fstream>
 
 #include "objectcode.h"
 #include "symboltable.h"
@@ -282,4 +283,38 @@ void ObjectCode::Clear( int start, int end, bool bAll )
 		memset( m_aMemory + start, 0, end - start );
 	}
 	memset( m_aFlags + start, 0, end - start );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	ObjectCode::IncBin()
+*/
+/*************************************************************************************************/
+void ObjectCode::IncBin( const char* filename )
+{
+	ifstream binfile;
+
+	binfile.open( filename, ios_base::in | ios_base::binary );
+
+	if ( !binfile )
+	{
+		throw AsmException_AssembleError_FileOpen();
+	}
+
+	char c;
+
+	while ( binfile.get( c ) )
+	{
+		assert( binfile.gcount() == 1 );
+		Assemble1( static_cast< unsigned char >( c ) );
+	}
+
+	if ( !binfile.eof() )
+	{
+		throw AsmException_AssembleError_FileRead();
+	}
+
+	binfile.close();
 }

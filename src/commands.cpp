@@ -43,7 +43,11 @@ LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "ALIGN",		&LineParser::HandleAlign },
 	{ "SKIP",		&LineParser::HandleSkip },
 	{ "GUARD",		&LineParser::HandleGuard },
-	{ "CLEAR",		&LineParser::HandleClear }
+	{ "CLEAR",		&LineParser::HandleClear },
+	{ "SKIPTO",		&LineParser::HandleSkipTo },
+	{ "INCBIN",		&LineParser::HandleIncBin },
+	{ "{",			&LineParser::HandleOpenBrace },
+	{ "}",			&LineParser::HandleCloseBrace }
 };
 
 
@@ -125,7 +129,7 @@ void LineParser::HandleDefineLabel()
 			}
 			else
 			{
-				SymbolTable::Instance().AddSymbol( fullSymbolName, ObjectCode::Instance().GetPC() );
+				SymbolTable::Instance().AddSymbol( fullSymbolName, ObjectCode::Instance().GetPC(), true );
 			}
 		}
 		else
@@ -341,6 +345,49 @@ void LineParser::HandleSkip()
 
 /*************************************************************************************************/
 /**
+	LineParser::HandleSkipTo()
+*/
+/*************************************************************************************************/
+void LineParser::HandleSkipTo()
+{
+	int oldColumn = m_column;
+
+	int addr = EvaluateExpressionAsInt();
+	if ( addr < 0 || addr > 0xFFFF )
+	{
+		throw AsmException_SyntaxError_BadAddress( m_line, oldColumn );
+	}
+
+	if ( ObjectCode::Instance().GetPC() > addr )
+	{
+		throw AsmException_SyntaxError_BackwardsSkip( m_line, oldColumn );
+	}
+
+	while ( ObjectCode::Instance().GetPC() < addr )
+	{
+		try
+		{
+			ObjectCode::Instance().PutByte( 0 );
+		}
+		catch ( AsmException_AssembleError& e )
+		{
+			e.SetString( m_line );
+			e.SetColumn( m_column );
+			throw;
+		}
+	}
+
+	if ( m_line[ m_column ] == ',' )
+	{
+		// Unexpected comma (remembering that an expression can validly end with a comma)
+		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
 	LineParser::HandleInclude()
 */
 /*************************************************************************************************/
@@ -375,11 +422,61 @@ void LineParser::HandleInclude()
 
 		if ( GlobalData::Instance().IsFirstPass() )
 		{
-			cout << "Including file " << filename << endl;
+			cerr << "Including file " << filename << endl;
 		}
 
 		SourceFile input( filename.c_str() );
 		input.Process();
+	}
+
+	m_column = endQuotePos + 1;
+
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleIncBin()
+*/
+/*************************************************************************************************/
+void LineParser::HandleIncBin()
+{
+	if ( !AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	if ( m_line[ m_column ] != '\"' )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	// string
+	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
+
+	if ( endQuotePos == string::npos )
+	{
+		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+	}
+	else
+	{
+		string filename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
+
+		try
+		{
+			ObjectCode::Instance().IncBin( filename.c_str() );
+		}
+		catch ( AsmException_AssembleError& e )
+		{
+			e.SetString( m_line );
+			e.SetColumn( m_column );
+			throw;
+		}
 	}
 
 	m_column = endQuotePos + 1;
@@ -868,6 +965,18 @@ void LineParser::HandleFor()
 
 /*************************************************************************************************/
 /**
+	LineParser::HandleOpenBrace()
+*/
+/*************************************************************************************************/
+void LineParser::HandleOpenBrace()
+{
+	m_sourceFile->OpenBrace( m_line, m_column - 1 );
+}
+
+
+
+/*************************************************************************************************/
+/**
 	LineParser::HandleNext()
 */
 /*************************************************************************************************/
@@ -882,6 +991,20 @@ void LineParser::HandleNext()
 	}
 
 	m_sourceFile->UpdateFor( m_line, oldColumn );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleCloseBrace()
+
+	Braces for scoping variables are just FORs in disguise...
+*/
+/*************************************************************************************************/
+void LineParser::HandleCloseBrace()
+{
+	m_sourceFile->CloseBrace( m_line, m_column - 1 );
 }
 
 

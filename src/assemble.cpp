@@ -528,6 +528,11 @@ void LineParser::HandleAssembler( int instruction )
 					throw AsmException_SyntaxError_NotZeroPage( m_line, oldColumn + 1 );
 				}
 
+				if ( value < 0 )
+				{
+					throw AsmException_SyntaxError_BadAddress( m_line, oldColumn + 1 );
+				}
+
 				Assemble2( instruction, INDY, value );
 				return;
 			}
@@ -594,6 +599,11 @@ void LineParser::HandleAssembler( int instruction )
 				throw AsmException_SyntaxError_NotZeroPage( m_line, oldColumn + 1 );
 			}
 
+			if ( value < 0 )
+			{
+				throw AsmException_SyntaxError_BadAddress( m_line, oldColumn + 1 );
+			}
+
 			Assemble2( instruction, INDX, value );
 			return;
 		}
@@ -656,6 +666,11 @@ void LineParser::HandleAssembler( int instruction )
 		// we assemble abs or zp depending on whether 'value' is a 16- or 8-bit number.
 		// we contrive that unknown labels will get a 16-bit value so that absolute addressing is the default.
 
+		if ( value < 0 || value > 0xFFFF )
+		{
+			throw AsmException_SyntaxError_BadAddress( m_line, oldColumn );
+		}
+
 		if ( value < 0x100 && HasAddressingMode( instruction, ZP ) )
 		{
 			Assemble2( instruction, ZP, value );
@@ -698,6 +713,11 @@ void LineParser::HandleAssembler( int instruction )
 			throw AsmException_SyntaxError_BadIndexed( m_line, m_column );
 		}
 
+		if ( value < 0 || value > 0xFFFF )
+		{
+			throw AsmException_SyntaxError_BadAddress( m_line, oldColumn );
+		}
+
 		if ( value < 0x100 && HasAddressingMode( instruction, ZPX ) )
 		{
 			Assemble2( instruction, ZPX, value );
@@ -722,6 +742,11 @@ void LineParser::HandleAssembler( int instruction )
 		{
 			// We were not expecting any more characters
 			throw AsmException_SyntaxError_BadIndexed( m_line, m_column );
+		}
+
+		if ( value < 0 || value > 0xFFFF )
+		{
+			throw AsmException_SyntaxError_BadAddress( m_line, oldColumn );
 		}
 
 		if ( value < 0x100 && HasAddressingMode( instruction, ZPY ) )

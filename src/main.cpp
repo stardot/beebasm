@@ -23,7 +23,7 @@
 using namespace std;
 
 
-#define VERSION "0.02"
+#define VERSION "0.03"
 
 
 /*************************************************************************************************/
@@ -53,6 +53,7 @@ int main( int argc, char* argv[] )
 
 	} state = READY;
 
+	bool bDumpSymbols = false;
 
 	GlobalData::Create();
 
@@ -84,6 +85,10 @@ int main( int argc, char* argv[] )
 				{
 					GlobalData::Instance().SetVerbose( true );
 				}
+				else if ( strcmp( argv[i], "-d" ) == 0 )
+				{
+					bDumpSymbols = true;
+				}
 				else if ( strcmp( argv[i], "--help" ) == 0 )
 				{
 					cout << "beebasm " VERSION << endl << endl;
@@ -93,6 +98,7 @@ int main( int argc, char* argv[] )
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
 					cout << " -v             Verbose output" << endl;
+					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
@@ -195,6 +201,11 @@ int main( int argc, char* argv[] )
 	}
 
 	delete pDiscIm;
+
+	if ( bDumpSymbols && exitCode == EXIT_SUCCESS )
+	{
+		SymbolTable::Instance().Dump();
+	}
 
 	ObjectCode::Destroy();
 	SymbolTable::Destroy();

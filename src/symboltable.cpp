@@ -5,10 +5,15 @@
 /*************************************************************************************************/
 
 #include <cmath>
+#include <iostream>
+
 #include "symboltable.h"
 
-SymbolTable* SymbolTable::m_gInstance = NULL;
 
+using namespace std;
+
+
+SymbolTable* SymbolTable::m_gInstance = NULL;
 
 
 /*************************************************************************************************/
@@ -103,10 +108,10 @@ bool SymbolTable::IsSymbolDefined( const std::string& symbol ) const
 	@param		int				Its value
 */
 /*************************************************************************************************/
-void SymbolTable::AddSymbol( const std::string& symbol, double value )
+void SymbolTable::AddSymbol( const std::string& symbol, double value, bool isLabel )
 {
 	assert( !IsSymbolDefined( symbol ) );
-	m_map.insert( make_pair( symbol, value ) );
+	m_map.insert( make_pair( symbol, Symbol( value, isLabel ) ) );
 }
 
 
@@ -123,7 +128,7 @@ void SymbolTable::AddSymbol( const std::string& symbol, double value )
 double SymbolTable::GetSymbol( const std::string& symbol ) const
 {
 	assert( IsSymbolDefined( symbol ) );
-	return m_map.find( symbol )->second;
+	return m_map.find( symbol )->second.GetValue();
 }
 
 
@@ -141,7 +146,7 @@ double SymbolTable::GetSymbol( const std::string& symbol ) const
 void SymbolTable::ChangeSymbol( const std::string& symbol, double value )
 {
 	assert( IsSymbolDefined( symbol ) );
-	m_map.find( symbol )->second = value;
+	m_map.find( symbol )->second.SetValue( value );
 }
 
 
@@ -159,4 +164,41 @@ void SymbolTable::RemoveSymbol( const std::string& symbol )
 {
 	assert( IsSymbolDefined( symbol ) );
 	m_map.erase( symbol );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SymbolTable::Dump()
+
+	Dumps all global symbols in the symbol table
+*/
+/*************************************************************************************************/
+void SymbolTable::Dump() const
+{
+	cout << "[{";
+
+	bool bFirst = true;
+
+	for ( map<string, Symbol>::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
+	{
+		const string&	symbolName = it->first;
+		const Symbol&	symbol = it->second;
+
+		if ( symbol.IsLabel() &&
+			 symbolName.find_first_of( '@' ) == string::npos )
+		{
+			if ( !bFirst )
+			{
+				cout << ",";
+			}
+
+			cout << "'" << symbolName << "':" << symbol.GetValue() << "L";
+
+			bFirst = false;
+		}
+	}
+
+	cout << "}]" << endl;
 }

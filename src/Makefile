@@ -35,7 +35,7 @@ LDLIBS			:=		-lstdc++
 
 # Parameters to the executable
 
-PARAMS			:=		-i ..\demo.asm -do ..\demo.ssd -boot Code
+PARAMS			:=		-i ..\demo.asm -do ..\demo.ssd -boot Code -d
 
 
 
