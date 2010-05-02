@@ -54,17 +54,17 @@ DEPS			:=		$(OBJS:.o=.d)
 
 # Declare executable names
 
-CC				:=		C:/MinGW/bin/gcc
-CXX				:=		C:/MinGW/bin/gcc
-LD				:=		C:/MinGW/bin/gcc
-MKDIR			:=		C:/Cygwin/bin/mkdir -p
-RM				:=		C:/Cygwin/bin/rm -f
-ECHO			:=		@@C:/Cygwin/bin/echo -e
+CC				:=		gcc
+CXX				:=		gcc
+LD				:=		gcc
+MKDIR			:=		mkdir -p
+RM				:=		rm -f
+ECHO			:=		@@echo -e
 
 
 # Declare default number of CPUs
 
-CPUS			?=		2
+CPUS			?=		1
 
 
 # Set variables according to VERBOSE

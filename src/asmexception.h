@@ -23,6 +23,7 @@ class AsmException
 public:
 
 	AsmException() {}
+	virtual ~AsmException() {}
 
 	virtual void Print() const = 0;
 };
@@ -44,6 +45,8 @@ public:
 		:	m_pFilename( pFilename )
 	{
 	}
+
+	virtual ~AsmException_FileError() {}
 
 	virtual void Print() const;
 

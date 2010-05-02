@@ -23,7 +23,7 @@
 using namespace std;
 
 
-#define VERSION "0.06"
+#define VERSION "1.00"
 
 
 /*************************************************************************************************/
@@ -207,7 +207,7 @@ int main( int argc, char* argv[] )
 		SymbolTable::Instance().Dump();
 	}
 
-	if ( !GlobalData::Instance().IsSaved() )
+	if ( !GlobalData::Instance().IsSaved() && exitCode == EXIT_SUCCESS )
 	{
 		cerr << "warning: no SAVE command in source file." << endl;
 	}

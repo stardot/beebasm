@@ -1,6 +1,6 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V0.06                                 *
+*                               BeebAsm V1.00                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
@@ -379,7 +379,7 @@ FOR <var>, start, end [, step] ... NEXT
   it.  However, unlike BBC BASIC, forward references to labels inside the loop
   will work properly, so, for example, this little multiply routine is
   perfectly ok:
-  
+
             .multiply
             \\ multiplies A*X, puts result in product/product+1
             CPX #0:BEQ zero
@@ -438,7 +438,7 @@ IF...ELSE...ENDIF
           BPL loop
           RTS
       }
-  
+
       .copy
       {
           LDY #31
@@ -552,6 +552,8 @@ really is pushing the hardware!!)
 
 9. VERSION HISTORY
 
+30/03/2008  1.00  First stable release.  Corrected a few C++ compliance
+                  issues in the source code.
 22/01/2008  0.06  Fixed bug with forward-referenced labels in indirect
                   instructions.
 09/01/2008  0.05  Added MAPCHAR.  Fixed SKIPTO (see, told you I was doing
