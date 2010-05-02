@@ -23,7 +23,7 @@
 using namespace std;
 
 
-#define VERSION "0.03"
+#define VERSION "0.05"
 
 
 /*************************************************************************************************/
@@ -205,6 +205,11 @@ int main( int argc, char* argv[] )
 	if ( bDumpSymbols && exitCode == EXIT_SUCCESS )
 	{
 		SymbolTable::Instance().Dump();
+	}
+
+	if ( !GlobalData::Instance().IsSaved() )
+	{
+		cerr << "warning: no SAVE command in source file." << endl;
 	}
 
 	ObjectCode::Destroy();

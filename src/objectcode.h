@@ -33,13 +33,18 @@ public:
 	void SetGuard( int i );
 	void Clear( int start, int end, bool bAll = true );
 
+	void SetMapping( int ascii, int mapped );
+	int GetMapping( int ascii ) const;
+
 
 private:
 
 	enum FLAGS
 	{
 		USED  = (1 << 0),
-		GUARD = (1 << 1)
+		GUARD = (1 << 1),
+		CHECK = (1 << 2),
+		DONT_CHECK = (1 << 3)
 	};
 
 
@@ -49,6 +54,8 @@ private:
 	unsigned char				m_aMemory[ 0x10000 ];
 	unsigned char				m_aFlags[ 0x10000 ];
 	int							m_PC;
+
+	unsigned char				m_aMapChar[ 96 ];
 
 	static ObjectCode*			m_gInstance;
 };

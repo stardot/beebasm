@@ -41,13 +41,14 @@ LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "ELSE",		&LineParser::HandleElse },
 	{ "ENDIF",		&LineParser::HandleEndif },
 	{ "ALIGN",		&LineParser::HandleAlign },
+	{ "SKIPTO",		&LineParser::HandleSkipTo },
 	{ "SKIP",		&LineParser::HandleSkip },
 	{ "GUARD",		&LineParser::HandleGuard },
 	{ "CLEAR",		&LineParser::HandleClear },
-	{ "SKIPTO",		&LineParser::HandleSkipTo },
 	{ "INCBIN",		&LineParser::HandleIncBin },
 	{ "{",			&LineParser::HandleOpenBrace },
-	{ "}",			&LineParser::HandleCloseBrace }
+	{ "}",			&LineParser::HandleCloseBrace },
+	{ "MAPCHAR",	&LineParser::HandleMapChar }
 };
 
 
@@ -262,6 +263,84 @@ void LineParser::HandleClear()
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleMapChar()
+*/
+/*************************************************************************************************/
+void LineParser::HandleMapChar()
+{
+	// get parameters - either 2 or 3
+
+	int param3 = -1;
+	int param1 = EvaluateExpressionAsInt();
+
+	if ( m_line[ m_column ] != ',' )
+	{
+		// did not find a comma
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+
+	m_column++;
+
+	int param2 = EvaluateExpressionAsInt();
+
+	if ( m_line[ m_column ] == ',' )
+	{
+		m_column++;
+
+		param3 = EvaluateExpressionAsInt();
+	}
+
+	if ( m_line[ m_column ] == ',' )
+	{
+		// Unexpected comma (remembering that an expression can validly end with a comma)
+		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
+	}
+
+	// range checks
+
+	if ( param1 < 32 || param1 > 126 )
+	{
+		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+	}
+
+	if ( param3 == -1 )
+	{
+		// two parameters
+
+		if ( param2 < 0 || param2 > 255 )
+		{
+			throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+		}
+
+		// do single character remapping
+		ObjectCode::Instance().SetMapping( param1, param2 );
+	}
+	else
+	{
+		// three parameters
+
+		if ( param2 < 32 || param2 > 126 || param2 < param1 )
+		{
+			throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+		}
+
+		if ( param3 < 0 || param3 > 255 )
+		{
+			throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+		}
+
+		// remap a block
+		for ( int i = param1; i <= param2; i++ )
+		{
+			ObjectCode::Instance().SetMapping( i, param3 + i - param1 );
+		}
 	}
 }
 
@@ -525,11 +604,13 @@ void LineParser::HandleEqub()
 
 				for ( size_t i = 0; i < equs.length(); i++ )
 				{
+					int mappedchar = ObjectCode::Instance().GetMapping( equs[ i ] );
+
 					if ( GlobalData::Instance().ShouldOutputAsm() )
 					{
 						if ( i < 3 )
 						{
-							cout << setw(2) << static_cast< int >( equs[ i ] ) << " ";
+							cout << setw(2) << mappedchar << " ";
 						}
 						else if ( i == 3 )
 						{
@@ -539,7 +620,8 @@ void LineParser::HandleEqub()
 
 					try
 					{
-						ObjectCode::Instance().PutByte( equs[ i ] );
+						// remap character from string as per character mapping table
+						ObjectCode::Instance().PutByte( mappedchar );
 					}
 					catch ( AsmException_AssembleError& e )
 					{
@@ -849,6 +931,8 @@ void LineParser::HandleSave()
 
 			objFile.close();
 		}
+
+		GlobalData::Instance().SetSaved();
 	}
 }
 

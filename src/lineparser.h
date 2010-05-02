@@ -124,6 +124,7 @@ private:
 	void			HandleSkipTo();
 	void			HandleGuard();
 	void			HandleClear();
+	void			HandleMapChar();
 
 	// expression evaluating methods
 

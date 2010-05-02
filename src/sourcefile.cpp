@@ -163,7 +163,7 @@ void SourceFile::Process()
 
 	if ( GlobalData::Instance().IsFirstPass() )
 	{
-		cerr << "Processed file '" << m_pFilename << "' ok" << endl << endl;
+		cerr << "Processed file '" << m_pFilename << "' ok" << endl;
 	}
 }
 

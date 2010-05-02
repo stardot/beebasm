@@ -1,6 +1,6 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V0.04                                 *
+*                               BeebAsm V0.05                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
@@ -156,7 +156,8 @@ Verbose output.  Assembled code will be output to the screen.
 
 -d
 
-Dumps all symbols in Swift-compatible format after assembly
+Dumps all global symbols in Swift-compatible format after assembly.
+This is used internally by Swift, and is just documented for completeness.
 
 
 
@@ -243,93 +244,118 @@ Here's a summary:
 
 ORG <addr>
 
-Set the address to be assembled from.  This can be changed multiple times
-during a source file if you wish (for example) to assemble two separate blocks
-of code at different addresses, but share the labels between both blocks.
-This is exactly equivalent to BBC BASIC's 'P%=<addr>'.
+  Set the address to be assembled from.  This can be changed multiple times
+  during a source file if you wish (for example) to assemble two separate
+  blocks of code at different addresses, but share the labels between both
+  blocks.  This is exactly equivalent to BBC BASIC's 'P%=<addr>'.
 
 
 SKIP <bytes>
 
-Moves the address pointer on by the specified number of bytes.  Use this to
-reserve a space of a fixed size in the code.
+  Moves the address pointer on by the specified number of bytes.  Use this to
+  reserve a space of a fixed size in the code.
 
 
 SKIPTO <addr>
 
-Moves the address pointer to the specified address.  An error is generated if
-this address is behind the current address pointer.
+  Moves the address pointer to the specified address.  An error is generated
+  if this address is behind the current address pointer.
 
 
 ALIGN <alignment>
 
-Used to align the address pointer to the next boundary, e.g. use ALIGN &100 to
-move to the next page (useful perhaps for positioning a table at a page
-boundary so that index accesses don't incur a "page crossed" penalty.
+  Used to align the address pointer to the next boundary, e.g. use ALIGN &100
+  to move to the next page (useful perhaps for positioning a table at a page
+  boundary so that index accesses don't incur a "page crossed" penalty.
 
 
 INCLUDE "filename"
 
-Includes the specified source file in the code at this point.
+  Includes the specified source file in the code at this point.
 
 
 INCBIN "filename"
 
-Includes the specified binary file in the object code at this point.
+  Includes the specified binary file in the object code at this point.
 
 
 EQUB a [, b, c, ...]
 
-Insert the specified byte(s) into the code.  Note, unlike BBC BASIC, that a
-comma-separated sequence can be inserted.
+  Insert the specified byte(s) into the code.  Note, unlike BBC BASIC, that a
+  comma-separated sequence can be inserted.
 
 
 EQUW a [, b, c, ...]
 
-Insert the specified 16-bit word(s) into the code.
+  Insert the specified 16-bit word(s) into the code.
 
 
 EQUS "string" [, "string", byte, ...]
 
-Inserts the specified string into the code.  Note that this can take a comma-
-separated list of parameters which may also include bytes.  So, to zero-
-terminate a string, you can write:
+  Inserts the specified string into the code.  Note that this can take a comma-
+  separated list of parameters which may also include bytes.  So, to zero-
+  terminate a string, you can write:
 
             EQUS "My string", 0
 
-In fact, under the surface, there is no difference between EQUS and EQUB,
-which is also able to take strings!
+  In fact, under the surface, there is no difference between EQUS and EQUB,
+  which is also able to take strings!
+
+
+MAPCHAR <ascii code>, <remapped code>
+MAPCHAR <start ascii code>, <end ascii code>, <remapped code>
+
+  By default, when EQUS "string" is assembled, the ASCII codes of each
+  character are written into the object code.  MAPCHAR allows you to specify
+  which value should be written to the object code for each character.
+  Suppose you have a font which contains the following symbols - space,
+  followed by A-Z, followed by digits 0-9, followed by .,!?-'
+
+  You could specify this with MAPCHAR as follows:
+
+             MAPCHAR ' ', 0
+             MAPCHAR 'A','Z', 1
+             MAPCHAR '0','9', 27
+             MAPCHAR '.', 37
+             MAPCHAR ',', 38
+             MAPCHAR '!', 39
+             MAPCHAR '?', 40
+             MAPCHAR '-', 41
+             MAPCHAR ''', 42
+
+  Now, when writing strings with EQUS, these codes will be written out instead
+  of the default ASCII codes.
 
 
 GUARD <addr>
 
-Puts a 'guard' on the specified address which will cause an error if you
-attempt to assemble code over this address.
+  Puts a 'guard' on the specified address which will cause an error if you
+  attempt to assemble code over this address.
 
 
 CLEAR <start>, <end>
 
-Clears all guards between the <start> and <end> addresses specified.  This can
-also be used to reset a section of memory which has had code assembled in it
-previously.  BeebAsm will complain if you attempt to assemble code over
-previously assembled code at the same address without having saved the previous
-code.
+  Clears all guards between the <start> and <end> addresses specified.  This
+  can also be used to reset a section of memory which has had code assembled
+  in it previously.  BeebAsm will complain if you attempt to assemble code
+  over previously assembled code at the same address without having CLEARed
+  it first.
 
 
 SAVE "filename", start, end [, exec]
 
-Saves out object code to either a DFS disc image (if one has been specified),
-or to the current directory as a standalone file.  'exec' specifies the
-execution address of the file when saved to a disc image.  A source file must
-have at least one SAVE statement in it, otherwise nothing will be output.
-BeebAsm will warn if this is the case.
+  Saves out object code to either a DFS disc image (if one has been
+  specified), or to the current directory as a standalone file.  'exec'
+  specifies the execution address of the file when saved to a disc image.  A
+  source file must have at least one SAVE statement in it, otherwise nothing
+  will be output.  BeebAsm will warn if this is the case.
 
 
 PRINT
 
-Displays some text.  PRINT takes a comma-separated list of strings or values.
-To print a value in hex, prefix the expression with a '~' character.
-Examples:
+  Displays some text.  PRINT takes a comma-separated list of strings or values.
+  To print a value in hex, prefix the expression with a '~' character.
+  Examples:
 
             PRINT "Value of label 'start' =", ~start
             PRINT "numdots =", numdots, "dottable size =", dotend-dotstart
@@ -337,10 +363,10 @@ Examples:
 
 FOR <var>, start, end [, step] ... NEXT
 
-I wanted this to have exactly the same syntax as BASIC, but I couldn't without
-rewriting my expression parser, so we're stuck with this for now.
+  I wanted this to have exactly the same syntax as BASIC, but I couldn't
+  without rewriting my expression parser, so we're stuck with this for now.
 
-It works exactly like BASIC's FOR...NEXT.  For example:
+  It works exactly like BASIC's FOR...NEXT.  For example:
 
             FOR n, 0, 10, 2    ; loop with n = 0, 2, 4, 6, 8, 10
               PRINT n
@@ -348,11 +374,12 @@ It works exactly like BASIC's FOR...NEXT.  For example:
               LDA #n:STA &901+n
             NEXT
 
-The variable n only exists for the scope of the FOR...NEXT loop.
-Also, any labels or variables defined within the loop are only visible within
-it.  However, unlike BBC BASIC, forward references to labels inside the loop
-will work properly, so, for example, this little multiply routine is perfectly
-ok:
+  The variable n only exists for the scope of the FOR...NEXT loop.
+  Also, any labels or variables defined within the loop are only visible within
+  it.  However, unlike BBC BASIC, forward references to labels inside the loop
+  will work properly, so, for example, this little multiply routine is
+  perfectly ok:
+  
             .multiply
             \\ multiplies A*X, puts result in product/product+1
             CPX #0:BEQ zero
@@ -369,11 +396,12 @@ ok:
 
 IF...ELSE...ENDIF
 
-Use to assemble conditionally.  Like anything else in BeebAsm, these statements
-can be placed on one line, separated by colons, but even if they are, ENDIF
-must be present to denote the end of the IF block (unlike BBC BASIC).
+  Use to assemble conditionally.  Like anything else in BeebAsm, these
+  statements can be placed on one line, separated by colons, but even if they
+  are, ENDIF must be present to denote the end of the IF block (unlike BBC
+  BASIC).
 
-Examples of use:
+  Examples of use:
 
             \\ build a rather strange table
             FOR n, 0, 9
@@ -390,36 +418,37 @@ Examples of use:
 
 { ... }
 
-Curly braces can be used to specify a block of code in which all symbols and
-labels defined will exist only within this block.  Effectively, this is a
-mechanism for providing 'local labels' without the slightly cumbersome syntax
-demanded by some other assemblers.  These can be nested.  Any symbols defined
-within a block will override any of the same name outside of the block, exactly
-like C/C++ - not sure if I like this behaviour, but for now it will stay.
+  Curly braces can be used to specify a block of code in which all symbols and
+  labels defined will exist only within this block.  Effectively, this is a
+  mechanism for providing 'local labels' without the slightly cumbersome syntax
+  demanded by some other assemblers.  These can be nested.  Any symbols defined
+  within a block will override any of the same name outside of the block,
+  exactly like C/C++ - not sure if I like this behaviour, but for now it will
+  stay.
 
-Example of use:
+  Example of use:
 
-    .initialise
-    {
-        LDY #31
-        LDA #0
-    .loop                ; label visible only within the braces
-        STA buffer,Y
-        DEY
-        BPL loop
-        RTS
-    }
-
-    .copy
-    {
-        LDY #31
-    .loop                ; perfectly ok to define .loop again in a new block
-        LDA source,Y
-        STA dest,Y
-        DEY
-        BPL loop
-        RTS
-    }
+      .initialise
+      {
+          LDY #31
+          LDA #0
+      .loop              ; label visible only within the braces
+          STA buffer,Y
+          DEY
+          BPL loop
+          RTS
+      }
+  
+      .copy
+      {
+          LDY #31
+      .loop              ; perfectly ok to define .loop again in a new block
+          LDA source,Y
+          STA dest,Y
+          DEY
+          BPL loop
+          RTS
+      }
 
 
 
@@ -523,10 +552,16 @@ really is pushing the hardware!!)
 
 9. VERSION HISTORY
 
+09/01/2008  0.05  Added MAPCHAR.  Fixed SKIPTO (see, told you I was doing
+                  it quickly!).  Enforce '%' as an end-of-symbol
+                  character.  Fixed bug in overlayed assembly.  Warns if
+                  there is no SAVE command in the source file.
 06/01/2008  0.04  Added braces for scoping labels.  Added INCBIN, SKIPTO.
                   Added some missing functions (NOT, LOG, LN, EXP).
                   Tightened up error checking on assembling out of range
-                  addresses (negative, or greater than &FFFF).
+                  addresses (negative, or greater than &FFFF).  Now
+                  distinguishes internally between labels and other
+                  symbols.
 05/01/2008  0.03  Added symbol dump for use with Swift.
 20/12/2007  0.02  Fixed small bug which withheld filename and line number
                   display in error messages.

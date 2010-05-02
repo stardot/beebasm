@@ -65,6 +65,13 @@ ObjectCode::ObjectCode()
 {
 	memset( m_aMemory, 0, sizeof m_aMemory );
 	memset( m_aFlags, 0, sizeof m_aFlags );
+
+	// initialise ascii mapping table
+
+	for ( int i = 0; i < 96; i++ )
+	{
+		m_aMapChar[ i ] = i + 32;
+	}
 }
 
 
@@ -86,7 +93,7 @@ ObjectCode::~ObjectCode()
 /**
 	ObjectCode::PutByte()
 
-	Puts one byte to memory image
+	Puts one byte to memory image, never doing pass consistency checks
 */
 /*************************************************************************************************/
 void ObjectCode::PutByte( unsigned int byte )
@@ -135,6 +142,8 @@ void ObjectCode::Assemble1( unsigned int opcode )
 	assert( opcode < 0x100 );
 
 	if ( GlobalData::Instance().IsSecondPass() &&
+		 ( m_aFlags[ m_PC ] & CHECK ) &&
+		 !( m_aFlags[ m_PC ] & DONT_CHECK ) &&
 		 m_aMemory[ m_PC ] != opcode )
 	{
 		throw AsmException_AssembleError_InconsistentCode();
@@ -150,7 +159,7 @@ void ObjectCode::Assemble1( unsigned int opcode )
 		throw AsmException_AssembleError_Overlap();
 	}
 
-	m_aFlags[ m_PC ] |= USED;
+	m_aFlags[ m_PC ] |= ( USED | CHECK );
 	m_aMemory[ m_PC++ ] = opcode;
 
 	SymbolTable::Instance().ChangeSymbol( "P%", m_PC );
@@ -177,6 +186,8 @@ void ObjectCode::Assemble2( unsigned int opcode, unsigned int val )
 	assert( val < 0x100 );
 
 	if ( GlobalData::Instance().IsSecondPass() &&
+		 ( m_aFlags[ m_PC ] & CHECK ) &&
+		 !( m_aFlags[ m_PC ] & DONT_CHECK ) &&
 		 m_aMemory[ m_PC ] != opcode )
 	{
 		throw AsmException_AssembleError_InconsistentCode();
@@ -194,7 +205,7 @@ void ObjectCode::Assemble2( unsigned int opcode, unsigned int val )
 		throw AsmException_AssembleError_Overlap();
 	}
 
-	m_aFlags[ m_PC ] |= USED;
+	m_aFlags[ m_PC ] |= ( USED | CHECK );
 	m_aMemory[ m_PC++ ] = opcode;
 	m_aFlags[ m_PC ] |= USED;
 	m_aMemory[ m_PC++ ] = val;
@@ -223,6 +234,8 @@ void ObjectCode::Assemble3( unsigned int opcode, unsigned int addr )
 	assert( addr < 0x10000 );
 
 	if ( GlobalData::Instance().IsSecondPass() &&
+		 ( m_aFlags[ m_PC ] & CHECK ) &&
+		 !( m_aFlags[ m_PC ] & DONT_CHECK ) &&
 		 m_aMemory[ m_PC ] != opcode )
 	{
 		throw AsmException_AssembleError_InconsistentCode();
@@ -242,7 +255,7 @@ void ObjectCode::Assemble3( unsigned int opcode, unsigned int addr )
 		throw AsmException_AssembleError_Overlap();
 	}
 
-	m_aFlags[ m_PC ] |= USED;
+	m_aFlags[ m_PC ] |= ( USED | CHECK );
 	m_aMemory[ m_PC++ ] = opcode;
 	m_aFlags[ m_PC ] |= USED;
 	m_aMemory[ m_PC++ ] = addr & 0xFF;
@@ -280,9 +293,22 @@ void ObjectCode::Clear( int start, int end, bool bAll )
 
 	if ( bAll )
 	{
+		// via CLEAR command
+		// as soon as we force a block to be cleared, we can no longer do inconsistency checks on
+		// the object code, so we flag the whole block as DONT_CHECK
 		memset( m_aMemory + start, 0, end - start );
+		memset( m_aFlags + start, DONT_CHECK, end - start );
 	}
-	memset( m_aFlags + start, 0, end - start );
+	else
+	{
+		// between first and second pass
+		// we preserve the memory image and the CHECK flags so that we can test for inconsistencies
+		// in the assembled code between first and second passes
+		for ( unsigned char* i = m_aFlags + start; i < m_aFlags + end; i++ )
+		{
+			(*i) &= ( CHECK | DONT_CHECK );
+		}
+	}
 }
 
 
@@ -317,4 +343,32 @@ void ObjectCode::IncBin( const char* filename )
 	}
 
 	binfile.close();
+}
+
+
+
+/*************************************************************************************************/
+/**
+	ObjectCode::SetMapping()
+*/
+/*************************************************************************************************/
+void ObjectCode::SetMapping( int ascii, int mapped )
+{
+	assert( ascii > 31 && ascii < 127 );
+	assert( mapped >= 0 && mapped < 256 );
+
+	m_aMapChar[ ascii - 32 ] = mapped;
+}
+
+
+
+/*************************************************************************************************/
+/**
+	ObjectCode::SetMapping()
+*/
+/*************************************************************************************************/
+int ObjectCode::GetMapping( int ascii ) const
+{
+	assert( ascii > 31 && ascii < 127 );
+	return m_aMapChar[ ascii - 32 ];
 }

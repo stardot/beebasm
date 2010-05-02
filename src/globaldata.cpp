@@ -54,7 +54,8 @@ GlobalData::GlobalData()
 	:	m_pBootFile( NULL ),
 		m_bVerbose( false ),
 		m_bUseDiscImage( false ),
-		m_pDiscImage( NULL )
+		m_pDiscImage( NULL ),
+		m_bSaved( false )
 {
 }
 

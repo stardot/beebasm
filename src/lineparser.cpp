@@ -343,10 +343,11 @@ string LineParser::GetSymbolName()
 	{
 		symbolName += m_line[ m_column++ ];
 
-	} while ( isalpha( m_line[ m_column ] ) ||
-			  isdigit( m_line[ m_column ] ) ||
-			  m_line[ m_column ] == '_' ||
-			  m_line[ m_column ] == '%' );
+	} while ( ( isalpha( m_line[ m_column ] ) ||
+				isdigit( m_line[ m_column ] ) ||
+				m_line[ m_column ] == '_' ||
+				m_line[ m_column ] == '%' ) &&
+				m_line[ m_column - 1 ] != '%' );
 
 	return symbolName;
 }
