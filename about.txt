@@ -1,10 +1,10 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V1.02                                 *
+*                               BeebAsm V1.04                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
-*                  Copyright (C) Rich Talbot-Watkins 2007, 2008               *
+*              Copyright (C) Rich Talbot-Watkins 2007, 2008, 2009             *
 *                            <rich_tw@hotmail.com>                            *
 *                                                                             *
 *    This program is free software: you can redistribute it and/or modify     *
@@ -270,6 +270,15 @@ ORG <addr>
   blocks.  This is exactly equivalent to BBC BASIC's 'P%=<addr>'.
 
 
+CPU <n>
+
+  Selects the target CPU, which determines the range of instructions that
+  will be accepted. The default is 0, which provides the original 6502
+  instruction set. The only current alternative is 1, which provides the
+  65C02 instruction set (including PLX, TRB etc, but not the Rockwell
+  additions like BBR).
+
+
 SKIP <bytes>
 
   Moves the address pointer on by the specified number of bytes.  Use this to
@@ -308,6 +317,11 @@ EQUB a [, b, c, ...]
 EQUW a [, b, c, ...]
 
   Insert the specified 16-bit word(s) into the code.
+
+
+EQUD a [, b, c, ...]
+
+  Insert the specified 32-bit word(s) into the code.
 
 
 EQUS "string" [, "string", byte, ...]
@@ -421,7 +435,7 @@ FOR <var>, start, end [, step] ... NEXT
             STX product:STX product+1:RTS
 
 
-IF...ELSE...ENDIF
+IF...ELIF...ELSE...ENDIF
 
   Use to assemble conditionally.  Like anything else in BeebAsm, these
   statements can be placed on one line, separated by colons, but even if they
@@ -441,6 +455,17 @@ IF...ELSE...ENDIF
             NEXT
 
             IF debugraster:LDA #3:STA &FE21:ENDIF
+
+            IF rom
+              ORG &8000
+              GUARD &C000
+            ELIF tube
+              ORG &B800
+              GUARD &F800
+            ELSE
+              ORG &3C00
+              GUARD &7C00
+            ENDIF
 
 
 { ... }
@@ -583,6 +608,10 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
+02/12/2009  1.04  Additions by Kevin Bracey:
+                  Added 65C02 instruction set and CPU directive.
+                  Added ELIF, EQUD.
+                  SKIP now lists the current address.
 27/07/2009  1.03  Bugfix: Corrected the unary < and > operators to
                   correspond to HI and LO as appropriate.
                   Added '$' as a valid hex literal prefix.

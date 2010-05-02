@@ -75,6 +75,8 @@ private:
 	struct If
 	{
 		bool				m_condition;
+		bool                m_hadElse;
+		bool				m_passed;
 		std::string			m_line;
 		int					m_column;
 		int					m_lineNumber;
@@ -105,6 +107,8 @@ public:
 	bool					IsIfConditionTrue() const;
 	void					AddIfLevel( std::string line, int column );
 	void					SetCurrentIfCondition( bool b );
+	void					StartElse( std::string line, int column );
+	void					StartElif( std::string line, int column );
 	void					ToggleCurrentIfCondition( std::string line, int column );
 	void					RemoveIfLevel( std::string line, int column );
 

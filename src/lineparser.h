@@ -46,11 +46,13 @@ public:
 private:
 
 	typedef void ( LineParser::*TokenHandler )();
+	typedef void ( SourceFile::*DirectiveHandler )( std::string line, int column );
 
 	struct Token
 	{
-		const char*		m_pName;
-		TokenHandler	m_handler;
+		const char*			m_pName;
+		TokenHandler		m_handler;
+		DirectiveHandler	m_directiveHandler;
 	};
 
 	enum ADDRESSING_MODE
@@ -64,9 +66,11 @@ private:
 		ABS,
 		ABSX,
 		ABSY,
+		IND,
 		INDX,
 		INDY,
 		IND16,
+		IND16X,
 		REL,
 
 		NUM_ADDRESSING_MODES
@@ -76,6 +80,7 @@ private:
 	{
 		short			m_aOpcodes[NUM_ADDRESSING_MODES];
 		const char*		m_pName;
+		int				m_cpu;
 	};
 
 
@@ -122,20 +127,21 @@ private:
 	void			HandleDefineLabel();
 	void			HandleDefineComment();
 	void			HandleStatementSeparator();
+	void			HandleDirective();
 	void			HandlePrint();
+	void			HandleCpu();
 	void			HandleOrg();
 	void			HandleInclude();
 	void			HandleIncBin();
 	void			HandleEqub();
 	void			HandleEquw();
+	void			HandleEqud();
 	void			HandleSave();
 	void			HandleFor();
 	void			HandleNext();
 	void			HandleOpenBrace();
 	void			HandleCloseBrace();
 	void			HandleIf();
-	void			HandleElse();
-	void			HandleEndif();
 	void			HandleAlign();
 	void			HandleSkip();
 	void			HandleSkipTo();
@@ -195,10 +201,10 @@ private:
 	std::string				m_line;
 	size_t					m_column;
 
-	static Token			m_gaTokenTable[];
-	static OpcodeData		m_gaOpcodeTable[];
-	static Operator			m_gaUnaryOperatorTable[];
-	static Operator			m_gaBinaryOperatorTable[];
+	static const Token		m_gaTokenTable[];
+	static const OpcodeData	m_gaOpcodeTable[];
+	static const Operator	m_gaUnaryOperatorTable[];
+	static const Operator	m_gaBinaryOperatorTable[];
 
 	#define MAX_VALUES		128
 	#define MAX_OPERATORS	32

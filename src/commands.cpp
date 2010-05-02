@@ -37,34 +37,36 @@
 
 using namespace std;
 
-
-LineParser::Token	LineParser::m_gaTokenTable[] =
+const LineParser::Token	LineParser::m_gaTokenTable[] =
 {
-	{ ".",			&LineParser::HandleDefineLabel },
-	{ "\\",			&LineParser::HandleDefineComment },
-	{ ";",			&LineParser::HandleDefineComment },
-	{ ":",			&LineParser::HandleStatementSeparator },
-	{ "PRINT",		&LineParser::HandlePrint },
-	{ "ORG",		&LineParser::HandleOrg },
-	{ "INCLUDE",	&LineParser::HandleInclude },
-	{ "EQUB",		&LineParser::HandleEqub },
-	{ "EQUS",		&LineParser::HandleEqub },
-	{ "EQUW",		&LineParser::HandleEquw },
-	{ "SAVE",		&LineParser::HandleSave },
-	{ "FOR",		&LineParser::HandleFor },
-	{ "NEXT",		&LineParser::HandleNext },
-	{ "IF",			&LineParser::HandleIf },
-	{ "ELSE",		&LineParser::HandleElse },
-	{ "ENDIF",		&LineParser::HandleEndif },
-	{ "ALIGN",		&LineParser::HandleAlign },
-	{ "SKIPTO",		&LineParser::HandleSkipTo },
-	{ "SKIP",		&LineParser::HandleSkip },
-	{ "GUARD",		&LineParser::HandleGuard },
-	{ "CLEAR",		&LineParser::HandleClear },
-	{ "INCBIN",		&LineParser::HandleIncBin },
-	{ "{",			&LineParser::HandleOpenBrace },
-	{ "}",			&LineParser::HandleCloseBrace },
-	{ "MAPCHAR",	&LineParser::HandleMapChar }
+	{ ".",			&LineParser::HandleDefineLabel,			0 }, // Why is gcc forcing me to
+	{ "\\",			&LineParser::HandleDefineComment,		0 }, // put all these 0s in?
+	{ ";",			&LineParser::HandleDefineComment,		0 },
+	{ ":",			&LineParser::HandleStatementSeparator,	0 },
+	{ "PRINT",		&LineParser::HandlePrint,				0 },
+	{ "CPU",		&LineParser::HandleCpu,					0 },
+	{ "ORG",		&LineParser::HandleOrg,					0 },
+	{ "INCLUDE",	&LineParser::HandleInclude,				0 },
+	{ "EQUB",		&LineParser::HandleEqub,				0 },
+	{ "EQUD",		&LineParser::HandleEqud,				0 },
+	{ "EQUS",		&LineParser::HandleEqub,				0 },
+	{ "EQUW",		&LineParser::HandleEquw,				0 },
+	{ "SAVE",		&LineParser::HandleSave,				0 },
+	{ "FOR",		&LineParser::HandleFor,					0 },
+	{ "NEXT",		&LineParser::HandleNext,				0 },
+	{ "IF",			&LineParser::HandleIf,					&SourceFile::AddIfLevel },
+	{ "ELIF",		&LineParser::HandleIf,					&SourceFile::StartElif },
+	{ "ELSE",		&LineParser::HandleDirective,			&SourceFile::StartElse },
+	{ "ENDIF",		&LineParser::HandleDirective,			&SourceFile::RemoveIfLevel },
+	{ "ALIGN",		&LineParser::HandleAlign,				0 },
+	{ "SKIPTO",		&LineParser::HandleSkipTo,				0 },
+	{ "SKIP",		&LineParser::HandleSkip,				0 },
+	{ "GUARD",		&LineParser::HandleGuard,				0 },
+	{ "CLEAR",		&LineParser::HandleClear,				0 },
+	{ "INCBIN",		&LineParser::HandleIncBin,				0 },
+	{ "{",			&LineParser::HandleOpenBrace,			0 },
+	{ "}",			&LineParser::HandleCloseBrace,			0 },
+	{ "MAPCHAR",	&LineParser::HandleMapChar,				0 }
 };
 
 
@@ -199,6 +201,23 @@ void LineParser::HandleStatementSeparator()
 
 /*************************************************************************************************/
 /**
+	LineParser::HandleDirective()
+*/
+/*************************************************************************************************/
+void LineParser::HandleDirective()
+{
+	// directive that doesn't need extra handling; just check rest of line is empty
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		// found nothing
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
 	LineParser::HandleOrg()
 */
 /*************************************************************************************************/
@@ -212,6 +231,30 @@ void LineParser::HandleOrg()
 
 	ObjectCode::Instance().SetPC( newPC );
 	SymbolTable::Instance().ChangeSymbol( "P%", newPC );
+
+	if ( m_line[ m_column ] == ',' )
+	{
+		// Unexpected comma (remembering that an expression can validly end with a comma)
+		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
+	}
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleCpu()
+*/
+/*************************************************************************************************/
+void LineParser::HandleCpu()
+{
+	int newCpu = EvaluateExpressionAsInt();
+	if ( newCpu < 0 || newCpu > 1 )
+	{
+		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+	}
+
+	ObjectCode::Instance().SetCPU( newCpu );
 
 	if ( m_line[ m_column ] == ',' )
 	{
@@ -413,6 +456,12 @@ void LineParser::HandleSkip()
 	if ( val < 0 )
 	{
 		throw AsmException_SyntaxError_ImmNegative( m_line, oldColumn );
+	}
+
+	if ( GlobalData::Instance().ShouldOutputAsm() )
+	{
+		cout << uppercase << hex << setfill( '0' ) << "     ";
+		cout << setw(4) << ObjectCode::Instance().GetPC() << endl;
 	}
 
 	for ( int i = 0; i < val; i++ )
@@ -796,6 +845,80 @@ void LineParser::HandleEquw()
 
 /*************************************************************************************************/
 /**
+	LineParser::HandleEqud()
+*/
+/*************************************************************************************************/
+void LineParser::HandleEqud()
+{
+	do
+	{
+		int value;
+
+		try
+		{
+			value = EvaluateExpressionAsInt();
+		}
+		catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+		{
+			if ( GlobalData::Instance().IsFirstPass() )
+			{
+				value = 0;
+			}
+			else
+			{
+				throw;
+			}
+		}
+
+		if ( GlobalData::Instance().ShouldOutputAsm() )
+		{
+			cout << uppercase << hex << setfill( '0' ) << "     ";
+			cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+			cout << setw(2) << ( value & 0xFF ) << " ";
+			cout << setw(2) << ( ( value & 0xFF00 ) >> 8 ) << " ";
+			cout << setw(2) << ( ( value & 0xFF0000 ) >> 16 ) << " ";
+			cout << setw(2) << ( ( value & 0xFF000000 ) >> 24 );
+			cout << endl << nouppercase << dec << setfill( ' ' );
+		}
+
+		try
+		{
+			ObjectCode::Instance().PutByte( value & 0xFF );
+			ObjectCode::Instance().PutByte( ( value & 0xFF00 ) >> 8 );
+			ObjectCode::Instance().PutByte( ( value & 0xFF0000 ) >> 16 );
+			ObjectCode::Instance().PutByte( ( value & 0xFF000000 ) >> 24 );
+		}
+		catch ( AsmException_AssembleError& e )
+		{
+			e.SetString( m_line );
+			e.SetColumn( m_column );
+			throw;
+		}
+
+		if ( !AdvanceAndCheckEndOfStatement() )
+		{
+			break;
+		}
+
+		if ( m_line[ m_column ] != ',' )
+		{
+			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+		}
+
+		m_column++;
+
+		if ( !AdvanceAndCheckEndOfStatement() )
+		{
+			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		}
+
+	} while ( true );
+}
+
+
+
+/*************************************************************************************************/
+/**
 	LineParser::HandleSave()
 */
 /*************************************************************************************************/
@@ -1129,6 +1252,7 @@ void LineParser::HandleCloseBrace()
 /*************************************************************************************************/
 void LineParser::HandleIf()
 {
+	// Handles both IF and ELIF
 	int condition = EvaluateExpressionAsInt();
 	m_sourceFile->SetCurrentIfCondition( condition );
 
@@ -1136,38 +1260,6 @@ void LineParser::HandleIf()
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
-	}
-}
-
-
-
-/*************************************************************************************************/
-/**
-	LineParser::HandleElse()
-*/
-/*************************************************************************************************/
-void LineParser::HandleElse()
-{
-	if ( AdvanceAndCheckEndOfStatement() )
-	{
-		// found nothing
-		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
-	}
-}
-
-
-
-/*************************************************************************************************/
-/**
-	LineParser::HandleEndif()
-*/
-/*************************************************************************************************/
-void LineParser::HandleEndif()
-{
-	if ( AdvanceAndCheckEndOfStatement() )
-	{
-		// found nothing
-		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 	}
 }
 

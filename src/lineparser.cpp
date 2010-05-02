@@ -291,19 +291,9 @@ void LineParser::HandleToken( int i, int oldColumn )
 {
 	assert( i >= 0 );
 
-	// Do special case handling for IF/ELSE/ENDIF
-
-	if ( m_gaTokenTable[ i ].m_handler == &LineParser::HandleIf )
+	if ( m_gaTokenTable[ i ].m_directiveHandler )
 	{
-		m_sourceFile->AddIfLevel( m_line, m_column );
-	}
-	else if ( m_gaTokenTable[ i ].m_handler == &LineParser::HandleElse )
-	{
-		m_sourceFile->ToggleCurrentIfCondition( m_line, m_column );
-	}
-	else if ( m_gaTokenTable[ i ].m_handler == &LineParser::HandleEndif )
-	{
-		m_sourceFile->RemoveIfLevel( m_line, m_column );
+		( m_sourceFile->*m_gaTokenTable[ i ].m_directiveHandler )( m_line, m_column );
 	}
 
 	if ( m_sourceFile->IsIfConditionTrue() )

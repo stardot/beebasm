@@ -387,6 +387,8 @@ void SourceFile::AddIfLevel( string line, int column )
 	}
 
 	m_ifStack[ m_ifStackPtr ].m_condition	= true;
+	m_ifStack[ m_ifStackPtr ].m_passed		= false;
+	m_ifStack[ m_ifStackPtr ].m_hadElse		= false;
 	m_ifStack[ m_ifStackPtr ].m_line		= line;
 	m_ifStack[ m_ifStackPtr ].m_column		= column;
 	m_ifStack[ m_ifStackPtr ].m_lineNumber	= m_lineNumber;
@@ -404,23 +406,46 @@ void SourceFile::SetCurrentIfCondition( bool b )
 {
 	assert( m_ifStackPtr > 0 );
 	m_ifStack[ m_ifStackPtr - 1 ].m_condition = b;
+	if ( b )
+	{
+		m_ifStack[ m_ifStackPtr - 1 ].m_passed = true;
+	}
 }
 
 
 
 /*************************************************************************************************/
 /**
-	SourceFile::ToggleCurrentIfCondition()
+	SourceFile::StartElse()
 */
 /*************************************************************************************************/
-void SourceFile::ToggleCurrentIfCondition( string line, int column )
+void SourceFile::StartElse( string line, int column )
 {
-	if ( m_ifStackPtr == 0 )
+	if ( m_ifStack[ m_ifStackPtr - 1 ].m_hadElse )
 	{
 		throw AsmException_SyntaxError_ElseWithoutIf( line, column );
 	}
 
-	m_ifStack[ m_ifStackPtr - 1 ].m_condition = !m_ifStack[ m_ifStackPtr - 1 ].m_condition;
+	m_ifStack[ m_ifStackPtr - 1 ].m_hadElse = true;
+
+	m_ifStack[ m_ifStackPtr - 1 ].m_condition = !m_ifStack[ m_ifStackPtr - 1 ].m_passed;
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SourceFile::StartElif()
+*/
+/*************************************************************************************************/
+void SourceFile::StartElif( string line, int column )
+{
+	if ( m_ifStack[ m_ifStackPtr - 1 ].m_hadElse )
+	{
+		throw AsmException_SyntaxError_ElifWithoutIf( line, column );
+	}
+
+	m_ifStack[ m_ifStackPtr - 1 ].m_condition = !m_ifStack[ m_ifStackPtr - 1 ].m_passed;
 }
 
 

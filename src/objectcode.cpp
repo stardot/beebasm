@@ -77,7 +77,8 @@ void ObjectCode::Destroy()
 */
 /*************************************************************************************************/
 ObjectCode::ObjectCode()
-	:	m_PC( 0 )
+	:	m_PC( 0 ),
+	 	m_CPU( 0 )
 {
 	memset( m_aMemory, 0, sizeof m_aMemory );
 	memset( m_aFlags, 0, sizeof m_aFlags );

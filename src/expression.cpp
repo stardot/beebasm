@@ -39,7 +39,7 @@ using namespace std;
 
 
 
-LineParser::Operator	LineParser::m_gaBinaryOperatorTable[] =
+const LineParser::Operator	LineParser::m_gaBinaryOperatorTable[] =
 {
 	{ ")",		-1,	NULL },		// special case
 	{ "]",		-1,	NULL },		// special case
@@ -69,7 +69,7 @@ LineParser::Operator	LineParser::m_gaBinaryOperatorTable[] =
 
 
 
-LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
+const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 {
 	{ "(",		-1,	NULL },		// special case
 	{ "[",		-1,	NULL },		// special case
@@ -142,7 +142,7 @@ double LineParser::GetValue()
 		{
 			// get a number
 
-			int hexValue;
+			unsigned int hexValue;
 
 			istringstream str( m_line );
 			str.seekg( m_column );
@@ -321,7 +321,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 			{
 				// If unary operator *was* found...
 
-				Operator& thisOp = m_gaUnaryOperatorTable[ matchedToken ];
+				const Operator& thisOp = m_gaUnaryOperatorTable[ matchedToken ];
 
 				if ( thisOp.handler != NULL )
 				{
@@ -381,7 +381,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 
 			// we found binary operator
 
-			Operator& thisOp = m_gaBinaryOperatorTable[ matchedToken ];
+			const Operator& thisOp = m_gaBinaryOperatorTable[ matchedToken ];
 
 			if ( thisOp.handler != NULL )
 			{
