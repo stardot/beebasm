@@ -23,7 +23,7 @@
 using namespace std;
 
 
-#define VERSION "0.01"
+#define VERSION "0.02"
 
 
 /*************************************************************************************************/
@@ -94,6 +94,7 @@ int main( int argc, char* argv[] )
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " --help         See this help again" << endl;
+					return EXIT_SUCCESS;
 				}
 				else
 				{

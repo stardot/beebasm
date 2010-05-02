@@ -471,6 +471,8 @@ really is pushing the hardware!!)
 
 9. VERSION HISTORY
 
+20/12/2007  0.02  Fixed small bug which withheld filename and line number
+                  display in error messages.
 16/12/2007  0.01  First released version.
 
 
