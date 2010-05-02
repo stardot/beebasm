@@ -62,15 +62,50 @@ void LineParser::Process()
 
 		int oldColumn = m_column;
 
+		// Priority: check if it's symbol assignment and let it take priority over keywords
+		// This means symbols can begin with reserved words, e.g. PLAyer, but in the case of
+		// the line 'player = 1', the meaning is unambiguous, so we allow it as a symbol
+		// assignment.
+
+		bool bIsSymbolAssignment = false;
+
+		if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+		{
+			do
+			{
+				m_column++;
+
+			} while ( ( isalpha( m_line[ m_column ] ) ||
+						isdigit( m_line[ m_column ] ) ||
+						m_line[ m_column ] == '_' ||
+						m_line[ m_column ] == '%' ) &&
+						m_line[ m_column - 1 ] != '%' );
+
+			if ( AdvanceAndCheckEndOfStatement() )
+			{
+				if ( m_line[ m_column ] == '=' )
+				{
+					// if we have a valid symbol name, followed by an '=', it is definitely
+					// a symbol assignment.
+					bIsSymbolAssignment = true;
+				}
+			}
+		}
+
+		m_column = oldColumn;
+
 		// first check tokens - they have priority over opcodes, so that they can have names
 		// like INCLUDE (which would otherwise be interpreted as INC LUDE)
 
-		int token = GetTokenAndAdvanceColumn();
-
-		if ( token != -1 )
+		if ( !bIsSymbolAssignment )
 		{
-			HandleToken( token, oldColumn );
-			continue;
+			int token = GetTokenAndAdvanceColumn();
+
+			if ( token != -1 )
+			{
+				HandleToken( token, oldColumn );
+				continue;
+			}
 		}
 
 		// Next we see if we should even be trying to execute anything.... maybe the if condition is false
@@ -84,12 +119,15 @@ void LineParser::Process()
 
 		// No token match - check against opcodes
 
-		token = GetInstructionAndAdvanceColumn();
-
-		if ( token != -1 )
+		if ( !bIsSymbolAssignment )
 		{
-			HandleAssembler( token );
-			continue;
+			int token = GetInstructionAndAdvanceColumn();
+
+			if ( token != -1 )
+			{
+				HandleAssembler( token );
+				continue;
+			}
 		}
 
 		// Check to see if it's symbol assignment

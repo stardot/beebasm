@@ -170,7 +170,7 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 	{
 		bool bTheSame = true;
 
-		for ( size_t j = 0; j < 7 || j < strlen( pName ); j++ )
+		for ( size_t j = 0; j < strlen( pName ); j++ )
 		{
 			if ( toupper( pName[ j ] ) != toupper( m_aCatalog[ i + j ] ) )
 			{

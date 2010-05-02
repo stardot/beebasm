@@ -703,7 +703,7 @@ void LineParser::HandleAssembler( int instruction )
 		throw AsmException_SyntaxError_BadAbsolute( m_line, m_column );
 	}
 
-	if ( toupper( m_line[ m_column ] == 'X' ) )
+	if ( toupper( m_line[ m_column ] ) == 'X' )
 	{
 		m_column++;
 
@@ -734,7 +734,7 @@ void LineParser::HandleAssembler( int instruction )
 		}
 	}
 
-	if ( toupper( m_line[ m_column ] == 'Y' ) )
+	if ( toupper( m_line[ m_column ] ) == 'Y' )
 	{
 		m_column++;
 

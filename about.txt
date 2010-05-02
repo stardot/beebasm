@@ -1,6 +1,6 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V1.00                                 *
+*                               BeebAsm V1.01                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
@@ -552,6 +552,9 @@ really is pushing the hardware!!)
 
 9. VERSION HISTORY
 
+14/04/2008  1.01  Bugfixes: allow lower case index in abs,x or abs,y.
+                  Fails if file already exists in output disc image.
+                  Symbol names may now begin with assembler opcode names.
 30/03/2008  1.00  First stable release.  Corrected a few C++ compliance
                   issues in the source code.
 22/01/2008  0.06  Fixed bug with forward-referenced labels in indirect
