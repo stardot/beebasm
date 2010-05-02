@@ -1,10 +1,25 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V1.01                                 *
+*                               BeebAsm V1.02                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
-*                   Rich Talbot-Watkins <rich_tw@hotmail.com>                 *
+*                  Copyright (C) Rich Talbot-Watkins 2007, 2008               *
+*                            <rich_tw@hotmail.com>                            *
+*                                                                             *
+*    This program is free software: you can redistribute it and/or modify     *
+*    it under the terms of the GNU General Public License as published by     *
+*    the Free Software Foundation, either version 3 of the License, or        *
+*    (at your option) any later version.                                      *
+*                                                                             *
+*    This program is distributed in the hope that it will be useful, but      *
+*    WITHOUT ANY WARRANTY; without even the implied warranty of               *
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU        *
+*    General Public License for more details.                                 *
+*                                                                             *
+*    You should have received a copy of the GNU General Public License        *
+*    along with this program, as COPYING.txt.  If not, see                    *
+*    <http://www.gnu.org/licenses/>.                                          *
 *                                                                             *
 *******************************************************************************
 
@@ -38,7 +53,12 @@ functions, including SIN, COS and SQR - very useful for building lookup tables
 directly within a source file.
 
 BeebAsm is distributed with source code, and should be easily portable to any
-platform you wish.
+platform you wish.  To build under Windows, you will need to install MinGW
+(http://www.mingw.org), and the most basic subset of Cygwin
+(http://www.cygwin.org) which provides Windows versions of the common Unix
+commands.  Ensure the executables from these two packages are in your
+Windows path, and BeebAsm should compile without problems.  Just navigate to
+the directory containing 'Makefile', and enter 'make code'.
 
 
 
@@ -342,13 +362,20 @@ CLEAR <start>, <end>
   it first.
 
 
-SAVE "filename", start, end [, exec]
+SAVE "filename", start, end [, exec [, reload] ]
 
   Saves out object code to either a DFS disc image (if one has been
-  specified), or to the current directory as a standalone file.  'exec'
-  specifies the execution address of the file when saved to a disc image.  A
+  specified), or to the current directory as a standalone file.  A
   source file must have at least one SAVE statement in it, otherwise nothing
   will be output.  BeebAsm will warn if this is the case.
+  
+  'exec' can be optionally specified as the execution address of the file when
+  saved to a disc image.
+  
+  'reload' can additionally be specified to save the file on the disc image to
+  a different address to that which it was saved from.  Use this to assemble
+  code at its 'native' address,  but which loads at a DFS-friendly address,
+  ready to be relocated to its correct address upon execution.
 
 
 PRINT
@@ -547,11 +574,19 @@ limits, in terms of creating a flicker-free animation, updating at 50Hz.
 (This is not to say that it's particularly impressive, but nonetheless, it
 really is pushing the hardware!!)
 
+There is also a demo called "relocdemo.asm", which shows how the 'reload
+address' feature of SAVE can be used to write self-relocating code.  This is
+based on the above demo, but it runs at a low address (&300).
+
 
 
 
 9. VERSION HISTORY
 
+06/11/2008  1.02  Bugfix: now it's possible to save location &FFFF.
+                  Added 'reload address' parameter to SAVE.
+                  Properly integrated the GPL License text into the
+                  distribution.
 14/04/2008  1.01  Bugfixes: allow lower case index in abs,x or abs,y.
                   Fails if file already exists in output disc image.
                   Symbol names may now begin with assembler opcode names.
@@ -581,6 +616,6 @@ really is pushing the hardware!!)
 
 There are bound to be loads.  I wrote it quickly!  Please help me zap all the
 problems by reporting any bugs to me, Rich Talbot-Watkins, at
-rich_tw@hotmail.com
+<rich_tw@hotmail.com>, or join the forum at <http://www.retrosoftware.co.uk>.
 
 Thank you!

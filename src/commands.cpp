@@ -3,6 +3,22 @@
 	commands.cpp
 
 	Contains all the LineParser methods for parsing and handling assembler commands
+
+
+	Copyright (C) Rich Talbot-Watkins 2007, 2008
+
+	This file is part of BeebAsm.
+
+	BeebAsm is free software: you can redistribute it and/or modify it under the terms of the GNU
+	General Public License as published by the Free Software Foundation, either version 3 of the
+	License, or (at your option) any later version.
+
+	BeebAsm is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with BeebAsm, as
+	COPYING.txt.  If not, see <http://www.gnu.org/licenses/>.
 */
 /*************************************************************************************************/
 
@@ -238,7 +254,7 @@ void LineParser::HandleGuard()
 void LineParser::HandleClear()
 {
 	int start = EvaluateExpressionAsInt();
-	if ( start < 0 || start > 0xFFFF )
+	if ( start < 0 || start > 0x10000 )
 	{
 		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
 	}
@@ -788,8 +804,9 @@ void LineParser::HandleSave()
 	int start = 0;
 	int end = 0;
 	int exec = 0;
+	int reload = 0;
 
-	// syntax is SAVE "filename", start, end [, exec]
+	// syntax is SAVE "filename", start, end [, exec [, reload] ]
 
 	if ( !AdvanceAndCheckEndOfStatement() )
 	{
@@ -839,6 +856,8 @@ void LineParser::HandleSave()
 	m_column++;
 
 	start = EvaluateExpressionAsInt();
+	exec = start;
+	reload = start;
 
 	if ( start < 0 || start > 0xFFFF )
 	{
@@ -857,7 +876,7 @@ void LineParser::HandleSave()
 
 	end = EvaluateExpressionAsInt();
 
-	if ( end < 0 || end > 0xFFFF )
+	if ( end < 0 || end > 0x10000 )
 	{
 		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
 	}
@@ -880,15 +899,25 @@ void LineParser::HandleSave()
 				throw;
 			}
 		}
-	}
-	else
-	{
-		exec = start;
-	}
 
-	if ( exec < 0 || exec > 0xFFFF )
-	{
-		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+		if ( exec < 0 || exec > 0xFFFF )
+		{
+			throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+		}
+
+		// get optional reload address
+
+		if ( m_line[ m_column ] == ',' )
+		{
+			m_column++;
+
+			reload = EvaluateExpressionAsInt();
+
+			if ( reload < 0 || reload > 0xFFFF )
+			{
+				throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+			}
+		}
 	}
 
 	// expect no more
@@ -908,7 +937,7 @@ void LineParser::HandleSave()
 			// disc image version of the save
 			GlobalData::Instance().GetDiscImage()->AddFile( saveFile.c_str(),
 															ObjectCode::Instance().GetAddr( start ),
-															start,
+															reload,
 															exec,
 															end - start );
 		}

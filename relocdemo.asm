@@ -1,30 +1,22 @@
 \ ******************************************************************
 \ *
-\ *		BeebAsm demo
+\ *		Relocation demo
 \ *
-\ *		Spinning star globe
+\ *		Simple demonstration of how to write self-relocating code
+\ *		in BeebAsm, using the new 'reload address' feature of SAVE.
 \ *
-\ *		Change the speed of rotation with Z and X keys
-\ *		Press Esc to quit
-\ *
-\ *		Try assembling the code with debugrasters = TRUE (line 20)
-\ *		It shows how the frame is split up into various stages of
-\ *		processing.
-\ *
-\ *		The red part is where we start to plot the dots - starting as
-\ *		soon before the first screenline of the next frame is rastered
-\ *		as possible.
-\ *
-\ *		The magenta part is a small loop where we wait for 'vsync'.
-\ *		It's not actually vsync, but in fact a fixed time from actual
-\ *		vsync (timed by timer 1) from which point we can start to erase
-\ *		points from the top of the screen down.
-\ *
-\ *		The blue part is the time when we are erasing dots.  Because
-\ *		the dots are sorted from top to bottom of screen, we can
-\ *		overlap these updates with the actual screen rasterisation.
+\ *		This uses the 'star globe' demo as a base.
 \ *
 \ ******************************************************************
+
+
+\\ Define addresses
+
+NATIVE_ADDR		= &300		; address at which code will run
+RELOAD_ADDR		= &1100		; address at which code will load
+
+OFFSET			= RELOAD_ADDR - NATIVE_ADDR
+
 
 \\ Define globals
 
@@ -52,27 +44,14 @@ ORG 0
 
 \\ Set start address
 
-ORG &1100
+ORG NATIVE_ADDR
+
 
 \ ******************************************************************
-\ *	The entry point of the demo
+\ *	The start of the demo 'proper', after it has been relocated
 \ ******************************************************************
 
-.start
-
-	\\ Set up hardware state and interrupts
-
-	SEI
-	LDX #&FF:TXS				; reset stack
-	STX &FE44:STX &FE45
-	LDA #&7F:STA &FE4E			; disable all interrupts
-	STA &FE43					; set keyboard data direction
-	LDA #&C2:STA &FE4E			; enable VSync and timer interrupt
-	LDA #&0F:STA &FE42			; set addressable latch for writing
-	LDA #3:STA &FE40			; keyboard write enable
-	LDA #0:STA &FE4B			; timer 1 one shot mode
-	LDA #LO(irq):STA &204
-	LDA #HI(irq):STA &205		; set interrupt handler
+.START
 
 	\\ Clear the screen
 
@@ -87,39 +66,6 @@ ORG &1100
 	DEX
 	BNE clearloop
 
-	\\ Set up CRTC for MODE 2
-
-	LDX #13
-.crtcloop
-	STX &FE00
-	LDA crtcregs,X
-	STA &FE01
-	DEX
-	BPL crtcloop
-
-	\\ Set up video ULA for MODE 2
-
-	LDA #&F4
-	STA &FE20
-
-	\\ Set up palette for MODE 2
-
-	LDX #15
-.palloop
-	LDA paldata,X
-	STA &FE21
-	ORA #&80
-	STA &FE21
-	DEX
-	BPL palloop
-
-	\\ Initialise vars
-
-	LDA #0:STA angle:STA angle+1
-	STA vsync
-	STA speed
-	LDA #1:STA speed+1
-
 	\\ Enable interrupts, ready to start the main loop
 
 	CLI
@@ -128,6 +74,10 @@ ORG &1100
 
 .initialwait
 	LDA vsync:BEQ initialwait:LDA #0:STA vsync
+
+	\\ Enable the screen
+	
+	LDA #6:STA &FE00:LDA #32:STA &FE01
 
 	\\ This is the main loop!
 
@@ -299,53 +249,6 @@ ORG &1100
 	EQUB &2A, &15		; white pixels
 
 
-
-\ ******************************************************************
-\ *	Values of CRTC regs for MODE 2
-\ ******************************************************************
-
-.crtcregs
-	EQUB 127			; R0  horizontal total
-	EQUB 64				; R1  horizontal displayed - shrunk a little
-	EQUB 91				; R2  horizontal position
-	EQUB 40				; R3  sync width
-	EQUB 38				; R4  vertical total
-	EQUB 0				; R5  vertical total adjust
-	EQUB 32				; R6  vertical displayed
-	EQUB 34				; R7  vertical position
-	EQUB 0				; R8  interlace
-	EQUB 7				; R9  scanlines per row
-	EQUB 32				; R10 cursor start
-	EQUB 8				; R11 cursor end
-	EQUB HI(&4000/8)	; R12 screen start address, high
-	EQUB LO(&4000/8)	; R13 screen start address, low
-
-
-\ ******************************************************************
-\ *	Values of palette regs for MODE 2
-\ ******************************************************************
-
-PAL_black	= (0 EOR 7)
-PAL_blue	= (4 EOR 7)
-PAL_red		= (1 EOR 7)
-PAL_magenta = (5 EOR 7)
-PAL_green	= (2 EOR 7)
-PAL_cyan	= (6 EOR 7)
-PAL_yellow	= (3 EOR 7)
-PAL_white	= (7 EOR 7)
-
-.paldata
-	EQUB &00 + PAL_black
-	EQUB &10 + PAL_blue
-	EQUB &20 + PAL_red
-	EQUB &30 + PAL_magenta
-	EQUB &40 + PAL_green
-	EQUB &50 + PAL_cyan
-	EQUB &60 + PAL_yellow
-	EQUB &70 + PAL_white
-
-
-
 \ ******************************************************************
 \ *	sin table
 \ ******************************************************************
@@ -444,16 +347,165 @@ NEXT
 
 
 \ ******************************************************************
+\ *	This is the end of the main native block of code
+\ ******************************************************************
+.END
+
+
+\ ******************************************************************
+\ *	The entry point of the demo
+\ * This relocates the code to its 'real' address, and can also
+\ * do one-time initialisation, i.e. code we can chuck away afterwards.
+\ *
+\ * Since this is the relocation code, it has to go at the very end of
+\ * the executable.
+\
+\ * This code will be running at its assemble address + OFFSET,
+\ * so we have to patch up any absolute address references accordingly.
+\ ******************************************************************
+
+ALIGN &100
+.RELOC_START
+
+	\\ Set up hardware state and interrupts
+
+	SEI
+	LDX #&FF:TXS				; reset stack
+	STX &FE44:STX &FE45
+	LDA #&7F:STA &FE4E			; disable all interrupts
+	STA &FE43					; set keyboard data direction
+	LDA #&C2:STA &FE4E			; enable VSync and timer interrupt
+	LDA #&0F:STA &FE42			; set addressable latch for writing
+	LDA #3:STA &FE40			; keyboard write enable
+	LDA #0:STA &FE4B			; timer 1 one shot mode
+	LDA #LO(irq):STA &204
+	LDA #HI(irq):STA &205		; set interrupt handler
+
+	\\ Set up CRTC for MODE 2
+
+	LDX #13
+.crtcloop
+	STX &FE00
+	LDA crtcregs + OFFSET,X		; PATCHED ADDRESS
+	STA &FE01
+	DEX
+	BPL crtcloop
+
+	\\ Set up video ULA for MODE 2
+
+	LDA #&F4
+	STA &FE20
+
+	\\ Set up palette for MODE 2
+
+	LDX #15
+.palloop
+	LDA paldata + OFFSET,X		; PATCHED ADDRESS
+	STA &FE21
+	ORA #&80
+	STA &FE21
+	DEX
+	BPL palloop
+
+	\\ Initialise vars
+
+	LDA #0:STA angle:STA angle+1
+	STA vsync
+	STA speed
+	LDA #1:STA speed+1
+	
+	\\ Relocate
+	
+	LDX #HI(RELOC_START-START)
+	LDY #0
+	.relocloop
+	LDA RELOAD_ADDR,Y
+	STA NATIVE_ADDR,Y
+	INY
+	BNE relocloop
+	INC relocloop+OFFSET+2		; PATCHED ADDRESS
+	INC relocloop+OFFSET+5		; PATCHED ADDRESS
+	DEX
+	BNE relocloop
+	
+	JMP START
+
+
+\ ******************************************************************
+\ *	Values of CRTC regs for MODE 2
+\ ******************************************************************
+
+.crtcregs
+	EQUB 127			; R0  horizontal total
+	EQUB 64				; R1  horizontal displayed - shrunk a little
+	EQUB 91				; R2  horizontal position
+	EQUB 40				; R3  sync width
+	EQUB 38				; R4  vertical total
+	EQUB 0				; R5  vertical total adjust
+	EQUB 0				; R6  vertical displayed
+	EQUB 34				; R7  vertical position
+	EQUB 0				; R8  interlace
+	EQUB 7				; R9  scanlines per row
+	EQUB 32				; R10 cursor start
+	EQUB 8				; R11 cursor end
+	EQUB HI(&4000/8)	; R12 screen start address, high
+	EQUB LO(&4000/8)	; R13 screen start address, low
+
+
+\ ******************************************************************
+\ *	Values of palette regs for MODE 2
+\ ******************************************************************
+
+PAL_black	= (0 EOR 7)
+PAL_blue	= (4 EOR 7)
+PAL_red		= (1 EOR 7)
+PAL_magenta = (5 EOR 7)
+PAL_green	= (2 EOR 7)
+PAL_cyan	= (6 EOR 7)
+PAL_yellow	= (3 EOR 7)
+PAL_white	= (7 EOR 7)
+
+.paldata
+	EQUB &00 + PAL_black
+	EQUB &10 + PAL_blue
+	EQUB &20 + PAL_red
+	EQUB &30 + PAL_magenta
+	EQUB &40 + PAL_green
+	EQUB &50 + PAL_cyan
+	EQUB &60 + PAL_yellow
+	EQUB &70 + PAL_white
+
+
+
+
+\ ******************************************************************
 \ *	End address to be saved
 \ ******************************************************************
-.end
+.RELOC_END
+
+
+\ ******************************************************************
+\ *	Save the code, before the following data overlay clears it again
+\ ******************************************************************
+
+SAVE "Code", START, RELOC_END, RELOC_START+OFFSET, RELOAD_ADDR
+
 
 
 
 \ ******************************************************************
-\ *	Space reserved for tables but not initialised with anything
-\ * Therefore these are not saved in the executable
+\ * Start a new overlay:
+\ *
+\ * This is overlapped with the relocation code above, because it
+\ * will already have been thrown away by the time these tables are
+\ * used.
+\ *
+\ * These tables are filled at run-time, hence we just define their
+\ * addresses, we don't need to save anything.
 \ ******************************************************************
+
+CLEAR END, RELOC_END
+ORG END
 
 ; these store the screen address of the last dot
 ; at the end of the frame, we go through these tables, storing zeroes to
@@ -468,10 +520,3 @@ ALIGN &100
 ALIGN &100
 .olddotaddry	SKIP numdots
 
-
-
-\ ******************************************************************
-\ *	Save the code
-\ ******************************************************************
-
-SAVE "Code", start, end
