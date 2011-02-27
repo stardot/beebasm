@@ -126,7 +126,7 @@ double LineParser::GetValue()
 		istringstream str( m_line );
 		str.seekg( m_column );
 		str >> value;
-		m_column = str.tellg();
+		m_column = static_cast< size_t >( str.tellg() );
 	}
 	else if ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' )
 	{
@@ -148,7 +148,7 @@ double LineParser::GetValue()
 			istringstream str( m_line );
 			str.seekg( m_column );
 			str >> hex >> hexValue;
-			m_column = str.tellg();
+			m_column = static_cast< size_t >( str.tellg() );
 
 			value = static_cast< double >( hexValue );
 		}
@@ -299,7 +299,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 				{
 					value = GetValue();
 				}
-				catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+				catch ( AsmException_SyntaxError_SymbolNotDefined& )
 				{
 					// If we encountered an unknown symbol whilst evaluating the expression...
 

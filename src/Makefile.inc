@@ -42,11 +42,37 @@
 # Check that required variables have been set
 
 ifndef BUILD_DIR
-error Please set BUILD_DIR to the path into which objects are compiled
+$(error Please set BUILD_DIR to the path into which objects are compiled)
 endif
 
 ifndef TARGET
-error Please set TARGET to the filename of the final executable to be built
+$(error Please set TARGET to the filename of the final executable to be built)
+endif
+
+
+# List of allowed platform names.
+# Add extra valid platforms to this list as they are supported.
+
+PLATFORM_LIST	:=		mingw-gcc3
+PLATFORM_LIST	+=		mingw-gcc4
+
+
+# Try to determine the build platform if it wasn't explicitly specified on the command line
+
+ifndef PLATFORM
+# Do checks with $(shell uname -s) and/or $(OSTYPE) here to try to automatically determine
+# the appropriate platform type
+endif
+
+
+# If we still haven't got a valid value for $(PLATFORM), exit gracefully with a helpful message
+
+ifeq ($(findstring $(PLATFORM),$(PLATFORM_LIST)),)
+ifneq ($(MAKECMDGOALS),)
+ifneq ($(MAKECMDGOALS),help)
+$(error Could not determine the target platform, or an invalid value for PLATFORM was specified. Type 'make help' for information)
+endif
+endif
 endif
 
 
@@ -64,6 +90,13 @@ SRCS			:=		$(wildcard $(addsuffix /*.cpp,$(DIRS)) $(addsuffix /*.c,$(DIRS)))
 
 OBJS			:=		$(subst /./,/,$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SRCS)))
 DEPS			:=		$(OBJS:.o=.d)
+
+
+# Add platform-specific flags
+
+ifeq ($(PLATFORM),mingw-gcc4)
+LDFLAGS			+=		-static
+endif
 
 
 # Declare executable names
@@ -101,12 +134,19 @@ endif
 
 
 help:
+	$(ECHO) BeebAsm makefile
+	$(ECHO) ""
+	$(ECHO) "Syntax: make <option> [PLATFORM=<platform>] [VERBOSE=1]"
+	$(ECHO) ""
 	$(ECHO) Possible options:
 	$(ECHO) make all .... Build and run code
 	$(ECHO) make code ... Build code
 	$(ECHO) make run .... Run code
 	$(ECHO) make clean .. Clean code
 	$(ECHO) make help ... Display this message again
+	$(ECHO)
+	$(ECHO) Possible platforms: $(PLATFORM_LIST)
+	$(ECHO)
 	$(ECHO) Append VERBOSE=1 to show more information
 
 

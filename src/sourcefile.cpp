@@ -131,7 +131,7 @@ void SourceFile::Process()
 		}
 
 		m_lineNumber++;
-		m_filePointer = m_file.tellg();
+		m_filePointer = static_cast< int >( m_file.tellg() );
 	}
 
 	// Check whether we aborted prematurely

@@ -39,7 +39,7 @@ CXXFLAGS		:=		-O3 -pedantic $(WARNFLAGS)
 
 # Define linker switches
 
-LDFLAGS			:=		-s -static
+LDFLAGS			:=		-s
 
 # Define 2nd party libs to link
 
@@ -51,7 +51,7 @@ LDLIBS			:=		-lstdc++
 
 # Parameters to the executable
 
-PARAMS			:=		-i ..\demo.asm -do ..\demo.ssd -boot Code -v
+PARAMS			:=		-i ../demo.asm -do ../demo.ssd -boot Code -v
 
 
 

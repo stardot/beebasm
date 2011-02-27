@@ -411,7 +411,7 @@ void LineParser::HandleAssembler( int instruction )
 		{
 			value = EvaluateExpressionAsInt();
 		}
-		catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
 		{
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
@@ -485,7 +485,7 @@ void LineParser::HandleAssembler( int instruction )
 			// an extra close bracket.
 			value = EvaluateExpressionAsInt( true );
 		}
-		catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
 		{
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
@@ -695,7 +695,7 @@ void LineParser::HandleAssembler( int instruction )
 	{
 		value = EvaluateExpressionAsInt();
 	}
-	catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+	catch ( AsmException_SyntaxError_SymbolNotDefined& )
 	{
 		if ( GlobalData::Instance().IsFirstPass() )
 		{

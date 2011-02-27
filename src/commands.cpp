@@ -715,7 +715,7 @@ void LineParser::HandleEqub()
 			{
 				value = EvaluateExpressionAsInt();
 			}
-			catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+			catch ( AsmException_SyntaxError_SymbolNotDefined& )
 			{
 				if ( GlobalData::Instance().IsFirstPass() )
 				{
@@ -784,7 +784,7 @@ void LineParser::HandleEquw()
 		{
 			value = EvaluateExpressionAsInt();
 		}
-		catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
 		{
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
@@ -859,7 +859,7 @@ void LineParser::HandleEqud()
 		{
 			value = EvaluateExpressionAsInt();
 		}
-		catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
 		{
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
@@ -1016,7 +1016,7 @@ void LineParser::HandleSave()
 		{
 			exec = EvaluateExpressionAsInt();
 		}
-		catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
 		{
 			if ( GlobalData::Instance().IsSecondPass() )
 			{
@@ -1254,7 +1254,7 @@ void LineParser::HandleCloseBrace()
 void LineParser::HandleIf()
 {
 	// Handles both IF and ELIF
-	int condition = EvaluateExpressionAsInt();
+	bool condition = (EvaluateExpressionAsInt() != 0);
 	m_sourceFile->SetCurrentIfCondition( condition );
 
 	if ( m_line[ m_column ] == ',' )
@@ -1327,7 +1327,7 @@ void LineParser::HandlePrint()
 			{
 				value = EvaluateExpressionAsInt();
 			}
-			catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+			catch ( AsmException_SyntaxError_SymbolNotDefined& )
 			{
 				if ( GlobalData::Instance().IsFirstPass() )
 				{
@@ -1354,7 +1354,7 @@ void LineParser::HandlePrint()
 			{
 				value = EvaluateExpression();
 			}
-			catch ( AsmException_SyntaxError_SymbolNotDefined& e )
+			catch ( AsmException_SyntaxError_SymbolNotDefined& )
 			{
 				if ( GlobalData::Instance().IsFirstPass() )
 				{
