@@ -55,6 +55,7 @@ endif
 
 PLATFORM_LIST	:=		mingw-gcc3
 PLATFORM_LIST	+=		mingw-gcc4
+PLATFORM_LIST	+=		linux
 
 
 # Try to determine the build platform if it wasn't explicitly specified on the command line
@@ -63,6 +64,13 @@ ifndef PLATFORM
 # Do checks with $(shell uname -s) and/or $(OSTYPE) here to try to automatically determine
 # the appropriate platform type.  Ultimately, the goal is to automatically set the make
 # variable $(PLATFORM) to one of the values in PLATFORM_LIST, above.
+
+ifneq (,$(findstring linux,$(OSTYPE)))
+PLATFORM		:=		linux
+else ifeq ($(shell uname -s),Linux)
+PLATFORM		:=		linux
+endif
+
 endif
 
 
@@ -97,6 +105,7 @@ DEPS			:=		$(OBJS:.o=.d)
 
 ifeq ($(PLATFORM),mingw-gcc4)
 LDFLAGS			+=		-static
+TARGET			:=		$(addsuffix .exe,$(TARGET))
 endif
 
 

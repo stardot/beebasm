@@ -28,9 +28,9 @@ DIRS			:=
 
 BUILD_DIR		:=		./objects
 
-# Define target file
+# Define target file (minus any platform-specific extension)
 
-TARGET			:=		../beebasm.exe
+TARGET			:=		../beebasm
 
 # Define compiler switches
 
@@ -47,7 +47,7 @@ LOADLIBES		:=
 
 # Define GNU libs to link
 
-LDLIBS			:=		-lstdc++
+LDLIBS			:=		-lstdc++ -lm
 
 # Parameters to the executable
 
