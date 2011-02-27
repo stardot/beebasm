@@ -39,7 +39,7 @@ CXXFLAGS		:=		-O3 -pedantic $(WARNFLAGS)
 
 # Define linker switches
 
-LDFLAGS			:=		-s
+LDFLAGS			:=		-s -static
 
 # Define 2nd party libs to link
 

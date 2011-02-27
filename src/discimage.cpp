@@ -20,6 +20,8 @@
 */
 /*************************************************************************************************/
 
+#include <cstdlib>
+#include <cstring>
 #include "discimage.h"
 #include "asmexception.h"
 #include "globaldata.h"

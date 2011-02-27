@@ -23,6 +23,7 @@
 /*************************************************************************************************/
 
 #include <cmath>
+#include <cstring>
 #include <cerrno>
 #include <sstream>
 #include <iomanip>

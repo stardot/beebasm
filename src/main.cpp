@@ -172,7 +172,7 @@ int main( int argc, char* argv[] )
 		return EXIT_FAILURE;
 	}
 
-	if ( pDiscInputFile != NULL && pDiscOutputFile == NULL ||
+	if ( ( pDiscInputFile != NULL && pDiscOutputFile == NULL ) ||
 		 ( pDiscInputFile != NULL && pDiscOutputFile != NULL && strcmp( pDiscInputFile, pDiscOutputFile ) == 0 ) )
 	{
 		cerr << "If a disc image file is provided as input, a different filename must be provided as output" << endl;
