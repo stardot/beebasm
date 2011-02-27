@@ -304,9 +304,15 @@ void ObjectCode::SetGuard( int addr )
 /*************************************************************************************************/
 void ObjectCode::Clear( int start, int end, bool bAll )
 {
-	assert( start < end );
+	assert( start <= end );
 	assert( start >= 0 && start < 0x10000 );
 	assert( end > 0 && end <= 0x10000 );
+
+	// Nothing to do if start == end
+	if ( start == end )
+	{
+		return;
+	}
 
 	if ( bAll )
 	{

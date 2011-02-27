@@ -168,7 +168,13 @@ DiscImage::~DiscImage()
 /*************************************************************************************************/
 void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load, int exec, int len )
 {
-	(void)pAddr;
+	char dirName = '$';
+
+	if ( strlen( pName ) > 2 && pName[ 1 ] == '.' )
+	{
+		dirName = pName[ 0 ];
+		pName += 2;
+	}
 
 	if ( strlen( pName ) > 7 )
 	{
@@ -256,7 +262,7 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 
 	// Write directory name
 
-	m_aCatalog[ 15 ] = '$';
+	m_aCatalog[ 15 ] = dirName;
 
 	// Write load address
 

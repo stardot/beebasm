@@ -61,7 +61,8 @@ PLATFORM_LIST	+=		mingw-gcc4
 
 ifndef PLATFORM
 # Do checks with $(shell uname -s) and/or $(OSTYPE) here to try to automatically determine
-# the appropriate platform type
+# the appropriate platform type.  Ultimately, the goal is to automatically set the make
+# variable $(PLATFORM) to one of the values in PLATFORM_LIST, above.
 endif
 
 
