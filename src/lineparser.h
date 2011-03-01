@@ -148,6 +148,8 @@ private:
 	void			HandleGuard();
 	void			HandleClear();
 	void			HandleMapChar();
+	void			HandlePutFile();
+	void			HandlePutBasic();
 
 	// expression evaluating methods
 

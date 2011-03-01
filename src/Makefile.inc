@@ -90,7 +90,9 @@ endif
 endif
 
 ifdef PLATFORM
+ifndef INCLUDE_DEPS
 $(info Automatically using platform $(PLATFORM))
+endif
 endif
 
 endif

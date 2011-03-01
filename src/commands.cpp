@@ -67,7 +67,9 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "INCBIN",		&LineParser::HandleIncBin,				0 },
 	{ "{",			&LineParser::HandleOpenBrace,			0 },
 	{ "}",			&LineParser::HandleCloseBrace,			0 },
-	{ "MAPCHAR",	&LineParser::HandleMapChar,				0 }
+	{ "MAPCHAR",	&LineParser::HandleMapChar,				0 },
+	{ "PUTFILE",	&LineParser::HandlePutFile,				0 },
+	{ "PUTBASIC",	&LineParser::HandlePutBasic,			0 }
 };
 
 
@@ -1378,3 +1380,245 @@ void LineParser::HandlePrint()
 		cout << endl;
 	}
 }
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandlePutFile()
+*/
+/*************************************************************************************************/
+void LineParser::HandlePutFile()
+{
+	if ( !AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	if ( m_line[ m_column ] != '\"' )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	// get first filename
+	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
+
+	if ( endQuotePos == string::npos )
+	{
+		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+	}
+
+	string hostFilename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
+	string beebFilename = hostFilename;
+	int start = 0;
+	int exec = 0;
+
+	m_column = endQuotePos + 1;
+
+	if ( !AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	if ( m_line[ m_column ] != ',' )
+	{
+		throw AsmException_SyntaxError_MissingComma( m_line, m_column );
+	}
+
+	m_column++;
+
+	if ( !AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	if ( m_line[ m_column ] == '\"' )
+	{
+		// string
+		endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
+
+		if ( endQuotePos == string::npos )
+		{
+			throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+		}
+
+		// get the second filename parameter
+
+		beebFilename = m_line.substr( m_column + 1, endQuotePos - m_column - 1 );
+
+		m_column = endQuotePos + 1;
+
+		if ( !AdvanceAndCheckEndOfStatement() )
+		{
+			// found nothing
+			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		}
+
+		if ( m_line[ m_column ] != ',' )
+		{
+			// did not find a comma
+			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+		}
+
+		m_column++;
+	}
+
+	// Get start address
+
+	try
+	{
+		start = EvaluateExpressionAsInt();
+	}
+	catch ( AsmException_SyntaxError_SymbolNotDefined& )
+	{
+		if ( GlobalData::Instance().IsSecondPass() )
+		{
+			throw;
+		}
+	}
+
+	exec = start;
+
+	if ( start < 0 || start > 0xFFFF )
+	{
+		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+	}
+
+	if ( m_line[ m_column ] == ',' )
+	{
+		m_column++;
+
+		try
+		{
+			exec = EvaluateExpressionAsInt();
+		}
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
+		{
+			if ( GlobalData::Instance().IsSecondPass() )
+			{
+				throw;
+			}
+		}
+
+		if ( exec < 0 || exec > 0xFFFF )
+		{
+			throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+		}
+	}
+
+	// check this is now the end
+
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+
+	if ( GlobalData::Instance().IsSecondPass() )
+	{
+		ifstream inputFile;
+		inputFile.open( hostFilename, ios_base::in | ios_base::binary );
+
+		if ( !inputFile )
+		{
+			throw AsmException_AssembleError_FileOpen();
+		}
+
+		inputFile.seekg( 0, ios_base::end );
+		size_t fileSize = static_cast< size_t >( inputFile.tellg() );
+		inputFile.seekg( 0, ios_base::beg );
+
+		char* buffer = new char[ fileSize ];
+		inputFile.read( buffer, fileSize );
+		inputFile.close();
+
+		cout << "Read file " << hostFilename << ": size " << fileSize << " bytes" << ": " << hex << start << " " << exec << endl;
+
+		if ( GlobalData::Instance().UsesDiscImage() )
+		{
+			// disc image version of the save
+			GlobalData::Instance().GetDiscImage()->AddFile( beebFilename.c_str(),
+															reinterpret_cast< unsigned char* >( buffer ),
+															start,
+															exec,
+															fileSize );
+		}
+
+		delete [] buffer;
+	}
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandlePutBasic()
+*/
+/*************************************************************************************************/
+void LineParser::HandlePutBasic()
+{
+	if ( !AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	if ( m_line[ m_column ] != '\"' )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	// get first filename
+	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
+
+	if ( endQuotePos == string::npos )
+	{
+		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+	}
+
+	string hostFilename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
+	string beebFilename = hostFilename;
+
+	m_column = endQuotePos + 1;
+
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		// see if there's a second parameter
+
+		if ( m_line[ m_column ] != ',' )
+		{
+			throw AsmException_SyntaxError_MissingComma( m_line, m_column );
+		}
+
+		m_column++;
+
+		if ( !AdvanceAndCheckEndOfStatement() )
+		{
+			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		}
+
+		if ( m_line[ m_column ] != '\"' )
+		{
+			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		}
+
+		// string
+		endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
+
+		if ( endQuotePos == string::npos )
+		{
+			throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+		}
+
+		// get the second parameter
+
+		beebFilename = m_line.substr( m_column + 1, endQuotePos - m_column - 1 );
+
+		m_column = endQuotePos + 1;
+	}
+
+	// check this is now the end
+
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+}
+

@@ -33,7 +33,6 @@ radius			= 100
 timerlength		= 64*8*26
 debugrasters	= FALSE
 
-
 \\ Define some zp locations
 
 ORG 0
