@@ -44,6 +44,7 @@ public:
 	inline void SetDiscImage( DiscImage* d )	{ m_pDiscImage = d; }
 	inline void ResetForId()					{ m_forId = 0; }
 	inline void SetSaved()						{ m_bSaved = true; }
+	inline void SetOutputFile( const char* p )	{ m_pOutputFile = p; }
 
 	inline int GetPass() const					{ return m_pass; }
 	inline bool IsFirstPass() const				{ return ( m_pass == 0 ); }
@@ -54,6 +55,7 @@ public:
 	inline DiscImage* GetDiscImage() const		{ return m_pDiscImage; }
 	inline int GetNextForId()					{ return m_forId++; }
 	inline bool IsSaved() const					{ return m_bSaved; }
+	inline const char* GetOutputFile() const	{ return m_pOutputFile; }
 
 
 private:
@@ -71,6 +73,7 @@ private:
 	int							m_forId;
 	int							m_randomSeed;
 	bool						m_bSaved;
+	const char*					m_pOutputFile;
 };
 
 

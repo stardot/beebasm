@@ -34,6 +34,7 @@
 #include "sourcefile.h"
 #include "asmexception.h"
 #include "discimage.h"
+#include "BASIC.h"
 
 
 using namespace std;
@@ -1390,6 +1391,9 @@ void LineParser::HandlePrint()
 /*************************************************************************************************/
 void LineParser::HandlePutFile()
 {
+	// Syntax:
+	// PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
+
 	if ( !AdvanceAndCheckEndOfStatement() )
 	{
 		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
@@ -1516,7 +1520,7 @@ void LineParser::HandlePutFile()
 	if ( GlobalData::Instance().IsSecondPass() )
 	{
 		ifstream inputFile;
-		inputFile.open( hostFilename, ios_base::in | ios_base::binary );
+		inputFile.open( hostFilename.c_str(), ios_base::in | ios_base::binary );
 
 		if ( !inputFile )
 		{
@@ -1620,5 +1624,35 @@ void LineParser::HandlePutBasic()
 	{
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 	}
+
+	if ( GlobalData::Instance().IsSecondPass() &&
+		 GlobalData::Instance().UsesDiscImage() )
+	{
+		Uint8* buffer = new Uint8[ 0x10000 ];
+		int fileSize;
+		bool bSuccess = ImportBASIC( hostFilename.c_str(), buffer, &fileSize );
+
+		if (!bSuccess)
+		{
+			if (GetBASICErrorNum() == 2)
+			{
+				throw AsmException_AssembleError_FileOpen();
+			}
+			else
+			{
+				throw AsmException_FileError( hostFilename.c_str() );
+			}
+		}
+
+		// disc image version of the save
+		GlobalData::Instance().GetDiscImage()->AddFile( beebFilename.c_str(),
+														reinterpret_cast< unsigned char* >( buffer ),
+														0xFFFF1900,
+														0xFFFF8023,
+														fileSize );
+
+		delete [] buffer;
+	}
+
 }
 

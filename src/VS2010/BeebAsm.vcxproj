@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClCompile Include="..\asmexception.cpp" />
     <ClCompile Include="..\assemble.cpp" />
+    <ClCompile Include="..\BASIC.cpp" />
     <ClCompile Include="..\commands.cpp" />
     <ClCompile Include="..\discimage.cpp" />
     <ClCompile Include="..\expression.cpp" />
@@ -89,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\asmexception.h" />
+    <ClInclude Include="..\BASIC.h" />
     <ClInclude Include="..\discimage.h" />
     <ClInclude Include="..\globaldata.h" />
     <ClInclude Include="..\lineparser.h" />

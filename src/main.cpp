@@ -34,12 +34,13 @@
 #include "objectcode.h"
 #include "symboltable.h"
 #include "discimage.h"
+#include "BASIC.h"
 
 
 using namespace std;
 
 
-#define VERSION "1.04"
+#define VERSION "1.05"
 
 
 /*************************************************************************************************/
@@ -56,6 +57,7 @@ using namespace std;
 int main( int argc, char* argv[] )
 {
 	const char* pInputFile = NULL;
+	const char* pOutputFile = NULL;
 	const char* pDiscInputFile = NULL;
 	const char* pDiscOutputFile = NULL;
 
@@ -63,6 +65,7 @@ int main( int argc, char* argv[] )
 	{
 		READY,
 		WAITING_FOR_INPUT_FILENAME,
+		WAITING_FOR_OUTPUT_FILENAME,
 		WAITING_FOR_DISC_INPUT_FILENAME,
 		WAITING_FOR_DISC_OUTPUT_FILENAME,
 		WAITING_FOR_BOOT_FILENAME
@@ -84,6 +87,10 @@ int main( int argc, char* argv[] )
 				if ( strcmp( argv[i], "-i" ) == 0 )
 				{
 					state = WAITING_FOR_INPUT_FILENAME;
+				}
+				else if ( strcmp( argv[i], "-o" ) == 0 )
+				{
+					state = WAITING_FOR_OUTPUT_FILENAME;
 				}
 				else if ( strcmp( argv[i], "-do" ) == 0 )
 				{
@@ -110,6 +117,7 @@ int main( int argc, char* argv[] )
 					cout << "beebasm " VERSION << endl << endl;
 					cout << "Possible options:" << endl;
 					cout << " -i <file>      Specify source filename" << endl;
+					cout << " -o <file>      Specify output filename (when not specified by SAVE command)" << endl;
 					cout << " -di <file>     Specify a disc image file to be added to" << endl;
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
@@ -130,6 +138,13 @@ int main( int argc, char* argv[] )
 			case WAITING_FOR_INPUT_FILENAME:
 
 				pInputFile = argv[i];
+				state = READY;
+				break;
+
+
+			case WAITING_FOR_OUTPUT_FILENAME:
+
+				pOutputFile = argv[i];
 				state = READY;
 				break;
 
@@ -160,7 +175,7 @@ int main( int argc, char* argv[] )
 	if ( state != READY )
 	{
 		cerr << "Parameter error -" << endl;
-		cerr << "Type beebasm -help for syntax" << endl;
+		cerr << "Type beebasm --help for syntax" << endl;
 		return EXIT_FAILURE;
 	}
 
@@ -186,6 +201,7 @@ int main( int argc, char* argv[] )
 
 	SymbolTable::Create();
 	ObjectCode::Create();
+	SetupBASICTables();
 
 	time_t randomSeed = time( NULL );
 
