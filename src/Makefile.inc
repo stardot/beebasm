@@ -66,6 +66,7 @@ ECHO			:=		@@echo -e
 PLATFORM_LIST	:=		mingw-gcc3
 PLATFORM_LIST	+=		mingw-gcc4
 PLATFORM_LIST	+=		linux
+PLATFORM_LIST	+=		macosx
 
 
 # Try to determine the build platform if it wasn't explicitly specified on the command line
@@ -79,6 +80,12 @@ ifneq (,$(findstring linux,$(OSTYPE)))
 PLATFORM		:=		linux
 else ifeq ($(shell uname -s),Linux)
 PLATFORM		:=		linux
+endif
+
+ifneq (,$(findstring darwin,$(OSTYPE)))
+PLATFORM		:=		macosx
+else ifeq ($(shell uname -s),Darwin)
+PLATFORM		:=		macosx
 endif
 
 ifeq ($(OS),Windows_NT)
@@ -132,7 +139,6 @@ LDFLAGS			+=		-static
 TARGET			:=		$(addsuffix .exe,$(TARGET))
 endif
 
-
 # Declare default number of CPUs
 
 CPUS			?=		1
@@ -180,13 +186,10 @@ folders: $(addprefix $(BUILD_DIR)/,$(DIRS))
 objs: folders
 	$(VB)$(MAKE) $(VB_MAKE) -j $(CPUS) $(OBJS) INCLUDE_DEPS=1
 
-
 deps: folders
 	$(VB)$(MAKE) $(VB_MAKE) -j $(CPUS) $(DEPS) INCLUDE_DEPS=1
 
-
 code: deps objs $(TARGET)
-
 
 run:
 	$(ECHO) Running ... $(TARGET)\n
