@@ -54,6 +54,9 @@
     <ClCompile Include="..\BASIC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\macro.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\asmexception.h">
@@ -83,10 +86,10 @@
     <ClInclude Include="..\symboltable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\tokens.h">
+    <ClInclude Include="..\BASIC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\BASIC.h">
+    <ClInclude Include="..\macro.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

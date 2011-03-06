@@ -35,6 +35,7 @@
 #include "symboltable.h"
 #include "discimage.h"
 #include "BASIC.h"
+#include "macro.h"
 
 
 using namespace std;
@@ -201,6 +202,7 @@ int main( int argc, char* argv[] )
 
 	SymbolTable::Create();
 	ObjectCode::Create();
+	MacroTable::Create();
 	SetupBASICTables();
 
 	time_t randomSeed = time( NULL );
@@ -244,6 +246,7 @@ int main( int argc, char* argv[] )
 		cerr << "warning: no SAVE command in source file." << endl;
 	}
 
+	MacroTable::Destroy();
 	ObjectCode::Destroy();
 	SymbolTable::Destroy();
 	GlobalData::Destroy();

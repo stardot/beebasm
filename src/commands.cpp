@@ -70,7 +70,9 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "}",			&LineParser::HandleCloseBrace,			0 },
 	{ "MAPCHAR",	&LineParser::HandleMapChar,				0 },
 	{ "PUTFILE",	&LineParser::HandlePutFile,				0 },
-	{ "PUTBASIC",	&LineParser::HandlePutBasic,			0 }
+	{ "PUTBASIC",	&LineParser::HandlePutBasic,			0 },
+	{ "MACRO",		&LineParser::HandleMacro,				&SourceFile::StartMacro },
+	{ "ENDMACRO",	&LineParser::HandleEndMacro,			&SourceFile::EndMacro }
 };
 
 
@@ -568,7 +570,7 @@ void LineParser::HandleInclude()
 	{
 		string filename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
 
-		if ( GlobalData::Instance().IsFirstPass() )
+		if ( GlobalData::Instance().ShouldOutputAsm() )
 		{
 			cerr << "Including file " << filename << endl;
 		}
@@ -1049,10 +1051,10 @@ void LineParser::HandleSave()
 
 	// expect no more
 
-	if ( AdvanceAndCheckEndOfStatement() )
+	if ( m_line[ m_column ] == ',' )
 	{
-		// found something else - wrong!
-		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+		// Unexpected comma (remembering that an expression can validly end with a comma)
+		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
 	}
 
 	// OK - do it
@@ -1535,8 +1537,6 @@ void LineParser::HandlePutFile()
 		inputFile.read( buffer, fileSize );
 		inputFile.close();
 
-		cout << "Read file " << hostFilename << ": size " << fileSize << " bytes" << ": " << hex << start << " " << exec << endl;
-
 		if ( GlobalData::Instance().UsesDiscImage() )
 		{
 			// disc image version of the save
@@ -1654,5 +1654,98 @@ void LineParser::HandlePutBasic()
 		delete [] buffer;
 	}
 
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleMacro()
+*/
+/*************************************************************************************************/
+void LineParser::HandleMacro()
+{
+	if ( !AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	string macroName;
+
+	if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+	{
+		macroName = GetSymbolName();
+
+		if ( GlobalData::Instance().IsFirstPass() )
+		{
+			if ( MacroTable::Instance().Exists( macroName ) )
+			{
+				throw AsmException_SyntaxError_DuplicateMacroName( m_line, m_column );
+			}
+
+			m_sourceFile->GetCurrentMacro()->SetName( macroName );
+			cout << "MACRO '" << macroName << "'" << endl;
+		}
+	}
+	else
+	{
+		throw AsmException_SyntaxError_InvalidMacroName( m_line, m_column );
+	}
+
+	bool bExpectComma = false;
+	bool bHasParameters = false;
+
+	while ( AdvanceAndCheckEndOfStatement() )
+	{
+		if ( bExpectComma )
+		{
+			if ( m_line[ m_column ] == ',' )
+			{
+				m_column++;
+				bExpectComma = false;
+			}
+			else
+			{
+				throw AsmException_SyntaxError_MissingComma( m_line, m_column );
+			}
+		}
+		else if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+		{
+			string param = GetSymbolName();
+
+			if ( GlobalData::Instance().IsFirstPass() )
+			{
+				m_sourceFile->GetCurrentMacro()->AddParameter( param );
+				cout << "  param: '" << param << "'" << endl;
+			}
+			bExpectComma = true;
+			bHasParameters = true;
+		}
+		else
+		{
+			throw AsmException_SyntaxError_InvalidSymbolName( m_line, m_column );
+		}
+	}
+
+	if ( bHasParameters && !bExpectComma )
+	{
+		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column - 1 );
+	}
+
+	m_sourceFile->SetCurrentIfCondition(false);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleEndMacro()
+*/
+/*************************************************************************************************/
+void LineParser::HandleEndMacro()
+{
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		// found something
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
 }
 

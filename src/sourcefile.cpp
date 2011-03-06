@@ -50,7 +50,8 @@ using namespace std;
 */
 /*************************************************************************************************/
 SourceFile::SourceFile( const char* pFilename )
-	:	m_pFilename( pFilename ),
+	:	m_currentMacro( NULL ),
+		m_pFilename( pFilename ),
 		m_lineNumber( 1 ),
 		m_filePointer( 0 )
 {
@@ -190,12 +191,12 @@ void SourceFile::Process()
 	SourceFile::AddFor()
 */
 /*************************************************************************************************/
-void SourceFile::AddFor( string varName,
+void SourceFile::AddFor( const string& varName,
 						 double start,
 						 double end,
 						 double step,
 						 int filePtr,
-						 string line,
+						 const string& line,
 						 int column )
 {
 	if ( m_forStackPtr == MAX_FOR_LEVELS )
@@ -232,7 +233,7 @@ void SourceFile::AddFor( string varName,
 	Braces for scoping variables are just FORs in disguise...
 */
 /*************************************************************************************************/
-void SourceFile::OpenBrace( string line, int column )
+void SourceFile::OpenBrace( const string& line, int column )
 {
 	if ( m_forStackPtr == MAX_FOR_LEVELS )
 	{
@@ -262,7 +263,7 @@ void SourceFile::OpenBrace( string line, int column )
 	SourceFile::UpdateFor()
 */
 /*************************************************************************************************/
-void SourceFile::UpdateFor( string line, int column )
+void SourceFile::UpdateFor( const string& line, int column )
 {
 	if ( m_forStackPtr == 0 )
 	{
@@ -306,7 +307,7 @@ void SourceFile::UpdateFor( string line, int column )
 	Braces for scoping variables are just FORs in disguise...
 */
 /*************************************************************************************************/
-void SourceFile::CloseBrace( string line, int column )
+void SourceFile::CloseBrace( const string& line, int column )
 {
 	if ( m_forStackPtr == 0 )
 	{
@@ -379,7 +380,7 @@ bool SourceFile::IsIfConditionTrue() const
 	SourceFile::AddIfLevel()
 */
 /*************************************************************************************************/
-void SourceFile::AddIfLevel( string line, int column )
+void SourceFile::AddIfLevel( const string& line, int column )
 {
 	if ( m_ifStackPtr == MAX_IF_LEVELS )
 	{
@@ -419,7 +420,7 @@ void SourceFile::SetCurrentIfCondition( bool b )
 	SourceFile::StartElse()
 */
 /*************************************************************************************************/
-void SourceFile::StartElse( string line, int column )
+void SourceFile::StartElse( const string& line, int column )
 {
 	if ( m_ifStack[ m_ifStackPtr - 1 ].m_hadElse )
 	{
@@ -438,7 +439,7 @@ void SourceFile::StartElse( string line, int column )
 	SourceFile::StartElif()
 */
 /*************************************************************************************************/
-void SourceFile::StartElif( string line, int column )
+void SourceFile::StartElif( const string& line, int column )
 {
 	if ( m_ifStack[ m_ifStackPtr - 1 ].m_hadElse )
 	{
@@ -455,7 +456,7 @@ void SourceFile::StartElif( string line, int column )
 	SourceFile::RemoveIfLevel()
 */
 /*************************************************************************************************/
-void SourceFile::RemoveIfLevel( string line, int column )
+void SourceFile::RemoveIfLevel( const string& line, int column )
 {
 	if ( m_ifStackPtr == 0 )
 	{
@@ -463,4 +464,52 @@ void SourceFile::RemoveIfLevel( string line, int column )
 	}
 
 	m_ifStackPtr--;
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SourceFile::StartMacro()
+*/
+/*************************************************************************************************/
+void SourceFile::StartMacro( const string& line, int column )
+{
+	if ( GlobalData::Instance().IsFirstPass() )
+	{
+		if ( m_currentMacro == NULL )
+		{
+			m_currentMacro = new Macro();
+		}
+		else
+		{
+			throw AsmException_SyntaxError_NoNestedMacros( line, column );
+		}
+	}
+
+	AddIfLevel( line, column );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SourceFile::EndMacro()
+*/
+/*************************************************************************************************/
+void SourceFile::EndMacro( const string& line, int column )
+{
+	if ( GlobalData::Instance().IsFirstPass() &&
+		 m_currentMacro == NULL )
+	{
+		throw AsmException_SyntaxError_EndMacroUnexpected( line, column - 8 );
+	}
+
+	RemoveIfLevel( line, column );
+
+	if ( GlobalData::Instance().IsFirstPass() )
+	{
+		MacroTable::Instance().Add( m_currentMacro );
+		m_currentMacro = NULL;
+	}
 }

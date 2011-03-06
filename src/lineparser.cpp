@@ -22,6 +22,7 @@
 */
 /*************************************************************************************************/
 
+#include <iostream>
 #include "lineparser.h"
 #include "asmexception.h"
 #include "stringutils.h"
@@ -130,6 +131,7 @@ void LineParser::Process()
 		{
 			m_column = oldColumn;
 			SkipStatement();
+
 			continue;
 		}
 
@@ -210,35 +212,49 @@ void LineParser::SkipStatement()
 	bool bInQuotes = false;
 	bool bInSingleQuotes = false;
 
-	while ( m_column < m_line.length() && ( bInQuotes || bInSingleQuotes || MoveToNextAtom( ":;\\" ) ) )
-	{
-		if ( m_line[ m_column ] == '\"' && !bInSingleQuotes )
-		{
-			bInQuotes = !bInQuotes;
-		}
-		else if ( m_line[ m_column ] == '\'' )
-		{
-			if ( bInSingleQuotes )
-			{
-				bInSingleQuotes = false;
-			}
-			else if ( m_line[ m_column + 2 ] == '\'' && !bInQuotes )
-			{
-				bInSingleQuotes = true;
-				m_column++;
-			}
-		}
+	int oldColumn = m_column;
 
+	if ( m_line[ m_column ] == '{' || m_line[ m_column ] == '}' || m_line[ m_column ] == ':' )
+	{
 		m_column++;
 	}
-
-	if ( m_line[ m_column ] == '\\' || m_line[ m_column ] == ';' )
+	else if ( m_line[ m_column ] == '\\' || m_line[ m_column ] == ';' )
 	{
 		m_column = m_line.length();
 	}
-	else if ( m_line[ m_column ] == ':' )
+	else
 	{
-		m_column++;
+		while ( m_column < m_line.length() && ( bInQuotes || bInSingleQuotes || MoveToNextAtom( ":;\\{}" ) ) )
+		{
+			if ( m_line[ m_column ] == '\"' && !bInSingleQuotes )
+			{
+				bInQuotes = !bInQuotes;
+			}
+			else if ( m_line[ m_column ] == '\'' )
+			{
+				if ( bInSingleQuotes )
+				{
+					bInSingleQuotes = false;
+				}
+				else if ( m_line[ m_column + 2 ] == '\'' && !bInQuotes )
+				{
+					bInSingleQuotes = true;
+					m_column++;
+				}
+			}
+
+			m_column++;
+		}
+	}
+
+	if ( m_sourceFile->GetCurrentMacro() != NULL &&
+		 m_line[ oldColumn ] != ':' &&
+		 m_line[ oldColumn ] != '\\' &&
+		 m_line[ oldColumn ] != ';' )
+	{
+		string command = m_line.substr( oldColumn, m_column - oldColumn );
+		m_sourceFile->GetCurrentMacro()->AddLine( command );
+		cout << "   '" << command << "'" << endl;
 	}
 }
 
@@ -378,7 +394,7 @@ bool LineParser::AdvanceAndCheckEndOfLine()
 /*************************************************************************************************/
 bool LineParser::AdvanceAndCheckEndOfStatement()
 {
-	return MoveToNextAtom( ";:\\" );
+	return MoveToNextAtom( ";:\\{}" );
 }
 
 
@@ -398,7 +414,7 @@ bool LineParser::AdvanceAndCheckEndOfStatement()
 /*************************************************************************************************/
 bool LineParser::AdvanceAndCheckEndOfSubStatement()
 {
-	return MoveToNextAtom( ";:\\," );
+	return MoveToNextAtom( ";:\\,{}" );
 }
 
 

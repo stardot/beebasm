@@ -26,6 +26,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "macro.h"
 
 
 class SourceFile
@@ -85,32 +86,38 @@ private:
 	int						m_ifStackPtr;
 	If						m_ifStack[ MAX_IF_LEVELS ];
 
+	Macro*					m_currentMacro;
+
+
 public:
 
-	void					OpenBrace( std::string line, int column );
-	void					CloseBrace( std::string line, int column );
+	void					OpenBrace( const std::string& line, int column );
+	void					CloseBrace( const std::string& line, int column );
 
-	void					AddFor( std::string varName,
+	void					AddFor( const std::string& varName,
 									double start,
 									double end,
 									double step,
 									int filePtr,
-									std::string line,
+									const std::string& line,
 									int column );
 
-	void					UpdateFor( std::string line, int column );
+	void					UpdateFor( const std::string& line, int column );
 
 	inline int 				GetForLevel() const { return m_forStackPtr; }
+	inline Macro*			GetCurrentMacro() { return m_currentMacro; }
 
 	std::string				GetSymbolNameSuffix( int level = -1 ) const;
 
 	bool					IsIfConditionTrue() const;
-	void					AddIfLevel( std::string line, int column );
+	void					AddIfLevel( const std::string& line, int column );
 	void					SetCurrentIfCondition( bool b );
-	void					StartElse( std::string line, int column );
-	void					StartElif( std::string line, int column );
-	void					ToggleCurrentIfCondition( std::string line, int column );
-	void					RemoveIfLevel( std::string line, int column );
+	void					StartElse( const std::string& line, int column );
+	void					StartElif( const std::string& line, int column );
+	void					ToggleCurrentIfCondition( const std::string& line, int column );
+	void					RemoveIfLevel( const std::string& line, int column );
+	void					StartMacro( const std::string& line, int column );
+	void					EndMacro( const std::string& line, int column );
 
 
 private:

@@ -46,7 +46,7 @@ public:
 private:
 
 	typedef void ( LineParser::*TokenHandler )();
-	typedef void ( SourceFile::*DirectiveHandler )( std::string line, int column );
+	typedef void ( SourceFile::*DirectiveHandler )( const std::string& line, int column );
 
 	struct Token
 	{
@@ -150,6 +150,8 @@ private:
 	void			HandleMapChar();
 	void			HandlePutFile();
 	void			HandlePutBasic();
+	void			HandleMacro();
+	void			HandleEndMacro();
 
 	// expression evaluating methods
 

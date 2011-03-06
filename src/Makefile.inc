@@ -192,7 +192,7 @@ deps: folders
 code: deps objs $(TARGET)
 
 run:
-	$(ECHO) Running ... $(TARGET)\n
+	$(ECHO) Running ... $(TARGET)
 	$(VB)$(TARGET) $(PARAMS)
 
 
