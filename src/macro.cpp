@@ -34,6 +34,104 @@ MacroTable* MacroTable::m_gInstance = NULL;
 
 /*************************************************************************************************/
 /**
+	Macro::Macro()
+
+	Constructor for Macro
+
+	@param		pFilename		Filename of source file which contains the macro
+	@param		lineNumber		Start line number of the macro in the file
+*/
+/*************************************************************************************************/
+Macro::Macro( const string& filename, int lineNumber )
+	:	m_filename( filename ),
+		m_lineNumber( lineNumber )
+{
+}
+
+
+
+/*************************************************************************************************/
+/**
+	MacroInstance::MacroInstance()
+
+	Constructor for MacroInstance
+
+	@param		macro			Macro definition to instance
+*/
+/*************************************************************************************************/
+MacroInstance::MacroInstance( const Macro* macro, const SourceCode* sourceCode )
+	:	SourceCode( macro->GetFilename(), macro->GetLineNumber() ),
+		m_stream( macro->GetBody() ),
+		m_macro( macro )
+{
+//	cout << "Instance macro: " << m_macro->GetName() << " (" << m_filename << ":" << m_lineNumber << ")" << endl;
+
+	// Copy FOR stack from the parent
+
+	CopyForStack( sourceCode );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	MacroInstance::GetLine()
+
+	Reads a line from the source code and returns it into lineFromFile
+*/
+/*************************************************************************************************/
+istream& MacroInstance::GetLine( string& lineFromFile ) 
+{
+	return getline( m_stream, lineFromFile );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	MacroInstance::GetFilePointer()
+
+	Returns the current file pointer
+*/
+/*************************************************************************************************/
+int MacroInstance::GetFilePointer()
+{
+	return static_cast< int >( m_stream.tellg() );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	MacroInstance::SetFilePointer()
+
+	Sets the current file pointer
+*/
+/*************************************************************************************************/
+void MacroInstance::SetFilePointer( int i )
+{
+	m_lineStartPointer = i;
+	m_stream.seekg( i );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	MacroInstance::IsAtEnd()
+
+	Returns whether the current stream is in an end-of-file state
+*/
+/*************************************************************************************************/
+bool MacroInstance::IsAtEnd()
+{
+	return m_stream.eof();
+}
+
+
+
+/*************************************************************************************************/
+/**
 	MacroTable::Create()
 
 	Creates the MacroTable singleton

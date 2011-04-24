@@ -22,6 +22,7 @@
 */
 /*************************************************************************************************/
 
+#include <iostream>
 #include <cmath>
 #include <cstring>
 #include <cerrno>
@@ -119,7 +120,7 @@ double LineParser::GetValue()
 {
 	double value = 0;
 
-	if ( isdigit( m_line[ m_column ] ) || m_line[ m_column ] == '.' )
+	if ( m_column < m_line.length() && ( isdigit( m_line[ m_column ] ) || m_line[ m_column ] == '.' ) )
 	{
 		// get a number
 
@@ -128,13 +129,13 @@ double LineParser::GetValue()
 		str >> value;
 		m_column = static_cast< size_t >( str.tellg() );
 	}
-	else if ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' )
+	else if ( m_column < m_line.length() && ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' ) )
 	{
 		// get a hex digit
 
 		m_column++;
 
-		if ( !isxdigit( m_line[ m_column ] ) )
+		if ( m_column >= m_line.length() || !isxdigit( m_line[ m_column ] ) )
 		{
 			// badly formed hex literal
 			throw AsmException_SyntaxError_BadHex( m_line, m_column );
@@ -153,13 +154,13 @@ double LineParser::GetValue()
 			value = static_cast< double >( hexValue );
 		}
 	}
-	else if ( m_line[ m_column ] == '%' )
+	else if ( m_column < m_line.length() && m_line[ m_column ] == '%' )
 	{
 		// get binary
 
 		m_column++;
 
-		if ( m_line[ m_column ] != '0' && m_line[ m_column ] != '1' )
+		if ( m_column >= m_line.length() || ( m_line[ m_column ] != '0' && m_line[ m_column ] != '1' ) )
 		{
 			// badly formed bin literal
 			throw AsmException_SyntaxError_BadBin( m_line, m_column );
@@ -175,19 +176,19 @@ double LineParser::GetValue()
 				binValue = ( binValue * 2 ) + ( m_line[ m_column ] - '0' );
 				m_column++;
 			}
-			while ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' );
+			while ( m_column < m_line.length() && ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' ) );
 
 			value = static_cast< double >( binValue );
 		}
 	}
-	else if ( m_line[ m_column ] == '*' )
+	else if ( m_column < m_line.length() && m_line[ m_column ] == '*' )
 	{
 		// get current PC
 
 		m_column++;
 		value = static_cast< double >( ObjectCode::Instance().GetPC() );
 	}
-	else if ( m_line[ m_column ] == '\'' )
+	else if ( m_column < m_line.length() && m_line[ m_column ] == '\'' )
 	{
 		// get char literal
 
@@ -200,7 +201,7 @@ double LineParser::GetValue()
 		value = static_cast< double >( m_line[ m_column + 1 ] );
 		m_column += 3;
 	}
-	else if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+	else if ( m_column < m_line.length() && ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
 	{
 		// get a symbol
 
@@ -208,9 +209,9 @@ double LineParser::GetValue()
 		string symbolName = GetSymbolName();
 		bool bFoundSymbol = false;
 
-		for ( int forLevel = m_sourceFile->GetForLevel(); forLevel >= 0; forLevel-- )
+		for ( int forLevel = m_sourceCode->GetForLevel(); forLevel >= 0; forLevel-- )
 		{
-			string fullSymbolName = symbolName + m_sourceFile->GetSymbolNameSuffix( forLevel );
+			string fullSymbolName = symbolName + m_sourceCode->GetSymbolNameSuffix( forLevel );
 
 			if ( SymbolTable::Instance().IsSymbolDefined( fullSymbolName ) )
 			{

@@ -134,10 +134,15 @@ DEPS			:=		$(OBJS:.o=.d)
 
 # Add platform-specific flags
 
+ifeq ($(PLATFORM),mingw-gcc3)
+TARGET			:=		$(addsuffix .exe,$(TARGET))
+endif
+
 ifeq ($(PLATFORM),mingw-gcc4)
 LDFLAGS			+=		-static
 TARGET			:=		$(addsuffix .exe,$(TARGET))
 endif
+
 
 # Declare default number of CPUs
 

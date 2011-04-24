@@ -130,7 +130,7 @@ int LineParser::GetTokenAndAdvanceColumn()
 /*************************************************************************************************/
 void LineParser::HandleDefineLabel()
 {
-	if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+	if ( m_column < m_line.length() && ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
 	{
 		// Symbol starts with a valid character
 
@@ -142,7 +142,7 @@ void LineParser::HandleDefineLabel()
 
 		// ...and mangle it according to whether we are in a FOR loop
 
-		string fullSymbolName = symbolName + m_sourceFile->GetSymbolNameSuffix();
+		string fullSymbolName = symbolName + m_sourceCode->GetSymbolNameSuffix();
 
 		if ( GlobalData::Instance().IsFirstPass() )
 		{
@@ -238,7 +238,7 @@ void LineParser::HandleOrg()
 	ObjectCode::Instance().SetPC( newPC );
 	SymbolTable::Instance().ChangeSymbol( "P%", newPC );
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -262,7 +262,7 @@ void LineParser::HandleCpu()
 
 	ObjectCode::Instance().SetCPU( newCpu );
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -286,7 +286,7 @@ void LineParser::HandleGuard()
 
 	ObjectCode::Instance().SetGuard( val );
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -308,7 +308,7 @@ void LineParser::HandleClear()
 		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
 	}
 
-	if ( m_line[ m_column ] != ',' )
+	if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 	{
 		// did not find a comma
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
@@ -324,7 +324,7 @@ void LineParser::HandleClear()
 
 	ObjectCode::Instance().Clear( start, end );
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -345,7 +345,7 @@ void LineParser::HandleMapChar()
 	int param3 = -1;
 	int param1 = EvaluateExpressionAsInt();
 
-	if ( m_line[ m_column ] != ',' )
+	if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 	{
 		// did not find a comma
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
@@ -355,14 +355,14 @@ void LineParser::HandleMapChar()
 
 	int param2 = EvaluateExpressionAsInt();
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		m_column++;
 
 		param3 = EvaluateExpressionAsInt();
 	}
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -440,7 +440,7 @@ void LineParser::HandleAlign()
 		}
 	}
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -484,7 +484,7 @@ void LineParser::HandleSkip()
 		}
 	}
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -527,7 +527,7 @@ void LineParser::HandleSkipTo()
 		}
 	}
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -543,7 +543,7 @@ void LineParser::HandleSkipTo()
 /*************************************************************************************************/
 void LineParser::HandleInclude()
 {
-	if ( m_sourceFile->GetForLevel() > 0 )
+	if ( m_sourceCode->GetForLevel() > 0 )
 	{
 		// disallow an include within a FOR loop
 		throw AsmException_SyntaxError_CantInclude( m_line, m_column );
@@ -554,7 +554,7 @@ void LineParser::HandleInclude()
 		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 	}
 
-	if ( m_line[ m_column ] != '\"' )
+	if ( m_column >= m_line.length() || m_line[ m_column ] != '\"' )
 	{
 		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 	}
@@ -601,7 +601,7 @@ void LineParser::HandleIncBin()
 		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 	}
 
-	if ( m_line[ m_column ] != '\"' )
+	if ( m_column >= m_line.length() || m_line[ m_column ] != '\"' )
 	{
 		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 	}
@@ -655,7 +655,7 @@ void LineParser::HandleEqub()
 
 		// handle string
 
-		if ( m_line[ m_column ] == '\"' )
+		if ( m_column < m_line.length() && m_line[ m_column ] == '\"' )
 		{
 			size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
 
@@ -762,7 +762,7 @@ void LineParser::HandleEqub()
 			break;
 		}
 
-		if ( m_line[ m_column ] != ',' )
+		if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 		{
 			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 		}
@@ -832,7 +832,7 @@ void LineParser::HandleEquw()
 			break;
 		}
 
-		if ( m_line[ m_column ] != ',' )
+		if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 		{
 			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 		}
@@ -906,7 +906,7 @@ void LineParser::HandleEqud()
 			break;
 		}
 
-		if ( m_line[ m_column ] != ',' )
+		if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 		{
 			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 		}
@@ -995,7 +995,7 @@ void LineParser::HandleSave()
 
 	// get end address
 
-	if ( m_line[ m_column ] != ',' )
+	if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 	{
 		// did not find a comma
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
@@ -1013,7 +1013,7 @@ void LineParser::HandleSave()
 	// get optional exec address
 	// we allow this to be a forward define as it needn't be within the block we actually save
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		m_column++;
 
@@ -1036,7 +1036,7 @@ void LineParser::HandleSave()
 
 		// get optional reload address
 
-		if ( m_line[ m_column ] == ',' )
+		if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 		{
 			m_column++;
 
@@ -1051,7 +1051,7 @@ void LineParser::HandleSave()
 
 	// expect no more
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -1121,7 +1121,7 @@ void LineParser::HandleFor()
 	// Symbol starts with a valid character
 
 	int oldColumn = m_column;
-	string symbolName = GetSymbolName() + m_sourceFile->GetSymbolNameSuffix();
+	string symbolName = GetSymbolName() + m_sourceCode->GetSymbolNameSuffix();
 
 	// Check variable has not yet been defined
 
@@ -1196,9 +1196,9 @@ void LineParser::HandleFor()
 
 	}
 
-	m_sourceFile->AddFor( symbolName,
+	m_sourceCode->AddFor( symbolName,
 						  start, end, step,
-						  m_sourceFile->GetFilePointer() + m_column,
+						  m_sourceCode->GetLineStartPointer() + m_column,
 						  m_line,
 						  oldColumn );
 }
@@ -1212,7 +1212,7 @@ void LineParser::HandleFor()
 /*************************************************************************************************/
 void LineParser::HandleOpenBrace()
 {
-	m_sourceFile->OpenBrace( m_line, m_column - 1 );
+	m_sourceCode->OpenBrace( m_line, m_column - 1 );
 }
 
 
@@ -1232,7 +1232,7 @@ void LineParser::HandleNext()
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 	}
 
-	m_sourceFile->UpdateFor( m_line, oldColumn );
+	m_sourceCode->UpdateFor( m_line, oldColumn );
 }
 
 
@@ -1246,7 +1246,7 @@ void LineParser::HandleNext()
 /*************************************************************************************************/
 void LineParser::HandleCloseBrace()
 {
-	m_sourceFile->CloseBrace( m_line, m_column - 1 );
+	m_sourceCode->CloseBrace( m_line, m_column - 1 );
 }
 
 
@@ -1260,9 +1260,9 @@ void LineParser::HandleIf()
 {
 	// Handles both IF and ELIF
 	bool condition = (EvaluateExpressionAsInt() != 0);
-	m_sourceFile->SetCurrentIfCondition( condition );
+	m_sourceCode->SetCurrentIfCondition( condition );
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -1490,7 +1490,7 @@ void LineParser::HandlePutFile()
 		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
 	}
 
-	if ( m_line[ m_column ] == ',' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 	{
 		m_column++;
 
@@ -1682,8 +1682,8 @@ void LineParser::HandleMacro()
 				throw AsmException_SyntaxError_DuplicateMacroName( m_line, m_column );
 			}
 
-			m_sourceFile->GetCurrentMacro()->SetName( macroName );
-			cout << "MACRO '" << macroName << "'" << endl;
+			m_sourceCode->GetCurrentMacro()->SetName( macroName );
+//			cout << "MACRO '" << macroName << "'" << endl;
 		}
 	}
 	else
@@ -1714,8 +1714,8 @@ void LineParser::HandleMacro()
 
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
-				m_sourceFile->GetCurrentMacro()->AddParameter( param );
-				cout << "  param: '" << param << "'" << endl;
+				m_sourceCode->GetCurrentMacro()->AddParameter( param );
+//				cout << "  param: '" << param << "'" << endl;
 			}
 			bExpectComma = true;
 			bHasParameters = true;
@@ -1731,7 +1731,7 @@ void LineParser::HandleMacro()
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column - 1 );
 	}
 
-	m_sourceFile->SetCurrentIfCondition(false);
+	m_sourceCode->SetCurrentIfCondition(false);
 }
 
 

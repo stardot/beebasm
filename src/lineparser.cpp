@@ -42,8 +42,8 @@ using namespace std;
 	Constructor for LineParser
 */
 /*************************************************************************************************/
-LineParser::LineParser( SourceFile* sourceFile, string line )
-	:	m_sourceFile( sourceFile ),
+LineParser::LineParser( SourceCode* sourceCode, string line )
+	:	m_sourceCode( sourceCode ),
 		m_line( line ),
 		m_column( 0 )
 {
@@ -92,7 +92,8 @@ void LineParser::Process()
 			{
 				m_column++;
 
-			} while ( ( isalpha( m_line[ m_column ] ) ||
+			} while ( m_column < m_line.length() &&
+					  ( isalpha( m_line[ m_column ] ) ||
 						isdigit( m_line[ m_column ] ) ||
 						m_line[ m_column ] == '_' ||
 						m_line[ m_column ] == '%' ) &&
@@ -127,7 +128,7 @@ void LineParser::Process()
 
 		// Next we see if we should even be trying to execute anything.... maybe the if condition is false
 
-		if ( !m_sourceFile->IsIfConditionTrue() )
+		if ( !m_sourceCode->IsIfConditionTrue() )
 		{
 			m_column = oldColumn;
 			SkipStatement();
@@ -148,53 +149,128 @@ void LineParser::Process()
 			}
 		}
 
-		// Check to see if it's symbol assignment
-
-		if ( !isalpha( m_line[ m_column ] ) && m_line[ m_column ] != '_' )
+		if ( bIsSymbolAssignment )
 		{
-			throw AsmException_SyntaxError_UnrecognisedToken( m_line, m_column );
-		}
+			// Deal here with symbol assignment
 
-		// Must be symbol assignment
+			string symbolName = GetSymbolName() + m_sourceCode->GetSymbolNameSuffix();
 
-		// Symbol starts with a valid character
-
-		string symbolName = GetSymbolName() + m_sourceFile->GetSymbolNameSuffix();
-
-		if ( !AdvanceAndCheckEndOfStatement() )
-		{
-			throw AsmException_SyntaxError_UnrecognisedToken( m_line, oldColumn );
-		}
-
-		if ( m_line[ m_column ] != '=' )
-		{
-			throw AsmException_SyntaxError_UnrecognisedToken( m_line, oldColumn );
-		}
-
-		m_column++;
-
-		double value = EvaluateExpression();
-
-		if ( GlobalData::Instance().IsFirstPass() )
-		{
-			// only add the symbol on the first pass
-
-			if ( SymbolTable::Instance().IsSymbolDefined( symbolName ) )
+			if ( !AdvanceAndCheckEndOfStatement() )
 			{
-				throw AsmException_SyntaxError_LabelAlreadyDefined( m_line, oldColumn );
+				throw AsmException_SyntaxError_UnrecognisedToken( m_line, oldColumn );
 			}
-			else
+
+			if ( m_line[ m_column ] != '=' )
 			{
-				SymbolTable::Instance().AddSymbol( symbolName, value );
+				throw AsmException_SyntaxError_UnrecognisedToken( m_line, oldColumn );
+			}
+
+			m_column++;
+
+			double value = EvaluateExpression();
+
+			if ( GlobalData::Instance().IsFirstPass() )
+			{
+				// only add the symbol on the first pass
+
+				if ( SymbolTable::Instance().IsSymbolDefined( symbolName ) )
+				{
+					throw AsmException_SyntaxError_LabelAlreadyDefined( m_line, oldColumn );
+				}
+				else
+				{
+					SymbolTable::Instance().AddSymbol( symbolName, value );
+				}
+			}
+
+			if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
+			{
+				// Unexpected comma (remembering that an expression can validly end with a comma)
+				throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
+			}
+
+			continue;
+		}
+
+		// Check macro matches
+
+		if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+		{
+			string macroName = GetSymbolName();
+			const Macro* macro = MacroTable::Instance().Get( macroName );
+			if ( macro != NULL )
+			{
+				if ( GlobalData::Instance().ShouldOutputAsm() )
+				{
+					cout << "Macro " << macroName << ":" << endl;
+				}
+
+				HandleOpenBrace();
+
+				for ( int i = 0; i < macro->GetNumberOfParameters(); i++ )
+				{
+					string paramName = macro->GetParameter( i ) + m_sourceCode->GetSymbolNameSuffix();
+
+					try
+					{
+						double value = EvaluateExpression();
+
+						if ( !SymbolTable::Instance().IsSymbolDefined( paramName ) )
+						{
+//							cout << "   (symbol '" << paramName << "' = " << value << ")" << endl;
+							SymbolTable::Instance().AddSymbol( paramName, value );
+						}
+
+					}
+					catch ( AsmException_SyntaxError_SymbolNotDefined& )
+					{
+//						cout << "   (symbol '" << paramName << "' not yet known)" << endl;
+						if ( GlobalData::Instance().IsSecondPass() )
+						{
+							throw;
+						}
+					}
+
+					if ( i != macro->GetNumberOfParameters() - 1 )
+					{
+						if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
+						{
+							throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+						}
+
+						m_column++;
+					}
+				}
+				
+				if ( AdvanceAndCheckEndOfStatement() )
+				{
+					throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+				}
+
+				MacroInstance macroInstance( macro, m_sourceCode );
+				macroInstance.Process();
+
+//				for ( int i = 0; i < macro->GetNumberOfLines(); i++ )
+//				{
+//					LineParser macroLine( m_sourceCode, macro->GetLine( i ) );
+//					cout << "   macro: " << macro->GetLine( i ) << endl;
+//					macroLine.Process();
+//				}
+
+				HandleCloseBrace();
+
+				if ( GlobalData::Instance().ShouldOutputAsm() )
+				{
+					cout << "End macro " << macroName << endl;
+				}
+
+				continue;
 			}
 		}
 
-		if ( m_line[ m_column ] == ',' )
-		{
-			// Unexpected comma (remembering that an expression can validly end with a comma)
-			throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
-		}
+		// If we got this far, we didn't recognise anything, so throw an error
 
+		throw AsmException_SyntaxError_UnrecognisedToken( m_line, oldColumn );
 	}
 }
 
@@ -214,11 +290,11 @@ void LineParser::SkipStatement()
 
 	int oldColumn = m_column;
 
-	if ( m_line[ m_column ] == '{' || m_line[ m_column ] == '}' || m_line[ m_column ] == ':' )
+	if ( m_column < m_line.length() && ( m_line[ m_column ] == '{' || m_line[ m_column ] == '}' || m_line[ m_column ] == ':' ) )
 	{
 		m_column++;
 	}
-	else if ( m_line[ m_column ] == '\\' || m_line[ m_column ] == ';' )
+	else if ( m_column < m_line.length() && ( m_line[ m_column ] == '\\' || m_line[ m_column ] == ';' ) )
 	{
 		m_column = m_line.length();
 	}
@@ -226,17 +302,17 @@ void LineParser::SkipStatement()
 	{
 		while ( m_column < m_line.length() && ( bInQuotes || bInSingleQuotes || MoveToNextAtom( ":;\\{}" ) ) )
 		{
-			if ( m_line[ m_column ] == '\"' && !bInSingleQuotes )
+			if ( m_column < m_line.length() && m_line[ m_column ] == '\"' && !bInSingleQuotes )
 			{
 				bInQuotes = !bInQuotes;
 			}
-			else if ( m_line[ m_column ] == '\'' )
+			else if ( m_column < m_line.length() && m_line[ m_column ] == '\'' )
 			{
 				if ( bInSingleQuotes )
 				{
 					bInSingleQuotes = false;
 				}
-				else if ( m_line[ m_column + 2 ] == '\'' && !bInQuotes )
+				else if ( m_column + 2 < m_line.length() && m_line[ m_column + 2 ] == '\'' && !bInQuotes )
 				{
 					bInSingleQuotes = true;
 					m_column++;
@@ -247,14 +323,20 @@ void LineParser::SkipStatement()
 		}
 	}
 
-	if ( m_sourceFile->GetCurrentMacro() != NULL &&
-		 m_line[ oldColumn ] != ':' &&
-		 m_line[ oldColumn ] != '\\' &&
-		 m_line[ oldColumn ] != ';' )
+	if ( m_sourceCode->GetCurrentMacro() != NULL )//&&
+//		 m_line[ oldColumn ] != ':' &&
+//		 m_line[ oldColumn ] != '\\' &&
+//		 m_line[ oldColumn ] != ';' )
 	{
 		string command = m_line.substr( oldColumn, m_column - oldColumn );
-		m_sourceFile->GetCurrentMacro()->AddLine( command );
-		cout << "   '" << command << "'" << endl;
+
+		if ( m_column == m_line.length() )
+		{
+			command += '\n';
+		}
+
+		m_sourceCode->GetCurrentMacro()->AddLine( command );
+//		cout << "   '" << command << "'" << endl;
 	}
 }
 
@@ -309,10 +391,10 @@ void LineParser::HandleToken( int i, int oldColumn )
 
 	if ( m_gaTokenTable[ i ].m_directiveHandler )
 	{
-		( m_sourceFile->*m_gaTokenTable[ i ].m_directiveHandler )( m_line, m_column );
+		( m_sourceCode->*m_gaTokenTable[ i ].m_directiveHandler )( m_line, m_column );
 	}
 
-	if ( m_sourceFile->IsIfConditionTrue() )
+	if ( m_sourceCode->IsIfConditionTrue() )
 	{
 		( this->*m_gaTokenTable[ i ].m_handler )();
 	}
@@ -437,7 +519,8 @@ string LineParser::GetSymbolName()
 	{
 		symbolName += m_line[ m_column++ ];
 
-	} while ( ( isalpha( m_line[ m_column ] ) ||
+	} while ( m_column < m_line.length() &&
+			  ( isalpha( m_line[ m_column ] ) ||
 				isdigit( m_line[ m_column ] ) ||
 				m_line[ m_column ] == '_' ||
 				m_line[ m_column ] == '%' ) &&

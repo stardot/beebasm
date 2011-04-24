@@ -57,8 +57,8 @@ class AsmException_FileError : public AsmException
 {
 public:
 
-	explicit AsmException_FileError( const char* pFilename )
-		:	m_pFilename( pFilename )
+	explicit AsmException_FileError( const std::string& filename )
+		:	m_filename( filename )
 	{
 	}
 
@@ -73,7 +73,7 @@ public:
 
 protected:
 
-	const char*			m_pFilename;
+	std::string			m_filename;
 };
 
 
@@ -81,8 +81,8 @@ protected:
 class AsmException_FileError_##a : public AsmException_FileError			\
 {																			\
 public:																		\
-	explicit AsmException_FileError_##a( const char* pFilename )			\
-		:	AsmException_FileError( pFilename ) {}							\
+	explicit AsmException_FileError_##a( const std::string filename )			\
+		:	AsmException_FileError( filename ) {}							\
 																			\
 	virtual ~AsmException_FileError_##a() {}								\
 																			\
@@ -116,7 +116,7 @@ class AsmException_SyntaxError : public AsmException
 public:
 
 	AsmException_SyntaxError()
-		:	m_pFilename( NULL ),
+		:	m_filename( "" ),
 			m_lineNumber( 0 )
 	{
 	}
@@ -124,14 +124,14 @@ public:
 	AsmException_SyntaxError( std::string line, int column )
 		:	m_line( line ),
 			m_column( column ),
-			m_pFilename( NULL ),
+			m_filename( "" ),
 			m_lineNumber( 0 )
 	{
 	}
 
 	virtual ~AsmException_SyntaxError() {}
 
-	void SetFilename( const char* filename )	{ if ( m_pFilename == NULL ) m_pFilename = filename; }
+	void SetFilename( const std::string& filename )	{ if ( m_filename == "" ) m_filename = filename; }
 	void SetLineNumber( int lineNumber )		{ if ( m_lineNumber == 0 ) m_lineNumber = lineNumber; }
 
 	virtual void Print() const;
@@ -145,7 +145,7 @@ protected:
 
 	std::string			m_line;
 	int					m_column;
-	const char*			m_pFilename;
+	std::string			m_filename;
 	int					m_lineNumber;
 };
 

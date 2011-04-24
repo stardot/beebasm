@@ -394,7 +394,7 @@ void LineParser::HandleAssembler( int instruction )
 
 	// OK, something follows... maybe it's immediate mode
 
-	if ( m_line[ m_column ] == '#' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == '#' )
 	{
 		if ( !HasAddressingMode( instruction, IMM ) )
 		{
@@ -435,7 +435,7 @@ void LineParser::HandleAssembler( int instruction )
 			throw AsmException_SyntaxError_ImmNegative( m_line, oldColumn );
 		}
 
-		if ( m_line[ m_column ] == ',' )
+		if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 		{
 			// Unexpected comma (remembering that an expression can validly end with a comma)
 			throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
@@ -448,7 +448,7 @@ void LineParser::HandleAssembler( int instruction )
 
 	// see if it's accumulator mode
 
-	if ( toupper( m_line[ m_column ] ) == 'A' && HasAddressingMode( instruction, ACC ) )
+	if ( m_column < m_line.length() && toupper( m_line[ m_column ] ) == 'A' && HasAddressingMode( instruction, ACC ) )
 	{
 		// might be... but only if the next character is a separator or whitespace
 		// otherwise, we must assume a label beginning with A
@@ -472,7 +472,7 @@ void LineParser::HandleAssembler( int instruction )
 
 	// see if it's (ind,X), (ind),Y or (ind16)
 
-	if ( m_line[ m_column ] == '(' )
+	if ( m_column < m_line.length() && m_line[ m_column ] == '(' )
 	{
 		oldColumn = m_column;
 		m_column++;
@@ -501,7 +501,7 @@ void LineParser::HandleAssembler( int instruction )
 		// we know that ind and ind16 forms are exclusive
 		// check (ind), (ind16) and (ind),Y
 
-		if ( m_line[ m_column ] == ')' )
+		if ( m_column < m_line.length() && m_line[ m_column ] == ')' )
 		{
 			m_column++;
 
@@ -549,7 +549,7 @@ void LineParser::HandleAssembler( int instruction )
 
 			// if we find ,Y then it's an (ind),Y
 
-			if ( m_line[ m_column ] == ',' )
+			if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 			{
 				m_column++;
 
@@ -606,7 +606,7 @@ void LineParser::HandleAssembler( int instruction )
 
 		// check (ind,X) or (ind16,X)
 
-		if ( m_line[ m_column ] == ',' )
+		if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
 		{
 			m_column++;
 
@@ -758,7 +758,7 @@ void LineParser::HandleAssembler( int instruction )
 
 	// finally, check for indexed versions of the opcode
 
-	if ( m_line[ m_column ] != ',' )
+	if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 	{
 		// weird character - throw error
 		throw AsmException_SyntaxError_BadAbsolute( m_line, m_column );
@@ -772,7 +772,7 @@ void LineParser::HandleAssembler( int instruction )
 		throw AsmException_SyntaxError_BadAbsolute( m_line, m_column );
 	}
 
-	if ( toupper( m_line[ m_column ] ) == 'X' )
+	if ( m_column < m_line.length() && toupper( m_line[ m_column ] ) == 'X' )
 	{
 		m_column++;
 
@@ -803,7 +803,7 @@ void LineParser::HandleAssembler( int instruction )
 		}
 	}
 
-	if ( toupper( m_line[ m_column ] ) == 'Y' )
+	if ( m_column < m_line.length() && toupper( m_line[ m_column ] ) == 'Y' )
 	{
 		m_column++;
 

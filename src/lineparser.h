@@ -25,7 +25,7 @@
 
 #include <string>
 
-class SourceFile;
+class SourceCode;
 
 class LineParser
 {
@@ -33,7 +33,7 @@ public:
 
 	// Constructor/destructor
 
-	LineParser( SourceFile* sourceFile, std::string line );
+	LineParser( SourceCode* sourceCode, std::string line );
 	~LineParser();
 
 	// Process the line
@@ -46,7 +46,7 @@ public:
 private:
 
 	typedef void ( LineParser::*TokenHandler )();
-	typedef void ( SourceFile::*DirectiveHandler )( const std::string& line, int column );
+	typedef void ( SourceCode::*DirectiveHandler )( const std::string& line, int column );
 
 	struct Token
 	{
@@ -105,6 +105,7 @@ private:
 	int				GetTokenAndAdvanceColumn();
 	void			HandleToken( int i, int oldColumn );
 	int				GetInstructionAndAdvanceColumn();
+	int				CheckMacroMatches();
 	bool			MoveToNextAtom( const char* pTerminators = NULL );
 	bool			AdvanceAndCheckEndOfLine();
 	bool			AdvanceAndCheckEndOfStatement();
@@ -201,7 +202,7 @@ private:
 	void			EvalExp();
 
 
-	SourceFile*				m_sourceFile;
+	SourceCode*				m_sourceCode;
 	std::string				m_line;
 	size_t					m_column;
 

@@ -27,12 +27,17 @@
 #include <cstdlib>
 #include <map>
 #include <string>
+#include <sstream>
 #include <vector>
+#include "sourcecode.h"
 
 
 class Macro
 {
 public:
+
+	Macro( const std::string& filename, int lineNumber );
+
 
 	void SetName( const std::string& name )
 	{
@@ -46,7 +51,7 @@ public:
 
 	void AddLine( const std::string& line )
 	{
-		m_content.push_back( line );
+		m_body += line;
 	}
 
 	const std::string& GetName() const
@@ -64,12 +69,53 @@ public:
 		return m_parameters[ i ];
 	}
 
+	const std::string& GetBody() const
+	{
+		return m_body;
+	}
+
+	const std::string& GetFilename() const
+	{
+		return m_filename;
+	}
+
+	int GetLineNumber() const
+	{
+		return m_lineNumber;
+	}
+
 
 private:
 
+	std::string						m_filename;
+	int								m_lineNumber;
+
 	std::string						m_name;
 	std::vector< std::string >		m_parameters;
-	std::vector< std::string >		m_content;
+	std::string						m_body;
+
+};
+
+
+class MacroInstance : public SourceCode
+{
+public:
+
+	MacroInstance( const Macro* macro, const SourceCode* parent );
+	virtual ~MacroInstance() {}
+
+	// Accessors
+
+	virtual int						GetFilePointer();
+	virtual void					SetFilePointer( int i );
+	virtual std::istream&			GetLine( std::string& lineFromFile );
+	virtual bool					IsAtEnd();
+
+
+private:
+
+	std::istringstream				m_stream;
+	const Macro*					m_macro;
 };
 
 

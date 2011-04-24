@@ -26,106 +26,33 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "sourcecode.h"
 #include "macro.h"
 
 
-class SourceFile
+class SourceFile : public SourceCode
 {
 public:
 
 	// Constructor/destructor (RAII class)
 
-	explicit SourceFile( const char* pFilename );
-	~SourceFile();
+	explicit SourceFile( const std::string& filename );
+	virtual ~SourceFile();
 
-	// Process the file
+	virtual void Process();
 
-	void Process();
 
 	// Accessors
 
-	inline const char*		GetFilename() const				{ return m_pFilename; }
-	inline int				GetLineNumber() const			{ return m_lineNumber; }
-	inline int				GetFilePointer() const			{ return m_filePointer; }
-	inline void				SetFilePointer( int i )			{ m_filePointer = i; m_file.seekg( i ); }
-
-	// For loop / if related stuff
-
-	#define MAX_FOR_LEVELS	32
-	#define MAX_IF_LEVELS	32
-
-private:
-
-	struct For
-	{
-		std::string			m_varName;
-		double				m_current;
-		double				m_end;
-		double				m_step;
-		int					m_filePtr;
-		int					m_id;
-		int					m_count;
-		std::string			m_line;
-		int					m_column;
-		int					m_lineNumber;
-	};
-
-	For						m_forStack[ MAX_FOR_LEVELS ];
-	int						m_forStackPtr;
-
-	struct If
-	{
-		bool				m_condition;
-		bool                m_hadElse;
-		bool				m_passed;
-		std::string			m_line;
-		int					m_column;
-		int					m_lineNumber;
-	};
-
-	int						m_ifStackPtr;
-	If						m_ifStack[ MAX_IF_LEVELS ];
-
-	Macro*					m_currentMacro;
-
-
-public:
-
-	void					OpenBrace( const std::string& line, int column );
-	void					CloseBrace( const std::string& line, int column );
-
-	void					AddFor( const std::string& varName,
-									double start,
-									double end,
-									double step,
-									int filePtr,
-									const std::string& line,
-									int column );
-
-	void					UpdateFor( const std::string& line, int column );
-
-	inline int 				GetForLevel() const { return m_forStackPtr; }
-	inline Macro*			GetCurrentMacro() { return m_currentMacro; }
-
-	std::string				GetSymbolNameSuffix( int level = -1 ) const;
-
-	bool					IsIfConditionTrue() const;
-	void					AddIfLevel( const std::string& line, int column );
-	void					SetCurrentIfCondition( bool b );
-	void					StartElse( const std::string& line, int column );
-	void					StartElif( const std::string& line, int column );
-	void					ToggleCurrentIfCondition( const std::string& line, int column );
-	void					RemoveIfLevel( const std::string& line, int column );
-	void					StartMacro( const std::string& line, int column );
-	void					EndMacro( const std::string& line, int column );
+	virtual int				GetFilePointer();
+	virtual void			SetFilePointer( int i );
+	virtual std::istream&	GetLine( std::string& lineFromFile );
+	virtual bool			IsAtEnd();
 
 
 private:
 
 	std::ifstream			m_file;
-	const char*				m_pFilename;
-	int						m_lineNumber;
-	int						m_filePointer;
 };
 
 

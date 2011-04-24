@@ -41,7 +41,7 @@ using namespace std;
 /*************************************************************************************************/
 void AsmException_FileError::Print() const
 {
-	cerr << "Error: " << m_pFilename << ": " << Message() << endl;
+	cerr << "Error: " << m_filename << ": " << Message() << endl;
 }
 
 
@@ -55,10 +55,10 @@ void AsmException_FileError::Print() const
 /*************************************************************************************************/
 void AsmException_SyntaxError::Print() const
 {
-	assert( m_pFilename != NULL );
+	assert( m_filename != "" );
 	assert( m_lineNumber != 0 );
 
-	cerr << m_pFilename << ":" << m_lineNumber << ": error: ";
+	cerr << m_filename << ":" << m_lineNumber << ": error: ";
 	cerr << Message() << endl << endl;
 	cerr << m_line << endl;
 	cerr << string( m_column, ' ' ) << "^" << endl;
