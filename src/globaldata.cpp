@@ -71,7 +71,8 @@ GlobalData::GlobalData()
 		m_bVerbose( false ),
 		m_bUseDiscImage( false ),
 		m_pDiscImage( NULL ),
-		m_bSaved( false )
+		m_bSaved( false ),
+		m_pOutputFile( NULL )
 {
 }
 

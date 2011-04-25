@@ -83,6 +83,7 @@ protected:
 		bool				m_condition;
 		bool                m_hadElse;
 		bool				m_passed;
+		bool				m_isMacroDefinition;
 		std::string			m_line;
 		int					m_column;
 		int					m_lineNumber;
@@ -118,6 +119,7 @@ public:
 
 	bool					IsIfConditionTrue() const;
 	void					AddIfLevel( const std::string& line, int column );
+	void					SetCurrentIfAsMacroDefinition();
 	void					SetCurrentIfCondition( bool b );
 	void					StartElse( const std::string& line, int column );
 	void					StartElif( const std::string& line, int column );

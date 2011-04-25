@@ -1731,6 +1731,18 @@ void LineParser::HandleMacro()
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column - 1 );
 	}
 
+	// If there is nothing else on the line following the MACRO command, put a newline at the
+	// beginning of the macro definition, so any errors are reported on the correct line
+
+	if ( m_column == m_line.length() &&
+		 GlobalData::Instance().IsFirstPass() )
+	{
+		m_sourceCode->GetCurrentMacro()->AddLine("\n");
+	}
+
+	// Set the IF condition to false - this is a cheaty way of ensuring that the macro body
+	// is not assembled as it is parsed
+
 	m_sourceCode->SetCurrentIfCondition(false);
 }
 

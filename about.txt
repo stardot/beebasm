@@ -152,6 +152,13 @@ This specifies the name of the source file for BeebAsm to process.  In the
 absence of any switches specifying disc image filenames, SAVE commands in the
 source code will write out object files directly to the current directory.
 
+-o <filename>
+
+If this is specified, then the SAVE command can be used without supplying a
+filename, and this one will be used instead.  This allows BeebAsm to be used
+like a conventional assembler, specifying both input and output filenames
+from the command line.
+
 -do <filename>
 
 This specifies the name of a new disc image to be created.  All object code
@@ -548,8 +555,8 @@ ENDMACRO
 	  ADDI8 bonus, 10          ; add 10 to the memory location 'bonus'
 	  ADDI8 pills, pill_add    ; pills += pill_add
 
-  Macros can also be nested, as demonstrated by this somewhat contrived
-  example:
+  Macros can also be called from other macros, as demonstrated by this somewhat
+  contrived example:
   
   	  MACRO ADDI16 addr, val
 	      IF val=0

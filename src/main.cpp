@@ -146,6 +146,7 @@ int main( int argc, char* argv[] )
 			case WAITING_FOR_OUTPUT_FILENAME:
 
 				pOutputFile = argv[i];
+				GlobalData::Instance().SetOutputFile( pOutputFile );
 				state = READY;
 				break;
 

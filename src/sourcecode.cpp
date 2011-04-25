@@ -154,16 +154,26 @@ void SourceCode::Process()
 		}
 	}
 
-	// Check that we have no IF mismatch
+	// Check that we have no IF / MACRO mismatch
 
 	if ( m_ifStackPtr > initialIfStackPtr )
 	{
 		If& mismatchedIf = m_ifStack[ m_ifStackPtr - 1 ];
 
-		AsmException_SyntaxError_IfWithoutEndif e( mismatchedIf.m_line, mismatchedIf.m_column );
-		e.SetFilename( m_filename );
-		e.SetLineNumber( mismatchedIf.m_lineNumber );
-		throw e;
+		if ( mismatchedIf.m_isMacroDefinition )
+		{
+			AsmException_SyntaxError_NoEndMacro e( mismatchedIf.m_line, mismatchedIf.m_column );
+			e.SetFilename( m_filename );
+			e.SetLineNumber( mismatchedIf.m_lineNumber );
+			throw e;
+		}
+		else
+		{
+			AsmException_SyntaxError_IfWithoutEndif e( mismatchedIf.m_line, mismatchedIf.m_column );
+			e.SetFilename( m_filename );
+			e.SetLineNumber( mismatchedIf.m_lineNumber );
+			throw e;
+		}
 	}
 }
 
@@ -385,13 +395,27 @@ void SourceCode::AddIfLevel( const string& line, int column )
 		throw AsmException_SyntaxError_TooManyIFs( line, column );
 	}
 
-	m_ifStack[ m_ifStackPtr ].m_condition	= true;
-	m_ifStack[ m_ifStackPtr ].m_passed		= false;
-	m_ifStack[ m_ifStackPtr ].m_hadElse		= false;
-	m_ifStack[ m_ifStackPtr ].m_line		= line;
-	m_ifStack[ m_ifStackPtr ].m_column		= column;
-	m_ifStack[ m_ifStackPtr ].m_lineNumber	= m_lineNumber;
+	m_ifStack[ m_ifStackPtr ].m_condition			= true;
+	m_ifStack[ m_ifStackPtr ].m_passed				= false;
+	m_ifStack[ m_ifStackPtr ].m_hadElse				= false;
+	m_ifStack[ m_ifStackPtr ].m_isMacroDefinition	= false;
+	m_ifStack[ m_ifStackPtr ].m_line				= line;
+	m_ifStack[ m_ifStackPtr ].m_column				= column;
+	m_ifStack[ m_ifStackPtr ].m_lineNumber			= m_lineNumber;
 	m_ifStackPtr++;
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SourceCode::SetCurrentIfAsMacroDefinition()
+*/
+/*************************************************************************************************/
+void SourceCode::SetCurrentIfAsMacroDefinition()
+{
+	assert( m_ifStackPtr > 0 );
+	m_ifStack[ m_ifStackPtr - 1 ].m_isMacroDefinition = true;
 }
 
 
@@ -486,6 +510,7 @@ void SourceCode::StartMacro( const string& line, int column )
 	}
 
 	AddIfLevel( line, column );
+	SetCurrentIfAsMacroDefinition();
 }
 
 
