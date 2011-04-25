@@ -1,11 +1,11 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V1.04                                 *
+*                               BeebAsm V1.05                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
-*              Copyright (C) Rich Talbot-Watkins 2007, 2008, 2009             *
-*                            <rich_tw@hotmail.com>                            *
+*                  Copyright (C) Rich Talbot-Watkins 2007-2011                *
+*                             <richtw1@gmail.com>                             *
 *                                                                             *
 *    This program is free software: you can redistribute it and/or modify     *
 *    it under the terms of the GNU General Public License as published by     *
@@ -503,6 +503,84 @@ IF...ELIF...ELSE...ENDIF
       }
 
 
+PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
+
+  This provides a convenient way of copying a file from the host OS directly
+  to the output disc image.  If no 'beeb filename' is provided, the host
+  filename will be used (and must therefore be 7 characters or less in length).
+  A start address must be provided (and optionally an execution address can
+  be provided too).
+  
+  
+PUTBASIC <host filename> [,<beeb filename>]
+
+  This takes a BASIC program as a plain text file on the host OS, tokenises it,
+  and outputs it to the disc image as a native BASIC file.  Credit to Thomas
+  Harte for the BASIC tokenising routine.
+  
+  
+MACRO <name> [,<parameter list...>]
+ENDMACRO
+
+  This pair of commands is used to define assembler macros.  Their use is best
+  illustrated by an example:
+  
+      MACRO ADDI8 addr, val
+		  IF val=1
+			  INC addr
+		  ELIF val>1
+			  CLC
+			  LDA addr
+			  ADC #val
+			  STA addr
+		  ENDIF
+	  ENDMACRO
+
+  This defines a macro called ADDI8 ("ADD Immediate 8-bit") whose function is
+  to add a constant to a memory address.  It expects two parameters: the
+  memory address and the constant value.  The body of the macro contains an IF
+  block which will generate the most appropriate code according to the constant
+  value passed in.
+  
+  Then, at any point afterwards, the macro can be used as follows:
+  
+      ADDI8 &900, 1            ; increment address &900 by 1
+	  ADDI8 bonus, 10          ; add 10 to the memory location 'bonus'
+	  ADDI8 pills, pill_add    ; pills += pill_add
+
+  Macros can also be nested, as demonstrated by this somewhat contrived
+  example:
+  
+  	  MACRO ADDI16 addr, val
+	      IF val=0
+		      ; do nothing
+		  ELIF val=1
+			  INC addr
+			  BNE skip1
+			  INC addr+1
+			  .skip1
+		  ELIF HI(val)=0
+			  ADDI8 addr, val
+			  BCC skip2
+			  INC addr+1
+			  .skip2
+		  ELSE
+		      CLC
+			  LDA addr
+			  ADC #LO(val)
+			  STA addr
+			  LDA addr+1
+			  ADC #HI(val)
+			  STA addr+1
+		  ENDIF
+	  ENDMACRO
+
+  Care should be taken with macros, as the details of the code assembled are
+  hidden.  In the above ADDI16 example, the C flag is not set consistently,
+  depending on the inputs to the macro (e.g. it remains unchanged if val=0 or
+  1, and will not be correct if val<256).
+
+
 
 7. TIPS AND TRICKS
 
@@ -608,6 +686,9 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
+25/04/2011  1.05  Added macros.
+                  Added PUTFILE and PUTBASIC (to tokenise a plaintext BASIC
+				  file, using code by Thomas Harte).
 02/12/2009  1.04  Additions by Kevin Bracey:
                   Added 65C02 instruction set and CPU directive.
                   Added ELIF, EQUD.
@@ -649,6 +730,6 @@ based on the above demo, but it runs at a low address (&300).
 
 There are bound to be loads.  I wrote it quickly!  Please help me zap all the
 problems by reporting any bugs to me, Rich Talbot-Watkins, at
-<rich_tw@hotmail.com>, or join the forum at <http://www.retrosoftware.co.uk>.
+<richtw1@gmail.com>, or join the forum at <http://www.retrosoftware.co.uk>.
 
 Thank you!

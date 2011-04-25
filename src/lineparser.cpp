@@ -5,7 +5,7 @@
 	Represents a line of the source file
 
 
-	Copyright (C) Rich Talbot-Watkins 2007, 2008
+	Copyright (C) Rich Talbot-Watkins 2007 - 2011
 
 	This file is part of BeebAsm.
 
