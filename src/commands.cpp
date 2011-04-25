@@ -935,6 +935,8 @@ void LineParser::HandleSave()
 	int exec = 0;
 	int reload = 0;
 
+	int oldColumn = m_column;
+
 	// syntax is SAVE "filename", start, end [, exec [, reload] ]
 
 	if ( !AdvanceAndCheckEndOfStatement() )
@@ -943,46 +945,40 @@ void LineParser::HandleSave()
 		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 	}
 
-	if ( m_line[ m_column ] != '\"' )
+	string saveFile;
+
+	if ( m_line[ m_column ] == '\"' )
 	{
-		// did not find a string
-		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+		// get filename
+
+		size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
+
+		if ( endQuotePos == string::npos )
+		{
+			// did not find the end of the string
+			throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+		}
+
+		saveFile = m_line.substr( m_column + 1, endQuotePos - m_column - 1 );
+
+		m_column = endQuotePos + 1;
+
+		if ( !AdvanceAndCheckEndOfStatement() )
+		{
+			// found nothing
+			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		}
+
+		if ( m_line[ m_column ] != ',' )
+		{
+			// did not find a comma
+			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+		}
+
+		m_column++;
 	}
-
-	// get filename
-
-	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-	if ( endQuotePos == string::npos )
-	{
-		// did not find the end of the string
-		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-	}
-
-	string saveFile( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
-
-	if ( GlobalData::Instance().ShouldOutputAsm() )
-	{
-		cout << "Saving file '" << saveFile << "'" << endl;
-	}
-
-	m_column = endQuotePos + 1;
 
 	// get start address
-
-	if ( !AdvanceAndCheckEndOfStatement() )
-	{
-		// found nothing
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
-
-	if ( m_line[ m_column ] != ',' )
-	{
-		// did not find a comma
-		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
-	}
-
-	m_column++;
 
 	start = EvaluateExpressionAsInt();
 	exec = start;
@@ -1055,6 +1051,35 @@ void LineParser::HandleSave()
 	{
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
+	}
+
+	if ( saveFile == "" )
+	{
+		if ( GlobalData::Instance().GetOutputFile() != NULL )
+		{
+			saveFile = GlobalData::Instance().GetOutputFile();
+
+			if ( GlobalData::Instance().IsSecondPass() )
+			{
+				if ( GlobalData::Instance().GetNumAnonSaves() > 0 )
+				{
+					throw AsmException_SyntaxError_OnlyOneAnonSave( m_line, oldColumn );
+				}
+				else
+				{
+					GlobalData::Instance().IncNumAnonSaves();
+				}
+			}
+		}
+		else
+		{
+			throw AsmException_SyntaxError_NoAnonSave( m_line, oldColumn );
+		}
+	}
+
+	if ( GlobalData::Instance().ShouldOutputAsm() )
+	{
+		cout << "Saving file '" << saveFile << "'" << endl;
 	}
 
 	// OK - do it
@@ -1683,7 +1708,6 @@ void LineParser::HandleMacro()
 			}
 
 			m_sourceCode->GetCurrentMacro()->SetName( macroName );
-//			cout << "MACRO '" << macroName << "'" << endl;
 		}
 	}
 	else
@@ -1715,7 +1739,6 @@ void LineParser::HandleMacro()
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
 				m_sourceCode->GetCurrentMacro()->AddParameter( param );
-//				cout << "  param: '" << param << "'" << endl;
 			}
 			bExpectComma = true;
 			bHasParameters = true;

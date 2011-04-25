@@ -45,6 +45,7 @@ public:
 	inline void ResetForId()					{ m_forId = 0; }
 	inline void SetSaved()						{ m_bSaved = true; }
 	inline void SetOutputFile( const char* p )	{ m_pOutputFile = p; }
+	inline void IncNumAnonSaves()				{ m_numAnonSaves++; }
 
 	inline int GetPass() const					{ return m_pass; }
 	inline bool IsFirstPass() const				{ return ( m_pass == 0 ); }
@@ -56,6 +57,7 @@ public:
 	inline int GetNextForId()					{ return m_forId++; }
 	inline bool IsSaved() const					{ return m_bSaved; }
 	inline const char* GetOutputFile() const	{ return m_pOutputFile; }
+	inline int GetNumAnonSaves() const			{ return m_numAnonSaves; }
 
 
 private:
@@ -74,6 +76,7 @@ private:
 	int							m_randomSeed;
 	bool						m_bSaved;
 	const char*					m_pOutputFile;
+	int							m_numAnonSaves;
 };
 
 

@@ -217,14 +217,12 @@ void LineParser::Process()
 
 						if ( !SymbolTable::Instance().IsSymbolDefined( paramName ) )
 						{
-//							cout << "   (symbol '" << paramName << "' = " << value << ")" << endl;
 							SymbolTable::Instance().AddSymbol( paramName, value );
 						}
 
 					}
 					catch ( AsmException_SyntaxError_SymbolNotDefined& )
 					{
-//						cout << "   (symbol '" << paramName << "' not yet known)" << endl;
 						if ( GlobalData::Instance().IsSecondPass() )
 						{
 							throw;
@@ -249,13 +247,6 @@ void LineParser::Process()
 
 				MacroInstance macroInstance( macro, m_sourceCode );
 				macroInstance.Process();
-
-//				for ( int i = 0; i < macro->GetNumberOfLines(); i++ )
-//				{
-//					LineParser macroLine( m_sourceCode, macro->GetLine( i ) );
-//					cout << "   macro: " << macro->GetLine( i ) << endl;
-//					macroLine.Process();
-//				}
 
 				HandleCloseBrace();
 
@@ -323,10 +314,7 @@ void LineParser::SkipStatement()
 		}
 	}
 
-	if ( m_sourceCode->GetCurrentMacro() != NULL )//&&
-//		 m_line[ oldColumn ] != ':' &&
-//		 m_line[ oldColumn ] != '\\' &&
-//		 m_line[ oldColumn ] != ';' )
+	if ( m_sourceCode->GetCurrentMacro() != NULL )
 	{
 		string command = m_line.substr( oldColumn, m_column - oldColumn );
 
@@ -336,7 +324,6 @@ void LineParser::SkipStatement()
 		}
 
 		m_sourceCode->GetCurrentMacro()->AddLine( command );
-//		cout << "   '" << command << "'" << endl;
 	}
 }
 

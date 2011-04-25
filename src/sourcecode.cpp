@@ -94,7 +94,6 @@ void SourceCode::Process()
 
 	string lineFromFile;
 
-//	while ( getline( m_file, lineFromFile ) )
 	while ( GetLine( lineFromFile ) )
 	{
 		// Convert tabs to spaces
@@ -532,7 +531,6 @@ void SourceCode::EndMacro( const string& line, int column )
 
 	if ( GlobalData::Instance().IsFirstPass() )
 	{
-//		cout << "Macro: '" << m_currentMacro->GetBody() << "'" << endl;
 		MacroTable::Instance().Add( m_currentMacro );
 		m_currentMacro = NULL;
 	}

@@ -222,6 +222,8 @@ DEFINE_SYNTAX_EXCEPTION( TooManyIFs, "Too many nested IFs." );
 DEFINE_SYNTAX_EXCEPTION( BadAlignment, "Bad alignment." );
 DEFINE_SYNTAX_EXCEPTION( OutOfRange, "Out of range." );
 DEFINE_SYNTAX_EXCEPTION( BackwardsSkip, "Attempted to skip backwards to an address." );
+DEFINE_SYNTAX_EXCEPTION( NoAnonSave, "Cannot specify SAVE without a filename if no default output filename has been specified." );
+DEFINE_SYNTAX_EXCEPTION( OnlyOneAnonSave, "Can only use SAVE without a filename once per project." );
 
 
 
