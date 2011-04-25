@@ -55,9 +55,10 @@ public:
 
 
 	// For loop / if related stuff
+	// Should use a std::vector here, but I can't really be bothered to change it now
 
-	#define MAX_FOR_LEVELS	32
-	#define MAX_IF_LEVELS	32
+	#define MAX_FOR_LEVELS	64
+	#define MAX_IF_LEVELS	64
 
 protected:
 
@@ -77,6 +78,7 @@ protected:
 
 	For						m_forStack[ MAX_FOR_LEVELS ];
 	int						m_forStackPtr;
+	int						m_initialForStackPtr;
 
 	struct If
 	{
@@ -90,6 +92,7 @@ protected:
 	};
 
 	int						m_ifStackPtr;
+	int						m_initialIfStackPtr;
 	If						m_ifStack[ MAX_IF_LEVELS ];
 
 	Macro*					m_currentMacro;

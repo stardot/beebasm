@@ -51,7 +51,9 @@ using namespace std;
 /*************************************************************************************************/
 SourceCode::SourceCode( const string& filename, int lineNumber )
 	:	m_forStackPtr( 0 ),
+		m_initialForStackPtr( 0 ),
 		m_ifStackPtr( 0 ),
+		m_initialIfStackPtr( 0 ),
 		m_currentMacro( NULL ),
 		m_filename( filename ),
 		m_lineNumber( lineNumber ),
@@ -87,8 +89,8 @@ void SourceCode::Process()
 {
 	// Remember the FOR and IF stack initial pointer values
 
-	int initialForStackPtr = m_forStackPtr;
-	int initialIfStackPtr = m_ifStackPtr;
+	m_initialForStackPtr = m_forStackPtr;
+	m_initialIfStackPtr = m_ifStackPtr;
 
 	// Iterate through the file line-by-line
 
@@ -133,7 +135,7 @@ void SourceCode::Process()
 
 	// Check that we have no FOR / braces mismatch
 
-	if ( m_forStackPtr > initialForStackPtr )
+	if ( m_forStackPtr != m_initialForStackPtr )
 	{
 		For& mismatchedFor = m_forStack[ m_forStackPtr - 1 ];
 
@@ -155,7 +157,7 @@ void SourceCode::Process()
 
 	// Check that we have no IF / MACRO mismatch
 
-	if ( m_ifStackPtr > initialIfStackPtr )
+	if ( m_ifStackPtr != m_initialIfStackPtr )
 	{
 		If& mismatchedIf = m_ifStack[ m_ifStackPtr - 1 ];
 
@@ -301,7 +303,15 @@ void SourceCode::UpdateFor( const string& line, int column )
 /*************************************************************************************************/
 void SourceCode::CloseBrace( const string& line, int column )
 {
-	if ( m_forStackPtr == 0 )
+	// Instead of comparing against 0, I compare with the initial value of the stack ptr when
+	// SourceCode::Process() was called.
+	// This is because macros start wih a copy of the parent FOR stack frame, with an extra set of
+	// braces pushed so they are in their own scope.  Without this amendment, it'd be possible to
+	// close the 'hidden' braces started by the macro instantiation - with hilarious* consequences!
+	//
+	// * for unfunny values of hilarious
+
+	if ( m_forStackPtr == m_initialForStackPtr )
 	{
 		throw AsmException_SyntaxError_MismatchedBraces( line, column );
 	}
