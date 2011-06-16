@@ -153,11 +153,13 @@ private:
 	void			HandlePutBasic();
 	void			HandleMacro();
 	void			HandleEndMacro();
+	void			HandleError();
 
 	// expression evaluating methods
 
 	double			EvaluateExpression( bool bAllowOneMismatchedCloseBracket = false );
 	int				EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket = false );
+	unsigned int	EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatchedCloseBracket = false );
 	double			GetValue();
 
 	void			EvalAdd();

@@ -72,7 +72,8 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "PUTFILE",	&LineParser::HandlePutFile,				0 },
 	{ "PUTBASIC",	&LineParser::HandlePutBasic,			0 },
 	{ "MACRO",		&LineParser::HandleMacro,				&SourceFile::StartMacro },
-	{ "ENDMACRO",	&LineParser::HandleEndMacro,			&SourceFile::EndMacro }
+	{ "ENDMACRO",	&LineParser::HandleEndMacro,			&SourceFile::EndMacro },
+	{ "ERROR",		&LineParser::HandleError,				0 }
 };
 
 
@@ -858,11 +859,11 @@ void LineParser::HandleEqud()
 {
 	do
 	{
-		int value;
+		unsigned int value;
 
 		try
 		{
-			value = EvaluateExpressionAsInt();
+			value = EvaluateExpressionAsUnsignedInt();
 		}
 		catch ( AsmException_SyntaxError_SymbolNotDefined& )
 		{
@@ -1780,6 +1781,50 @@ void LineParser::HandleEndMacro()
 	if ( AdvanceAndCheckEndOfStatement() )
 	{
 		// found something
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleError()
+*/
+/*************************************************************************************************/
+void LineParser::HandleError()
+{
+	int oldColumn = m_column;
+
+	if ( !AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	if ( m_column >= m_line.length() || m_line[ m_column ] != '\"' )
+	{
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	// string
+	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
+
+	if ( endQuotePos == string::npos )
+	{
+		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+	}
+	else
+	{
+		string errorMsg( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
+
+		// throw error
+
+		throw AsmException_UserError( m_line, oldColumn, errorMsg );
+	}
+
+	m_column = endQuotePos + 1;
+
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 	}
 }

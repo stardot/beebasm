@@ -46,6 +46,7 @@ public:
 	inline void SetSaved()						{ m_bSaved = true; }
 	inline void SetOutputFile( const char* p )	{ m_pOutputFile = p; }
 	inline void IncNumAnonSaves()				{ m_numAnonSaves++; }
+	inline void SetDiscOption( int opt )		{ m_discOption = opt; }
 
 	inline int GetPass() const					{ return m_pass; }
 	inline bool IsFirstPass() const				{ return ( m_pass == 0 ); }
@@ -58,7 +59,7 @@ public:
 	inline bool IsSaved() const					{ return m_bSaved; }
 	inline const char* GetOutputFile() const	{ return m_pOutputFile; }
 	inline int GetNumAnonSaves() const			{ return m_numAnonSaves; }
-
+	inline int GetDiscOption() const			{ return m_discOption; }
 
 private:
 
@@ -77,6 +78,7 @@ private:
 	bool						m_bSaved;
 	const char*					m_pOutputFile;
 	int							m_numAnonSaves;
+	int							m_discOption;
 };
 
 

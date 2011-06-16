@@ -114,6 +114,7 @@ const LineParser::OpcodeData	LineParser::m_gaOpcodeTable[] =
 	DATA( 0, "TYA",	0x98,	 X,		 X,		 X,		 X,		 X,		 X,		 X,		 X,		 X,		 X,		 X,		 X,		 X,		 X		)
 };
 
+#undef X
 
 
 /*************************************************************************************************/

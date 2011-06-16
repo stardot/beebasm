@@ -57,8 +57,8 @@ public:
 	// For loop / if related stuff
 	// Should use a std::vector here, but I can't really be bothered to change it now
 
-	#define MAX_FOR_LEVELS	64
-	#define MAX_IF_LEVELS	64
+	#define MAX_FOR_LEVELS	256
+	#define MAX_IF_LEVELS	256
 
 protected:
 

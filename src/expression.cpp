@@ -499,6 +499,19 @@ int LineParser::EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket )
 }
 
 
+/*************************************************************************************************/
+/**
+	LineParser::EvaluateExpressionAsUnsignedInt()
+
+	Version of EvaluateExpression which returns its result as an unsigned int
+*/
+/*************************************************************************************************/
+unsigned int LineParser::EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatchedCloseBracket )
+{
+	return static_cast< unsigned int >( EvaluateExpression( bAllowOneMismatchedCloseBracket ) );
+}
+
+
 
 /*************************************************************************************************/
 /**

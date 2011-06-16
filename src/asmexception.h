@@ -45,7 +45,6 @@ public:
 };
 
 
-
 /*************************************************************************************************/
 /**
 	@class		AsmException_FileError
@@ -268,5 +267,36 @@ DEFINE_ASSEMBLE_EXCEPTION( Overlap, "Trying to assemble over existing code." );
 DEFINE_ASSEMBLE_EXCEPTION( InconsistentCode, "Assembled object code has changed between 1st and 2nd pass. Has a zero-page symbol been forward-declared?" );
 DEFINE_ASSEMBLE_EXCEPTION( FileOpen, "Error opening file." );
 DEFINE_ASSEMBLE_EXCEPTION( FileRead, "Error reading file." );
+
+
+/*************************************************************************************************/
+/**
+	@class		AsmException_UserError
+
+	Exception class used for user generated errors
+*/
+/*************************************************************************************************/
+class AsmException_UserError : public AsmException_SyntaxError
+{
+public:
+
+	AsmException_UserError( std::string line, int column, std::string message )
+		:	AsmException_SyntaxError( line, column ),
+			m_message( message )
+	{
+	}
+
+	virtual const char* Message() const
+	{
+		return m_message.c_str();
+	}
+
+
+protected:
+
+	std::string		m_message;
+};
+
+
 
 #endif // ASMEXCEPTION_H_

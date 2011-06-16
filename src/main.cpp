@@ -41,7 +41,7 @@
 using namespace std;
 
 
-#define VERSION "1.05"
+#define VERSION "1.06"
 
 
 /*************************************************************************************************/
@@ -69,7 +69,8 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_OUTPUT_FILENAME,
 		WAITING_FOR_DISC_INPUT_FILENAME,
 		WAITING_FOR_DISC_OUTPUT_FILENAME,
-		WAITING_FOR_BOOT_FILENAME
+		WAITING_FOR_BOOT_FILENAME,
+		WAITING_FOR_DISC_OPTION
 
 	} state = READY;
 
@@ -105,6 +106,10 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_BOOT_FILENAME;
 				}
+				else if ( strcmp( argv[i], "-opt" ) == 0 )
+				{
+					state = WAITING_FOR_DISC_OPTION;
+				}
 				else if ( strcmp( argv[i], "-v" ) == 0 )
 				{
 					GlobalData::Instance().SetVerbose( true );
@@ -122,6 +127,7 @@ int main( int argc, char* argv[] )
 					cout << " -di <file>     Specify a disc image file to be added to" << endl;
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
+					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " --help         See this help again" << endl;
@@ -169,6 +175,12 @@ int main( int argc, char* argv[] )
 			case WAITING_FOR_BOOT_FILENAME:
 
 				GlobalData::Instance().SetBootFile( argv[i] );
+				state = READY;
+				break;
+
+			case WAITING_FOR_DISC_OPTION:
+
+				GlobalData::Instance().SetDiscOption( std::strtol( argv[i], NULL, 10 ) );
 				state = READY;
 				break;
 		}

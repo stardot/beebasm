@@ -1,6 +1,6 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V1.05                                 *
+*                               BeebAsm V1.06                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
@@ -408,6 +408,21 @@ PRINT
             PRINT "Value of label 'start' =", ~start
             PRINT "numdots =", numdots, "dottable size =", dotend-dotstart
 
+			
+ERROR "message"
+
+  Causes BeebAsm to abort assembly with the provided error message.  This can
+  be useful for enforcing certain constraints on generated code, for example:
+  
+            .table
+			    FOR n, 1, 32
+				    EQUB 255 / n
+			    NEXT
+				
+			IF HI(P%)<>HI(table)
+			    ERROR "Table crosses page boundary"
+			ENDIF
+
 
 FOR <var>, start, end [, step] ... NEXT
 
@@ -693,6 +708,8 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
+16/06/2011  1.06  Fixed bug in EQUD with unsigned int values.
+                  Added ERROR directive.
 25/04/2011  1.05  Added macros.
                   Added PUTFILE and PUTBASIC (to tokenise a plaintext BASIC
 				  file, using code by Thomas Harte).

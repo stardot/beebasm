@@ -112,7 +112,7 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 		// generate a blank catalog
 
 		memset( m_aCatalog, 0, 0x200 );
-		m_aCatalog[ 0x106 ] = 0x33;
+		m_aCatalog[ 0x106 ] = 0x03 | ( ( GlobalData::Instance().GetDiscOption() & 3 ) << 4);
 		m_aCatalog[ 0x107 ] = 0x20;
 
 		if ( !m_outputFile.write( reinterpret_cast< char* >( m_aCatalog ), 0x200 ) )
@@ -131,6 +131,8 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 			strcat( pPlingBoot, "\r" );
 
 			AddFile( "!Boot", reinterpret_cast< unsigned char* >( pPlingBoot ), 0, 0xFFFFFF, strlen( pPlingBoot ) );
+
+			m_aCatalog[ 0x106 ] = 0x33;		// force *OPT to 3 (EXEC)
 		}
 	}
 
