@@ -611,7 +611,8 @@ bool EncodeLine()
 					if(StartOfStatement)
 					{
 						/* * at start of statement means don't tokenise rest of statement, other than string literals */
-						while(!EndOfFile && !ErrorNum && IncomingBuffer[0] != ':' && IncomingBuffer[0] != '\n')
+						// Bugfix RTW - * commands should not be terminated by colons
+						while(!EndOfFile && !ErrorNum && /*IncomingBuffer[0] != ':' &&*/ IncomingBuffer[0] != '\n')
 						{
 							switch(IncomingBuffer[0])
 							{
