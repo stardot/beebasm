@@ -78,27 +78,27 @@ const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 
 	{ "-",		8,	&LineParser::EvalNegate },
 	{ "+",		8,	&LineParser::EvalPosate },
-	{ "HI",		10,	&LineParser::EvalHi },
-	{ "LO",		10,	&LineParser::EvalLo },
+	{ "HI(",	10,	&LineParser::EvalHi },
+	{ "LO(",	10,	&LineParser::EvalLo },
 	{ ">",		10,	&LineParser::EvalHi },
 	{ "<",		10,	&LineParser::EvalLo },
-	{ "SIN",	10, &LineParser::EvalSin },
-	{ "COS",	10, &LineParser::EvalCos },
-	{ "TAN",	10, &LineParser::EvalTan },
-	{ "ASN",	10, &LineParser::EvalArcSin },
-	{ "ACS",	10, &LineParser::EvalArcCos },
-	{ "ATN",	10, &LineParser::EvalArcTan },
-	{ "SQR",	10, &LineParser::EvalSqrt },
-	{ "RAD",	10, &LineParser::EvalDegToRad },
-	{ "DEG",	10, &LineParser::EvalRadToDeg },
-	{ "INT",	10,	&LineParser::EvalInt },
-	{ "ABS",	10, &LineParser::EvalAbs },
-	{ "SGN",	10, &LineParser::EvalSgn },
-	{ "RND",	10,	&LineParser::EvalRnd },
-	{ "NOT",	10, &LineParser::EvalNot },
-	{ "LOG",	10, &LineParser::EvalLog },
-	{ "LN",		10,	&LineParser::EvalLn },
-	{ "EXP",	10,	&LineParser::EvalExp }
+	{ "SIN(",	10, &LineParser::EvalSin },
+	{ "COS(",	10, &LineParser::EvalCos },
+	{ "TAN(",	10, &LineParser::EvalTan },
+	{ "ASN(",	10, &LineParser::EvalArcSin },
+	{ "ACS(",	10, &LineParser::EvalArcCos },
+	{ "ATN(",	10, &LineParser::EvalArcTan },
+	{ "SQR(",	10, &LineParser::EvalSqrt },
+	{ "RAD(",	10, &LineParser::EvalDegToRad },
+	{ "DEG(",	10, &LineParser::EvalRadToDeg },
+	{ "INT(",	10,	&LineParser::EvalInt },
+	{ "ABS(",	10, &LineParser::EvalAbs },
+	{ "SGN(",	10, &LineParser::EvalSgn },
+	{ "RND(",	10,	&LineParser::EvalRnd },
+	{ "NOT(",	10, &LineParser::EvalNot },
+	{ "LOG(",	10, &LineParser::EvalLog },
+	{ "LN(",	10,	&LineParser::EvalLn },
+	{ "EXP(",	10,	&LineParser::EvalExp }
 };
 
 
@@ -277,10 +277,31 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 
 				// see if token matches
 
-				if ( m_line.compare( m_column, len, token ) == 0 )
+				bool bMatch = true;
+				for ( unsigned int j = 0; j < len; j++ )
+				{
+					if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+					{
+						bMatch = false;
+						break;
+					}
+				}
+
+				// it matches; advance line pointer and remember token
+
+				if ( bMatch )
 				{
 					matchedToken = i;
 					m_column += len;
+
+					// if token ends with (but is not) an open bracket, step backwards one place so that we parse it next time
+
+					if ( len > 1 && token[ len - 1 ] == '(' )
+					{
+						m_column--;
+						assert( m_line[ m_column ] == '(' );
+					}
+
 					break;
 				}
 			}
@@ -367,7 +388,17 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 
 				// see if token matches
 
-				if ( m_line.compare( m_column, len, token ) == 0 )
+				bool bMatch = true;
+				for ( unsigned int j = 0; j < len; j++ )
+				{
+					if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+					{
+						bMatch = false;
+						break;
+					}
+				}
+
+				if ( bMatch )
 				{
 					matchedToken = i;
 					m_column += len;

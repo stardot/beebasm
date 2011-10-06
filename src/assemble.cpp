@@ -143,19 +143,19 @@ int LineParser::GetInstructionAndAdvanceColumn()
 		if ( cpu > ObjectCode::Instance().GetCPU() )
 			continue;
 
-		// create lower-case version of token
-
-		char tokenLC[ 16 ];
-
-		for ( size_t j = 0; j <= len; j++ )
-		{
-			tokenLC[ j ] = tolower( token[ j ] );
-		}
-
 		// see if token matches
 
-		if ( m_line.compare( m_column, len, token ) == 0 ||
-			 m_line.compare( m_column, len, tokenLC ) == 0 )
+		bool bMatch = true;
+		for ( unsigned int j = 0; j < len; j++ )
+		{
+			if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+			{
+				bMatch = false;
+				break;
+			}
+		}
+
+		if ( bMatch )
 		{
 			m_column += len;
 			return i;
