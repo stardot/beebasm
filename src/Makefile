@@ -3,7 +3,7 @@
 #	Makefile for beebasm
 #
 #
-#	Copyright (C) Rich Talbot-Watkins 2007, 2008
+#	Copyright (C) Rich Talbot-Watkins 2007-2012
 #
 #	This file is part of BeebAsm.
 #
@@ -47,7 +47,7 @@ LOADLIBES		:=
 
 # Define GNU libs to link
 
-LDLIBS			:=		-lstdc++ -lm
+LDLIBS			:=		-lm
 
 # Parameters to the executable
 

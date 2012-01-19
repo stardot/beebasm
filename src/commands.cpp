@@ -5,7 +5,7 @@
 	Contains all the LineParser methods for parsing and handling assembler commands
 
 
-	Copyright (C) Rich Talbot-Watkins 2007 - 2011
+	Copyright (C) Rich Talbot-Watkins 2007 - 2012
 
 	This file is part of BeebAsm.
 
@@ -73,7 +73,8 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "PUTBASIC",	&LineParser::HandlePutBasic,			0 },
 	{ "MACRO",		&LineParser::HandleMacro,				&SourceFile::StartMacro },
 	{ "ENDMACRO",	&LineParser::HandleEndMacro,			&SourceFile::EndMacro },
-	{ "ERROR",		&LineParser::HandleError,				0 }
+	{ "ERROR",		&LineParser::HandleError,				0 },
+	{ "COPYBLOCK",	&LineParser::HandleCopyBlock,			0 }
 };
 
 
@@ -304,7 +305,7 @@ void LineParser::HandleGuard()
 void LineParser::HandleClear()
 {
 	int start = EvaluateExpressionAsInt();
-	if ( start < 0 || start > 0x10000 )
+	if ( start < 0 || start > 0xFFFF )
 	{
 		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
 	}
@@ -318,7 +319,7 @@ void LineParser::HandleClear()
 	m_column++;
 
 	int end = EvaluateExpressionAsInt();
-	if ( end < 0 || end > 0xFFFF )
+	if ( end < 0 || end > 0x10000 )
 	{
 		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
 	}
@@ -504,7 +505,7 @@ void LineParser::HandleSkipTo()
 	int oldColumn = m_column;
 
 	int addr = EvaluateExpressionAsInt();
-	if ( addr < 0 || addr > 0xFFFF )
+	if ( addr < 0 || addr > 0x10000 )
 	{
 		throw AsmException_SyntaxError_BadAddress( m_line, oldColumn );
 	}
@@ -1826,6 +1827,60 @@ void LineParser::HandleError()
 	if ( AdvanceAndCheckEndOfStatement() )
 	{
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleCopyBlock()
+*/
+/*************************************************************************************************/
+void LineParser::HandleCopyBlock()
+{
+	int start = EvaluateExpressionAsInt();
+	if ( start < 0 || start > 0xFFFF )
+	{
+		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+	}
+
+	if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
+	{
+		// did not find a comma
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+
+	m_column++;
+
+	int end = EvaluateExpressionAsInt();
+	if ( end < 0 || end > 0xFFFF )
+	{
+		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+	}
+
+	if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
+	{
+		// did not find a comma
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+
+	m_column++;
+
+	int dest = EvaluateExpressionAsInt();
+	if ( dest < 0 || dest > 0xFFFF )
+	{
+		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
+	}
+
+	if ( GlobalData::Instance().IsSecondPass() )
+	{
+		ObjectCode::Instance().CopyBlock( start, end, dest );
+	}
+
+	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
+	{
+		// Unexpected comma (remembering that an expression can validly end with a comma)
+		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
 	}
 }
 

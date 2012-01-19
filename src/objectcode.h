@@ -3,7 +3,7 @@
 	objectcode.h
 
 
-	Copyright (C) Rich Talbot-Watkins 2007 - 2011
+	Copyright (C) Rich Talbot-Watkins 2007 - 2012
 
 	This file is part of BeebAsm.
 
@@ -43,6 +43,8 @@ public:
 
 	inline const unsigned char* GetAddr( int i ) const { return m_aMemory + i; }
 
+	void InitialisePass();
+
 	void PutByte( unsigned int byte );
 	void Assemble1( unsigned int opcode );
 	void Assemble2( unsigned int opcode, unsigned int val );
@@ -55,6 +57,7 @@ public:
 	void SetMapping( int ascii, int mapped );
 	int GetMapping( int ascii ) const;
 
+	void CopyBlock( int start, int end, int dest );
 
 private:
 

@@ -1,10 +1,10 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V1.06                                 *
+*                               BeebAsm V1.08                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
-*                  Copyright (C) Rich Talbot-Watkins 2007-2011                *
+*                  Copyright (C) Rich Talbot-Watkins 2007-2012                *
 *                             <richtw1@gmail.com>                             *
 *                                                                             *
 *    This program is free software: you can redistribute it and/or modify     *
@@ -713,11 +713,18 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
+19/01/2012  1.08  Fixed makefile for GCC (MinGW) builds.
+                  Added COPYBLOCK command to manage blocks of memory.
+06/10/2011  1.07  Fixed mixed-case bug for keywords (so now oddities such as
+                  INy are parsed correctly).
+                  Now function keywords require an open bracket immediately
+                  afterwards (which now means that symbol names such as
+                  HIGHSCORE, which start with the keyword HI, are valid).
 16/06/2011  1.06  Fixed bug in EQUD with unsigned int values.
                   Added ERROR directive.
 25/04/2011  1.05  Added macros.
                   Added PUTFILE and PUTBASIC (to tokenise a plaintext BASIC
-				  file, using code by Thomas Harte).
+                  file, using code by Thomas Harte).
 02/12/2009  1.04  Additions by Kevin Bracey:
                   Added 65C02 instruction set and CPU directive.
                   Added ELIF, EQUD.

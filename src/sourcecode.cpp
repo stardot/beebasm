@@ -5,7 +5,7 @@
 	Represents a piece of source code, whether from a file, or a macro definition.
 
 
-	Copyright (C) Rich Talbot-Watkins 2007 - 2011
+	Copyright (C) Rich Talbot-Watkins 2007 - 2012
 
 	This file is part of BeebAsm.
 

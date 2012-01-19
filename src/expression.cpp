@@ -5,7 +5,7 @@
 	Contains all the LineParser methods for parsing and evaluating expressions
 
 
-	Copyright (C) Rich Talbot-Watkins 2007 - 2011
+	Copyright (C) Rich Talbot-Watkins 2007 - 2012
 
 	This file is part of BeebAsm.
 

@@ -3,7 +3,7 @@
 	objectcode.cpp
 
 
-	Copyright (C) Rich Talbot-Watkins 2007 - 2011
+	Copyright (C) Rich Talbot-Watkins 2007 - 2012
 
 	This file is part of BeebAsm.
 
@@ -82,13 +82,6 @@ ObjectCode::ObjectCode()
 {
 	memset( m_aMemory, 0, sizeof m_aMemory );
 	memset( m_aFlags, 0, sizeof m_aFlags );
-
-	// initialise ascii mapping table
-
-	for ( int i = 0; i < 96; i++ )
-	{
-		m_aMapChar[ i ] = i + 32;
-	}
 }
 
 
@@ -104,6 +97,33 @@ ObjectCode::~ObjectCode()
 {
 }
 
+
+/*************************************************************************************************/
+/**
+	ObjectCode::InitialisePass()
+
+	Initialise at the beginning of each pass
+*/
+/*************************************************************************************************/
+void ObjectCode::InitialisePass()
+{
+	// Reset CPU type and PC
+
+	SetCPU( 0 );
+	SetPC( 0 );
+	SymbolTable::Instance().ChangeSymbol( "P%", m_PC );
+
+	// Clear flags between passes
+
+	Clear( 0, 0x10000, false );
+
+	// initialise ascii mapping table
+
+	for ( int i = 0; i < 96; i++ )
+	{
+		m_aMapChar[ i ] = i + 32;
+	}
+}
 
 
 /*************************************************************************************************/
@@ -387,11 +407,58 @@ void ObjectCode::SetMapping( int ascii, int mapped )
 
 /*************************************************************************************************/
 /**
-	ObjectCode::SetMapping()
+	ObjectCode::GetMapping()
 */
 /*************************************************************************************************/
 int ObjectCode::GetMapping( int ascii ) const
 {
 	assert( ascii > 31 && ascii < 127 );
 	return m_aMapChar[ ascii - 32 ];
+}
+
+
+
+/*************************************************************************************************/
+/**
+	ObjectCode::CopyBlock()
+*/
+/*************************************************************************************************/
+void ObjectCode::CopyBlock( int start, int end, int dest )
+{
+	int length = end - start;
+
+	if ( start + length > 0x10000 ||
+		 dest + length > 0x10000 )
+	{
+		throw AsmException_AssembleError_OutOfMemory();
+	}
+
+	if ( start < dest )
+	{
+		for ( int i = length - 1; i >= 0; i-- )
+		{
+			if ( m_aFlags[ dest + i ] & GUARD )
+			{
+				throw AsmException_AssembleError_GuardHit();
+			}
+
+			m_aMemory[ dest + i ] = m_aMemory[ start + i ];
+			m_aFlags[ dest + i ] = m_aFlags[ start + i ];
+			m_aFlags[ start + i ] &= ( CHECK | DONT_CHECK );
+		}
+	}
+	else if ( start > dest )
+	{
+		for ( int i = 0; i < length; i++ )
+		{
+			if ( m_aFlags[ dest + i ] & GUARD )
+			{
+				throw AsmException_AssembleError_GuardHit();
+			}
+
+			m_aMemory[ dest + i ] = m_aMemory[ start + i ];
+			m_aFlags[ dest + i ] = m_aFlags[ start + i ];
+			m_aFlags[ start + i ] &= ( CHECK | DONT_CHECK );
+		}
+	}
 }

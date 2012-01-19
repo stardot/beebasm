@@ -5,7 +5,7 @@
 	Main entry point for the application
 
 
-	Copyright (C) Rich Talbot-Watkins 2007 - 2011
+	Copyright (C) Rich Talbot-Watkins 2007 - 2012
 
 	This file is part of BeebAsm.
 
@@ -41,7 +41,7 @@
 using namespace std;
 
 
-#define VERSION "1.07"
+#define VERSION "1.08"
 
 
 /*************************************************************************************************/
@@ -233,8 +233,7 @@ int main( int argc, char* argv[] )
 		for ( int pass = 0; pass < 2; pass++ )
 		{
 			GlobalData::Instance().SetPass( pass );
-			ObjectCode::Instance().SetPC( 0 );
-			ObjectCode::Instance().Clear( 0, 0x10000, false );
+			ObjectCode::Instance().InitialisePass();
 			GlobalData::Instance().ResetForId();
 			srand( static_cast< unsigned int >( randomSeed ) );
 			SourceFile input( pInputFile );

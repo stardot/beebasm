@@ -22,7 +22,7 @@
 #		VERBOSE			Echoes all commands launched by make
 #
 #
-#	Copyright (C) Rich Talbot-Watkins 2007, 2008
+#	Copyright (C) Rich Talbot-Watkins 2007-2012
 #
 #	This file is part of BeebAsm.
 #
@@ -53,8 +53,8 @@ endif
 # Declare executable names
 
 CC				:=		gcc
-CXX				:=		gcc
-LD				:=		gcc
+CXX				:=		g++
+LD				:=		g++
 MKDIR			:=		mkdir -p
 RM				:=		rm -f
 ECHO			:=		@@echo -e
@@ -63,8 +63,7 @@ ECHO			:=		@@echo -e
 # List of allowed platform names.
 # Add extra valid platforms to this list as they are supported.
 
-PLATFORM_LIST	:=		mingw-gcc3
-PLATFORM_LIST	+=		mingw-gcc4
+PLATFORM_LIST	:=		mingw-gcc
 PLATFORM_LIST	+=		linux
 PLATFORM_LIST	+=		macosx
 
@@ -89,11 +88,7 @@ PLATFORM		:=		macosx
 endif
 
 ifeq ($(OS),Windows_NT)
-ifeq ($(word 1,$(subst ., ,$(shell $(CC) -dumpversion))),4)
-PLATFORM		:=		mingw-gcc4
-else
-PLATFORM		:=		mingw-gcc3
-endif
+PLATFORM		:=		mingw-gcc
 endif
 
 ifdef PLATFORM
@@ -134,11 +129,7 @@ DEPS			:=		$(OBJS:.o=.d)
 
 # Add platform-specific flags
 
-ifeq ($(PLATFORM),mingw-gcc3)
-TARGET			:=		$(addsuffix .exe,$(TARGET))
-endif
-
-ifeq ($(PLATFORM),mingw-gcc4)
+ifeq ($(PLATFORM),mingw-gcc)
 LDFLAGS			+=		-static
 TARGET			:=		$(addsuffix .exe,$(TARGET))
 endif
