@@ -25,6 +25,7 @@
 #include "discimage.h"
 #include "asmexception.h"
 #include "globaldata.h"
+#include <iostream>
 
 using namespace std;
 
@@ -37,8 +38,7 @@ using namespace std;
 */
 /*************************************************************************************************/
 DiscImage::DiscImage( const char* pOutput, const char* pInput )
-	:	m_outputFilename( pOutput ),
-		m_inputFilename( pInput )
+	:	m_outputFilename( pOutput )
 {
 	// open output file
 
@@ -155,6 +155,19 @@ DiscImage::~DiscImage()
 	if ( !m_outputFile.write( reinterpret_cast< char* >( m_aCatalog ), 0x200 ) )
 	{
 		// don't throw an exception in the destructor, just bear it silently..!
+	}
+
+	if ( GlobalData::Instance().GetPadDiscImage() )
+	{
+		int numSectors = m_aCatalog[ 0x107 ] | ( ( m_aCatalog[ 0x106 ] & 3 ) << 8 );
+		//cout<<"NumSectors="<<numSectors<<endl;
+		m_outputFile.seekp( 0, ios::end );
+		//cout<<"Tell="<<m_outputFile.tellp()<<endl;
+		while ( m_outputFile.tellp() < numSectors * 256 )
+		{
+			static const unsigned char x = 0xE5;
+			m_outputFile << x;
+		}
 	}
 
 	m_outputFile.close();

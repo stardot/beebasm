@@ -74,7 +74,8 @@ GlobalData::GlobalData()
 		m_bSaved( false ),
 		m_pOutputFile( NULL ),
 		m_numAnonSaves( 0 ),
-		m_discOption( 0 )
+		m_discOption( 0 ),
+		m_padDiscImage( false )
 {
 }
 

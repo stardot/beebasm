@@ -41,7 +41,6 @@ private:
 	std::ofstream				m_outputFile;
 	std::ifstream				m_inputFile;
 	const char*					m_outputFilename;
-	const char*					m_inputFilename;
 	unsigned char				m_aCatalog[ 0x200 ];
 
 };

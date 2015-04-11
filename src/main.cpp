@@ -118,6 +118,10 @@ int main( int argc, char* argv[] )
 				{
 					bDumpSymbols = true;
 				}
+				else if ( strcmp( argv[i], "-pad" ) == 0 )
+				{
+					GlobalData::Instance().SetPadDiscImage( true );
+				}
 				else if ( strcmp( argv[i], "--help" ) == 0 )
 				{
 					cout << "beebasm " VERSION << endl << endl;
@@ -130,6 +134,7 @@ int main( int argc, char* argv[] )
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
+					cout << " -pad           Pad disc image to full size" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}

@@ -47,6 +47,7 @@ public:
 	inline void SetOutputFile( const char* p )	{ m_pOutputFile = p; }
 	inline void IncNumAnonSaves()				{ m_numAnonSaves++; }
 	inline void SetDiscOption( int opt )		{ m_discOption = opt; }
+	inline void SetPadDiscImage( bool pad )     { m_padDiscImage = pad; }
 
 	inline int GetPass() const					{ return m_pass; }
 	inline bool IsFirstPass() const				{ return ( m_pass == 0 ); }
@@ -60,6 +61,7 @@ public:
 	inline const char* GetOutputFile() const	{ return m_pOutputFile; }
 	inline int GetNumAnonSaves() const			{ return m_numAnonSaves; }
 	inline int GetDiscOption() const			{ return m_discOption; }
+	inline bool GetPadDiscImage() const         { return m_padDiscImage; }
 
 private:
 
@@ -74,11 +76,11 @@ private:
 	bool						m_bUseDiscImage;
 	DiscImage*					m_pDiscImage;
 	int							m_forId;
-	int							m_randomSeed;
 	bool						m_bSaved;
 	const char*					m_pOutputFile;
 	int							m_numAnonSaves;
 	int							m_discOption;
+	bool                        m_padDiscImage;
 };
 
 
