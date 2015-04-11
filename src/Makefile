@@ -39,7 +39,14 @@ CXXFLAGS		:=		-O3 -pedantic $(WARNFLAGS)
 
 # Define linker switches
 
-LDFLAGS			:=		-s
+LDFLAGS			:=
+
+ifeq ($(shell uname -s),Darwin)
+# Don't strip on OS X.
+else
+LDFLAGS                 :=              $(LDFLAGS) -s
+endif
+
 
 # Define 2nd party libs to link
 
