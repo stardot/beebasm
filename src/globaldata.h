@@ -48,6 +48,7 @@ public:
 	inline void IncNumAnonSaves()				{ m_numAnonSaves++; }
 	inline void SetDiscOption( int opt )		{ m_discOption = opt; }
 	inline void SetPadDiscImage( bool pad )     { m_padDiscImage = pad; }
+	inline void SetVolume( const char *volume ) { m_pVolume = volume; }
 
 	inline int GetPass() const					{ return m_pass; }
 	inline bool IsFirstPass() const				{ return ( m_pass == 0 ); }
@@ -62,6 +63,7 @@ public:
 	inline int GetNumAnonSaves() const			{ return m_numAnonSaves; }
 	inline int GetDiscOption() const			{ return m_discOption; }
 	inline bool GetPadDiscImage() const         { return m_padDiscImage; }
+	inline const char *GetVolume() const        { return m_pVolume; }
 
 private:
 
@@ -81,6 +83,7 @@ private:
 	int							m_numAnonSaves;
 	int							m_discOption;
 	bool                        m_padDiscImage;
+	const char *                m_pVolume;
 };
 
 

@@ -70,7 +70,8 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_DISC_INPUT_FILENAME,
 		WAITING_FOR_DISC_OUTPUT_FILENAME,
 		WAITING_FOR_BOOT_FILENAME,
-		WAITING_FOR_DISC_OPTION
+		WAITING_FOR_DISC_OPTION,
+		WAITING_FOR_VOLUME
 
 	} state = READY;
 
@@ -122,6 +123,10 @@ int main( int argc, char* argv[] )
 				{
 					GlobalData::Instance().SetPadDiscImage( true );
 				}
+				else if ( strcmp( argv[i], "-volume" ) == 0 )
+				{
+					state = WAITING_FOR_VOLUME;
+				}
 				else if ( strcmp( argv[i], "--help" ) == 0 )
 				{
 					cout << "beebasm " VERSION << endl << endl;
@@ -135,6 +140,7 @@ int main( int argc, char* argv[] )
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " -pad           Pad disc image to full size" << endl;
+					cout << " -volume <dir>  Specify path to 65Link drive folder to add file to" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
@@ -186,6 +192,12 @@ int main( int argc, char* argv[] )
 			case WAITING_FOR_DISC_OPTION:
 
 				GlobalData::Instance().SetDiscOption( std::strtol( argv[i], NULL, 10 ) );
+				state = READY;
+				break;
+
+			case WAITING_FOR_VOLUME:
+
+				GlobalData::Instance().SetVolume( argv[i] );
 				state = READY;
 				break;
 		}

@@ -35,7 +35,7 @@
 #include "asmexception.h"
 #include "discimage.h"
 #include "BASIC.h"
-
+#include "65Link.h"
 
 using namespace std;
 
@@ -1096,6 +1096,15 @@ void LineParser::HandleSave()
 															reload,
 															exec,
 															end - start );
+		}
+		else if ( const char *volume = GlobalData::Instance().GetVolume() )
+		{
+			Save65LinkFile( volume, 
+							saveFile.c_str(),
+							ObjectCode::Instance().GetAddr( start ),
+							reload,
+							exec,
+							end - start );
 		}
 		else
 		{
