@@ -43,6 +43,62 @@ using namespace std;
 
 #define VERSION "1.08"
 
+static void StripSpaces( string *s )
+{
+	while ( !s->empty() && isspace( (*s)[0] ) )
+		*s = s->substr( 1 );
+
+	while ( !s->empty() && isspace( (*s)[s->size() - 1] ) )
+		*s = s->substr( 0, s->size() - 1 );
+}
+
+static bool GetHexInt( double *d, const string &s )
+{
+	char *ep;
+	unsigned long ul = strtoul( s.c_str(), &ep, 16);
+
+	if ( *ep != 0 )
+		return false;
+
+	*d = ul;
+	return true;
+}
+
+static bool ParseCommandLineVariableDefinition( string *var, double *val, const char *arg )
+{
+	const char *eq = strchr( arg, '=' );
+	if ( !eq )
+		return false;
+
+	*var = string( arg, eq );
+	string valStr( eq + 1 );
+
+	StripSpaces( var );
+	StripSpaces( &valStr );
+
+	if ( var->empty() )
+		return false;
+
+	if ( valStr[0] == '$' || valStr[0] == '&')
+	{
+		if ( !GetHexInt( val, valStr.substr( 1 ) ) )
+			return false;
+	}
+	else if ( valStr.size() > 2 && valStr[0] == '0' && valStr[1] == 'x')
+	{
+		if ( !GetHexInt( val, valStr.substr( 2 ) ) )
+			return false;
+	}
+	else
+	{
+		char *ep;
+		*val = strtod( valStr.c_str(), &ep );
+		if ( *ep != 0 )
+			return false;
+	}
+
+	return true;
+}
 
 /*************************************************************************************************/
 /**
@@ -78,6 +134,7 @@ int main( int argc, char* argv[] )
 	bool bDumpSymbols = false;
 
 	GlobalData::Create();
+	SymbolTable::Create();
 
 	// Parse command line parameters
 
@@ -127,6 +184,15 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_VOLUME;
 				}
+				else if ( argv[i][0] == '-' && argv[i][1] == 'D' )
+				{
+					string var;
+					double val;
+					if ( !ParseCommandLineVariableDefinition( &var, &val, argv[i] + 2 ) )
+						goto bad_parameter;
+
+					SymbolTable::Instance().AddSymbol(var, val, false);
+				}
 				else if ( strcmp( argv[i], "--help" ) == 0 )
 				{
 					cout << "beebasm " VERSION << endl << endl;
@@ -141,11 +207,13 @@ int main( int argc, char* argv[] )
 					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " -pad           Pad disc image to full size" << endl;
 					cout << " -volume <dir>  Specify path to 65Link drive folder to add file to" << endl;
+					cout << " -D<var>=<val>  Set global variable <var> to <val>" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
 				else
 				{
+bad_parameter:
 					cerr << "Bad parameter: " << argv[i] << endl;
 					cerr << "Type beebasm --help for options" << endl;
 					return EXIT_FAILURE;
@@ -230,7 +298,6 @@ int main( int argc, char* argv[] )
 
 	int exitCode = EXIT_SUCCESS;
 
-	SymbolTable::Create();
 	ObjectCode::Create();
 	MacroTable::Create();
 	SetupBASICTables();
