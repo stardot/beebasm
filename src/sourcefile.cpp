@@ -93,9 +93,9 @@ void SourceFile::Process()
 
 	// Display ok message
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( std::ostream *o = GlobalData::Instance().GetVerboseMessageOutputStream() )
 	{
-		cerr << "Processed file '" << m_filename << "' ok" << endl;
+		*o << "Processed file '" << m_filename << "' ok" << endl;
 	}
 }
 

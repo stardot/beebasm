@@ -204,19 +204,19 @@ void LineParser::Assemble1( int instructionIndex, ADDRESSING_MODE mode )
 {
 	assert( HasAddressingMode( instructionIndex, mode ) );
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 	{
-		cout << uppercase << hex << setfill( '0' ) << "     ";
-		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
-		cout << setw(2) << GetOpcode( instructionIndex, mode ) << "         ";
-		cout << m_gaOpcodeTable[ instructionIndex ].m_pName;
+		*o << uppercase << hex << setfill( '0' ) << "     ";
+		*o << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+		*o << setw(2) << GetOpcode( instructionIndex, mode ) << "         ";
+		*o << m_gaOpcodeTable[ instructionIndex ].m_pName;
 
 		if ( mode == ACC )
 		{
-			cout << " A";
+			*o << " A";
 		}
 
-		cout << endl << nouppercase << dec << setfill( ' ' );
+		*o << endl << nouppercase << dec << setfill( ' ' );
 	}
 
 	try
@@ -243,54 +243,54 @@ void LineParser::Assemble2( int instructionIndex, ADDRESSING_MODE mode, unsigned
 	assert( value < 0x100 );
 	assert( HasAddressingMode( instructionIndex, mode ) );
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 	{
-		cout << uppercase << hex << setfill( '0' ) << "     ";
-		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
-		cout << setw(2) << GetOpcode( instructionIndex, mode ) << " ";
-		cout << setw(2) << value << "      ";
-		cout << m_gaOpcodeTable[ instructionIndex ].m_pName << " ";
+		*o << uppercase << hex << setfill( '0' ) << "     ";
+		*o << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+		*o << setw(2) << GetOpcode( instructionIndex, mode ) << " ";
+		*o << setw(2) << value << "      ";
+		*o << m_gaOpcodeTable[ instructionIndex ].m_pName << " ";
 
 		if ( mode == IMM )
 		{
-			cout << "#";
+			*o << "#";
 		}
 		else if ( mode == IND || mode == INDX || mode == INDY )
 		{
-			cout << "(";
+			*o << "(";
 		}
 
 		if ( mode == REL )
 		{
-			cout << "&" << setw(4) << ObjectCode::Instance().GetPC() + 2 + static_cast< signed char >( value );
+			*o << "&" << setw(4) << ObjectCode::Instance().GetPC() + 2 + static_cast< signed char >( value );
 		}
 		else
 		{
-			cout << "&" << setw(2) << value;
+			*o << "&" << setw(2) << value;
 		}
 
 		if ( mode == ZPX )
 		{
-			cout << ",X";
+			*o << ",X";
 		}
 		else if ( mode == ZPY )
 		{
-			cout << ",Y";
+			*o << ",Y";
 		}
 		else if ( mode == IND )
 		{
-			cout << ")";
+			*o << ")";
 		}
 		else if ( mode == INDX )
 		{
-			cout << ",X)";
+			*o << ",X)";
 		}
 		else if ( mode == INDY )
 		{
-			cout << "),Y";
+			*o << "),Y";
 		}
 
-		cout << endl << nouppercase << dec << setfill( ' ' );
+		*o << endl << nouppercase << dec << setfill( ' ' );
 	}
 
 	try
@@ -317,40 +317,40 @@ void LineParser::Assemble3( int instructionIndex, ADDRESSING_MODE mode, unsigned
 	assert( value < 0x10000 );
 	assert( HasAddressingMode( instructionIndex, mode ) );
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 	{
-		cout << uppercase << hex << setfill( '0' ) << "     ";
-		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
-		cout << setw(2) << GetOpcode( instructionIndex, mode ) << " ";
-		cout << setw(2) << ( value & 0xFF ) << " ";
-		cout << setw(2) << ( ( value >> 8 ) & 0xFF ) << "   ";
-		cout << m_gaOpcodeTable[ instructionIndex ].m_pName << " ";
+		*o << uppercase << hex << setfill( '0' ) << "     ";
+		*o << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+		*o << setw(2) << GetOpcode( instructionIndex, mode ) << " ";
+		*o << setw(2) << ( value & 0xFF ) << " ";
+		*o << setw(2) << ( ( value >> 8 ) & 0xFF ) << "   ";
+		*o << m_gaOpcodeTable[ instructionIndex ].m_pName << " ";
 
 		if ( mode == IND16 || mode == IND16X )
 		{
-			cout << "(";
+			*o << "(";
 		}
 
-		cout << "&" << setw(4) << value;
+		*o << "&" << setw(4) << value;
 
 		if ( mode == ABSX )
 		{
-			cout << ",X";
+			*o << ",X";
 		}
 		else if ( mode == ABSY )
 		{
-			cout << ",Y";
+			*o << ",Y";
 		}
 		else if ( mode == IND16 )
 		{
-			cout << ")";
+			*o << ")";
 		}
 		else if ( mode == IND16X )
 		{
-			cout << ",X)";
+			*o << ",X)";
 		}
 
-		cout << endl << nouppercase << dec << setfill( ' ' );
+		*o << endl << nouppercase << dec << setfill( ' ' );
 	}
 
 	try

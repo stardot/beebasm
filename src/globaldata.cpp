@@ -21,6 +21,7 @@
 /*************************************************************************************************/
 
 #include "globaldata.h"
+#include <iostream>
 
 GlobalData* GlobalData::m_gInstance = NULL;
 
@@ -68,7 +69,6 @@ void GlobalData::Destroy()
 /*************************************************************************************************/
 GlobalData::GlobalData()
 	:	m_pBootFile( NULL ),
-		m_bVerbose( false ),
 		m_bUseDiscImage( false ),
 		m_pDiscImage( NULL ),
 		m_bSaved( false ),
@@ -76,7 +76,9 @@ GlobalData::GlobalData()
 		m_numAnonSaves( 0 ),
 		m_discOption( 0 ),
 		m_padDiscImage( false ),
-		m_pVolume( 0 )
+		m_pVolume( 0 ),
+		m_pAsmOutputStream( 0 ),
+		m_pMessageOutputStream( 0 )
 {
 }
 
@@ -91,4 +93,46 @@ GlobalData::GlobalData()
 /*************************************************************************************************/
 GlobalData::~GlobalData()
 {
+}
+
+/*************************************************************************************************/
+
+void GlobalData::SetVerboseAsmOutputStream( std::ostream *pAsmOutputStream )
+{
+	m_pAsmOutputStream = pAsmOutputStream;
+}
+
+/*************************************************************************************************/
+
+std::ostream *GlobalData::GetVerboseAsmOutputStream()
+{
+	return GetVerboseOutputStream( m_pAsmOutputStream );
+}
+
+/*************************************************************************************************/
+
+void GlobalData::SetVerboseMessageOutputStream( std::ostream *pMessageOutputStream )
+{
+	m_pMessageOutputStream = pMessageOutputStream;
+}
+
+/*************************************************************************************************/
+
+std::ostream *GlobalData::GetVerboseMessageOutputStream()
+{
+	return GetVerboseOutputStream( m_pMessageOutputStream );
+}
+
+/*************************************************************************************************/
+
+std::ostream *GlobalData::GetVerboseOutputStream( std::ostream *pOutputStream )
+{
+	if ( IsSecondPass() )
+	{
+		return pOutputStream;
+	}
+	else
+	{
+		return 0;
+	}
 }

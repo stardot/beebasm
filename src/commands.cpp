@@ -169,9 +169,9 @@ void LineParser::HandleDefineLabel()
 			}
 		}
 
-		if ( GlobalData::Instance().ShouldOutputAsm() )
+		if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 		{
-			cout << "." << symbolName << endl;
+			*o << "." << symbolName << endl;
 		}
 	}
 	else
@@ -466,10 +466,10 @@ void LineParser::HandleSkip()
 		throw AsmException_SyntaxError_ImmNegative( m_line, oldColumn );
 	}
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 	{
-		cout << uppercase << hex << setfill( '0' ) << "     ";
-		cout << setw(4) << ObjectCode::Instance().GetPC() << endl;
+		*o << uppercase << hex << setfill( '0' ) << "     ";
+		*o << setw(4) << ObjectCode::Instance().GetPC() << endl;
 	}
 
 	for ( int i = 0; i < val; i++ )
@@ -572,9 +572,17 @@ void LineParser::HandleInclude()
 	{
 		string filename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
 
-		if ( GlobalData::Instance().ShouldOutputAsm() )
+		if ( std::ostream *o = GlobalData::Instance().GetVerboseMessageOutputStream() )
 		{
-			cerr << "Including file " << filename << endl;
+			// (void)o;
+			
+			// for(size_t i=0;i<filename.size();++i)
+			// {
+			// 	char c=filename[i];
+			// 	printf("%02X %d '%c'\n",c,c,(c>=32&&c<=126)?c:'.');
+			// }
+			
+			*o << "Including file " << filename << endl;
 		}
 
 		SourceFile input( filename.c_str() );
@@ -669,25 +677,25 @@ void LineParser::HandleEqub()
 			{
 				string equs( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
 
-				if ( GlobalData::Instance().ShouldOutputAsm() )
+				if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 				{
-					cout << uppercase << hex << setfill( '0' ) << "     ";
-					cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+					*o << uppercase << hex << setfill( '0' ) << "     ";
+					*o << setw(4) << ObjectCode::Instance().GetPC() << "   ";
 				}
 
 				for ( size_t i = 0; i < equs.length(); i++ )
 				{
 					int mappedchar = ObjectCode::Instance().GetMapping( equs[ i ] );
 
-					if ( GlobalData::Instance().ShouldOutputAsm() )
+					if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 					{
 						if ( i < 3 )
 						{
-							cout << setw(2) << mappedchar << " ";
+							*o << setw(2) << mappedchar << " ";
 						}
 						else if ( i == 3 )
 						{
-							cout << "...";
+							*o << "...";
 						}
 					}
 
@@ -704,9 +712,9 @@ void LineParser::HandleEqub()
 					}
 				}
 
-				if ( GlobalData::Instance().ShouldOutputAsm() )
+				if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 				{
-					cout << endl << nouppercase << dec << setfill( ' ' );
+					*o << endl << nouppercase << dec << setfill( ' ' );
 				}
 			}
 
@@ -739,12 +747,12 @@ void LineParser::HandleEqub()
 				throw AsmException_SyntaxError_NumberTooBig( m_line, m_column );
 			}
 
-			if ( GlobalData::Instance().ShouldOutputAsm() )
+			if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 			{
-				cout << uppercase << hex << setfill( '0' ) << "     ";
-				cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
-				cout << setw(2) << ( value & 0xFF );
-				cout << endl << nouppercase << dec << setfill( ' ' );
+				*o << uppercase << hex << setfill( '0' ) << "     ";
+				*o << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+				*o << setw(2) << ( value & 0xFF );
+				*o << endl << nouppercase << dec << setfill( ' ' );
 			}
 
 			try
@@ -808,13 +816,13 @@ void LineParser::HandleEquw()
 			throw AsmException_SyntaxError_NumberTooBig( m_line, m_column );
 		}
 
-		if ( GlobalData::Instance().ShouldOutputAsm() )
+		if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 		{
-			cout << uppercase << hex << setfill( '0' ) << "     ";
-			cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
-			cout << setw(2) << ( value & 0xFF ) << " ";
-			cout << setw(2) << ( ( value & 0xFF00 ) >> 8 );
-			cout << endl << nouppercase << dec << setfill( ' ' );
+			*o << uppercase << hex << setfill( '0' ) << "     ";
+			*o << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+			*o << setw(2) << ( value & 0xFF ) << " ";
+			*o << setw(2) << ( ( value & 0xFF00 ) >> 8 );
+			*o << endl << nouppercase << dec << setfill( ' ' );
 		}
 
 		try
@@ -878,15 +886,15 @@ void LineParser::HandleEqud()
 			}
 		}
 
-		if ( GlobalData::Instance().ShouldOutputAsm() )
+		if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 		{
-			cout << uppercase << hex << setfill( '0' ) << "     ";
-			cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
-			cout << setw(2) << ( value & 0xFF ) << " ";
-			cout << setw(2) << ( ( value & 0xFF00 ) >> 8 ) << " ";
-			cout << setw(2) << ( ( value & 0xFF0000 ) >> 16 ) << " ";
-			cout << setw(2) << ( ( value & 0xFF000000 ) >> 24 );
-			cout << endl << nouppercase << dec << setfill( ' ' );
+			*o << uppercase << hex << setfill( '0' ) << "     ";
+			*o << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+			*o << setw(2) << ( value & 0xFF ) << " ";
+			*o << setw(2) << ( ( value & 0xFF00 ) >> 8 ) << " ";
+			*o << setw(2) << ( ( value & 0xFF0000 ) >> 16 ) << " ";
+			*o << setw(2) << ( ( value & 0xFF000000 ) >> 24 );
+			*o << endl << nouppercase << dec << setfill( ' ' );
 		}
 
 		try
@@ -1079,9 +1087,9 @@ void LineParser::HandleSave()
 		}
 	}
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 	{
-		cout << "Saving file '" << saveFile << "'" << endl;
+		*o << "Saving file '" << saveFile << "'" << endl;
 	}
 
 	// OK - do it

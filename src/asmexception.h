@@ -103,6 +103,7 @@ DEFINE_FILE_EXCEPTION( TooManyFiles, "Too many files on DFS disc image (max 31).
 DEFINE_FILE_EXCEPTION( FileExists, "File already exists on DFS disc image." );
 DEFINE_FILE_EXCEPTION( OpenLEA, "Could not open LEA file for writing." );
 DEFINE_FILE_EXCEPTION( WriteLEA, "Problem writing to LEA file." );
+DEFINE_FILE_EXCEPTION( OpenVerboseOutputFile, "Problem opening verbose output file." );
 
 
 /*************************************************************************************************/

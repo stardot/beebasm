@@ -36,6 +36,7 @@
 #include "discimage.h"
 #include "BASIC.h"
 #include "macro.h"
+#include "mostream.h"
 
 
 using namespace std;
@@ -127,7 +128,8 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_DISC_OUTPUT_FILENAME,
 		WAITING_FOR_BOOT_FILENAME,
 		WAITING_FOR_DISC_OPTION,
-		WAITING_FOR_VOLUME
+		WAITING_FOR_VOLUME,
+		WAITING_FOR_VERBOSE_OUTPUT_FILENAME
 
 	} state = READY;
 
@@ -137,6 +139,9 @@ int main( int argc, char* argv[] )
 	SymbolTable::Create();
 
 	// Parse command line parameters
+
+	bool verbose = false;
+	const char *pVerboseOutputFilename = 0;
 
 	for ( int i = 1; i < argc; i++ )
 	{
@@ -170,7 +175,7 @@ int main( int argc, char* argv[] )
 				}
 				else if ( strcmp( argv[i], "-v" ) == 0 )
 				{
-					GlobalData::Instance().SetVerbose( true );
+					verbose = true;
 				}
 				else if ( strcmp( argv[i], "-d" ) == 0 )
 				{
@@ -193,6 +198,10 @@ int main( int argc, char* argv[] )
 
 					SymbolTable::Instance().AddSymbol(var, val, false);
 				}
+				else if ( strcmp( argv[i], "-l") == 0 )
+				{
+					state = WAITING_FOR_VERBOSE_OUTPUT_FILENAME;
+				}
 				else if ( strcmp( argv[i], "--help" ) == 0 )
 				{
 					cout << "beebasm " VERSION << endl << endl;
@@ -209,6 +218,7 @@ int main( int argc, char* argv[] )
 					cout << " -volume <dir>  Specify path to 65Link drive folder to add file to" << endl;
 					cout << " -D<var>=<val>  Set global variable <var> to <val>" << endl;
 					cout << " --help         See this help again" << endl;
+					cout << " -l <file>      Save verbose output to <file>" << endl;
 					return EXIT_SUCCESS;
 				}
 				else
@@ -268,6 +278,12 @@ bad_parameter:
 				GlobalData::Instance().SetVolume( argv[i] );
 				state = READY;
 				break;
+
+			case WAITING_FOR_VERBOSE_OUTPUT_FILENAME:
+
+				pVerboseOutputFilename = argv[i];
+				state = READY;
+				break;
 		}
 	}
 
@@ -293,6 +309,44 @@ bad_parameter:
 		return EXIT_FAILURE;
 	}
 
+	// Set up the verbose output streams.
+	mostream verboseAsmOutputStreams;
+	mostream verboseMessageOutputStreams;
+	std::ofstream verboseFileOutputStream;
+
+	{
+		bool useStreams = false;
+	
+		if ( verbose )
+		{
+			verboseAsmOutputStreams.add( &cout );
+			verboseMessageOutputStreams.add( &cerr );
+
+			useStreams = true;
+		}
+
+
+		if ( pVerboseOutputFilename )
+		{
+			verboseFileOutputStream.open( pVerboseOutputFilename, ios_base::out );
+			
+			if ( !verboseFileOutputStream )
+			{
+				throw AsmException_FileError_OpenVerboseOutputFile( pVerboseOutputFilename );
+			}
+
+			verboseAsmOutputStreams.add( &verboseFileOutputStream );
+			verboseMessageOutputStreams.add( &verboseFileOutputStream );
+
+			useStreams = true;
+		}
+
+		if ( useStreams )
+		{
+			GlobalData::Instance().SetVerboseAsmOutputStream( &verboseAsmOutputStreams );
+			GlobalData::Instance().SetVerboseMessageOutputStream( &verboseMessageOutputStreams );
+		}
+	}
 
 	// All good, start the assembling
 

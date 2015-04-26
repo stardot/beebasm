@@ -200,9 +200,9 @@ void LineParser::Process()
 			const Macro* macro = MacroTable::Instance().Get( macroName );
 			if ( macro != NULL )
 			{
-				if ( GlobalData::Instance().ShouldOutputAsm() )
+				if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 				{
-					cout << "Macro " << macroName << ":" << endl;
+					*o << "Macro " << macroName << ":" << endl;
 				}
 
 				HandleOpenBrace();
@@ -250,9 +250,9 @@ void LineParser::Process()
 
 				HandleCloseBrace();
 
-				if ( GlobalData::Instance().ShouldOutputAsm() )
+				if ( ostream *o = GlobalData::Instance().GetVerboseAsmOutputStream() )
 				{
-					cout << "End macro " << macroName << endl;
+					*o << "End macro " << macroName << endl;
 				}
 
 				continue;
