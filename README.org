@@ -1,0 +1,41 @@
+* beebasm (Tom Seddon's fork)
+
+For more about BeebAsm: http://www.retrosoftware.co.uk/wiki/index.php/BeebAsm
+
+This stuff here is waiting for me to get a moment or two to fix up the
+remaining problems with it, and suggest it for inclusion in the real
+version!
+
+** Platform support
+
+Builds on OS X Yosemite and Linux. Not yet sure about Windows.
+
+** =-pad= - pad disc image /(hack)/
+
+=-pad=, if specified, pads the disc image so it's full sized. If
+you're generating an 80 track disc image, for example, you'll get a
+204,800 byte file.
+
+/hack/ - this was an attempt to work around some really odd behaviour
+from B-Em, and may not be useful for anybody else.
+
+** 65Link support
+
+Specify =-volume PATH= to have =SAVE= write files to the 65Link drive
+at =PATH=. BeebAsm will do the file name translation and write a .lea
+file.
+
+(Yes, it's =-volume=, but =PATH= specifies the drive folder! This
+definitely needs fixing...)
+
+** =-D= - define variables
+
+Define variables on the command line as you might with gcc - e.g.,
+=-DBASE=$5000=.
+
+** =-l= - save verbose output to file /(WIP)/
+
+Saves verbose output to the given file.
+
+/WIP/ - it mostly works, but the first few bytes of output get lost
+somewhere, and I need to figure out why...
