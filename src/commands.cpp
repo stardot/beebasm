@@ -53,6 +53,7 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "EQUD",		&LineParser::HandleEqud,				0 },
 	{ "EQUS",		&LineParser::HandleEqub,				0 },
 	{ "EQUW",		&LineParser::HandleEquw,				0 },
+	{ "ASSERT",		&LineParser::HandleAssert,				0 },
 	{ "SAVE",		&LineParser::HandleSave,				0 },
 	{ "FOR",		&LineParser::HandleFor,					0 },
 	{ "NEXT",		&LineParser::HandleNext,				0 },
@@ -901,6 +902,66 @@ void LineParser::HandleEqud()
 			e.SetString( m_line );
 			e.SetColumn( m_column );
 			throw;
+		}
+
+		if ( !AdvanceAndCheckEndOfStatement() )
+		{
+			break;
+		}
+
+		if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
+		{
+			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+		}
+
+		m_column++;
+
+		if ( !AdvanceAndCheckEndOfStatement() )
+		{
+			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		}
+
+	} while ( true );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleAssert()
+*/
+/*************************************************************************************************/
+void LineParser::HandleAssert()
+{
+	do
+	{
+		unsigned int value;
+
+		try
+		{
+			// Take a copy of the column before evaluating the expression so
+			// we can point correctly at the failed expression when throwing.
+			size_t column = m_column;
+			value = EvaluateExpressionAsUnsignedInt();
+			// We never throw for value being false on the first pass, simply
+			// to ensure that if two assertions both fail, the one which 
+			// appears earliest in the source will be reported.
+			if ( !GlobalData::Instance().IsFirstPass() && !value )
+			{
+				while ( ( column < m_line.length() ) && isspace( static_cast< unsigned char >( m_line[ column ] ) ) )
+				{
+					column++;
+				}
+
+				throw AsmException_SyntaxError_AssertionFailed( m_line, column );
+			}
+		}
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
+		{
+			if ( !GlobalData::Instance().IsFirstPass() )
+			{
+				throw;
+			}
 		}
 
 		if ( !AdvanceAndCheckEndOfStatement() )

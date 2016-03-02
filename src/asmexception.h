@@ -206,6 +206,7 @@ DEFINE_SYNTAX_EXCEPTION( NoNestedMacros, "Cannot define one macro inside another
 DEFINE_SYNTAX_EXCEPTION( EndMacroUnexpected, "ENDMACRO encountered without a matching MACRO directive." );
 DEFINE_SYNTAX_EXCEPTION( NoEndMacro, "Unterminated macro (ENDMACRO not found)." );
 DEFINE_SYNTAX_EXCEPTION( DuplicateMacroName, "Macro name already defined." );
+DEFINE_SYNTAX_EXCEPTION( AssertionFailed, "Assertion failed." );
 
 // meta-language parsing exceptions
 DEFINE_SYNTAX_EXCEPTION( NextWithoutFor, "NEXT without FOR." );

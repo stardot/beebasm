@@ -1,0 +1,34 @@
+org &2000
+
+.start
+	assert (addr_offset + 3) <= 255
+
+	\ You can assert multiple things if you wish: 
+	assert 65==65, loop == start + 4
+	assert 1+2==3, 2+2 == 5
+
+	assert start == &2000
+
+	ldy #addr_offset
+	ldx #0
+.loop
+	lda (&70),y
+	sta &3000,x
+	iny
+	inx
+	cpx #4
+	bne loop
+	rts
+
+.end
+
+org &9000
+.some_object
+for i, 0, 253
+	equb 0
+next
+.addr
+	equd 0
+addr_offset = addr - some_object
+
+save "test", start, end
