@@ -25,6 +25,7 @@
 
 
 #include <string>
+#include <vector>
 
 
 /*************************************************************************************************/
@@ -115,24 +116,20 @@ class AsmException_SyntaxError : public AsmException
 public:
 
 	AsmException_SyntaxError()
-		:	m_column( 0 ),
-                        m_filename( "" ),
-			m_lineNumber( 0 )
+		:	m_column( 0 )
 	{
 	}
 
 	AsmException_SyntaxError( std::string line, int column )
 		:	m_line( line ),
-			m_column( column ),
-			m_filename( "" ),
-			m_lineNumber( 0 )
+			m_column( column )
 	{
 	}
 
 	virtual ~AsmException_SyntaxError() {}
 
-	void SetFilename( const std::string& filename )	{ if ( m_filename == "" ) m_filename = filename; }
-	void SetLineNumber( int lineNumber )		{ if ( m_lineNumber == 0 ) m_lineNumber = lineNumber; }
+	void SetFilename( const std::string& filename )	{ m_filename.push_back( filename ); }
+	void SetLineNumber( int lineNumber )		{ m_lineNumber.push_back( lineNumber ); }
 
 	virtual void Print() const;
 	virtual const char* Message() const
@@ -144,9 +141,9 @@ public:
 protected:
 
 	std::string			m_line;
-	int					m_column;
-	std::string			m_filename;
-	int					m_lineNumber;
+	int				m_column;
+	std::vector<std::string>	m_filename;
+	std::vector<int>                m_lineNumber;
 };
 
 

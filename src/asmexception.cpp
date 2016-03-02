@@ -55,12 +55,24 @@ void AsmException_FileError::Print() const
 /*************************************************************************************************/
 void AsmException_SyntaxError::Print() const
 {
-	assert( m_filename != "" );
-	assert( m_lineNumber != 0 );
+	assert( !m_filename.empty() );
+	assert( !m_lineNumber.empty() );
+	assert( m_filename.size() == m_lineNumber.size() ) ;
 
-	cerr << m_filename << ":" << m_lineNumber << ": error: ";
+	cerr << m_filename[0] << ":" << m_lineNumber[0];
+	cerr << ": error: ";
 	cerr << Message() << endl << endl;
 	cerr << m_line << endl;
 	cerr << string( m_column, ' ' ) << "^" << endl;
+
+	if ( m_filename.size() > 1 )
+	{
+		cerr << endl;
+		cerr << "Call stack:" << endl;
+		for (size_t i = 1; i < m_filename.size(); i++)
+		{
+			cerr << m_filename[i] << ":" << m_lineNumber[i] << endl;
+		}
+	}
 }
 
