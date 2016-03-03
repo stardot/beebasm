@@ -1,0 +1,7 @@
+org &2000
+.start
+	rts
+.end
+
+save "test", start, end
+putbasic "autolinenumdemo.bas", "alndemo"
