@@ -1553,7 +1553,10 @@ void LineParser::HandlePutFile()
 
 		if ( !inputFile )
 		{
-			throw AsmException_AssembleError_FileOpen();
+			AsmException_AssembleError_FileOpen e;
+			e.SetString( m_line );
+			e.SetColumn( m_column );
+			throw e;
 		}
 
 		inputFile.seekg( 0, ios_base::end );
@@ -1663,7 +1666,10 @@ void LineParser::HandlePutBasic()
 		{
 			if (GetBASICErrorNum() == 2)
 			{
-				throw AsmException_AssembleError_FileOpen();
+				AsmException_AssembleError_FileOpen e;
+				e.SetString( m_line );
+				e.SetColumn( m_column );
+				throw e;
 			}
 			else
 			{
