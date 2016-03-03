@@ -1673,7 +1673,8 @@ void LineParser::HandlePutBasic()
 			}
 			else
 			{
-				throw AsmException_FileError( hostFilename.c_str() );
+				std::string message = hostFilename + ": " + GetBASICError();
+				throw AsmException_UserError( m_line, m_column, message );
 			}
 		}
 
