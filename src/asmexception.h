@@ -199,6 +199,8 @@ DEFINE_SYNTAX_EXCEPTION( NoIndexedX, "X indexed mode does not exist for this ins
 DEFINE_SYNTAX_EXCEPTION( NoIndexedY, "Y indexed mode does not exist for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( LabelAlreadyDefined, "Symbol already defined." );
 DEFINE_SYNTAX_EXCEPTION( InvalidSymbolName, "Invalid symbol name; must start with a letter and contain only letters, numbers and underscore." );
+DEFINE_SYNTAX_EXCEPTION( SymbolScopeOutsideMacro, "Symbol scope cannot promote outside current macro." );
+DEFINE_SYNTAX_EXCEPTION( SymbolScopeOutsideFor, "Symbol scope cannot promote outside current FOR loop." );
 DEFINE_SYNTAX_EXCEPTION( SecondPassProblem, "Fatal error: the second assembler pass has generated different code to the first." );
 DEFINE_SYNTAX_EXCEPTION( InvalidMacroName, "Invalid macro name; must start with a letter and contain only letters, numbers and underscore." );
 DEFINE_SYNTAX_EXCEPTION( NoNestedMacros, "Cannot define one macro inside another." );
