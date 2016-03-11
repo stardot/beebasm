@@ -115,7 +115,8 @@ class AsmException_SyntaxError : public AsmException
 public:
 
 	AsmException_SyntaxError()
-		:	m_filename( "" ),
+		:	m_column( 0 ),
+                        m_filename( "" ),
 			m_lineNumber( 0 )
 	{
 	}
