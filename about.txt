@@ -529,6 +529,50 @@ IF...ELIF...ELSE...ENDIF
           RTS
       }
 
+  Labels can be defined within a scope which exist outside that scope in
+  two ways.
+
+  A label defined using '.*label' will be globally visible:
+  
+      .copy_10
+	  {
+	      LDX #10
+	  .*copy_x
+	      DEX
+	  .loop
+	      LDA from,X
+		  STA to,X
+		  DEX
+		  BPL loop
+		  RTS
+	  }
+
+	  JSR copy_10
+	  LDX #20
+	  JSR copy_x
+
+  A label defined using '.^label' will be visible in the parent scope:
+
+      .contrived
+	  {
+	      LDX #255
+		  {
+		      LDY #3
+		  .^loop
+			  DEX
+			  BEQ exit
+		      DEY
+			  BNE loop
+		  }
+		  LDY #7
+		  JMP loop ; .loop *is* visible here
+		  .exit
+		      RTS
+	  }
+	  JMP loop ; error, .loop is *not* visible here
+
+  For a more realistic example of the use of '.^label', see scopedemo2.6502.
+
 
 PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
 

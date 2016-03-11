@@ -132,7 +132,42 @@ int LineParser::GetTokenAndAdvanceColumn()
 /*************************************************************************************************/
 void LineParser::HandleDefineLabel()
 {
-	if ( m_column < m_line.length() && ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
+        if ( m_column >= m_line.length() )
+	{
+		throw AsmException_SyntaxError_InvalidSymbolName( m_line, m_column );
+	}
+
+        int initialColumn = m_column;
+        char first_char = m_line[ m_column ];
+        int target_level = m_sourceCode->GetForLevel();
+        if (first_char == '*')
+        {
+                m_column++;
+                target_level = 0;
+        }
+        else if (first_char == '^')
+        {
+                m_column++;
+                target_level = std::max( target_level - 1, 0 );
+        }
+
+        // '*' and '^' may not cause a label to be defined outside the current macro expansion.
+        if ( target_level < m_sourceCode->GetInitialForStackPtr() )
+        {
+                throw AsmException_SyntaxError_SymbolScopeOutsideMacro( m_line, initialColumn );
+        }
+
+        // '*' and '^' may not cause a label to be defined outside the current for loop; note that
+        // this loop is a no-op for ordinary labels where target_level == m_sourceCode->GetForLevel().
+        for ( int level = m_sourceCode->GetForLevel(); level > target_level; level-- )
+        {
+                if ( m_sourceCode->IsRealForLevel( level ) )
+                {
+                        throw AsmException_SyntaxError_SymbolScopeOutsideFor( m_line, initialColumn );
+                }
+        }
+
+	if ( ( m_column < m_line.length() ) && ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
 	{
 		// Symbol starts with a valid character
 
@@ -144,7 +179,7 @@ void LineParser::HandleDefineLabel()
 
 		// ...and mangle it according to whether we are in a FOR loop
 
-		string fullSymbolName = symbolName + m_sourceCode->GetSymbolNameSuffix();
+		string fullSymbolName = symbolName + m_sourceCode->GetSymbolNameSuffix( target_level );
 
 		if ( GlobalData::Instance().IsFirstPass() )
 		{
@@ -1890,4 +1925,3 @@ void LineParser::HandleCopyBlock()
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
 	}
 }
-
