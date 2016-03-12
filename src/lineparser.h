@@ -137,6 +137,7 @@ private:
 	void			HandleEqub();
 	void			HandleEquw();
 	void			HandleEqud();
+	void			HandleAssert();
 	void			HandleSave();
 	void			HandleFor();
 	void			HandleNext();

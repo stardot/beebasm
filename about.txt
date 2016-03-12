@@ -608,6 +608,12 @@ ENDMACRO
   1, and will not be correct if val<256).
 
 
+ASSERT a [, b, c, ...]
+
+  Abort assembly if any of the expressions is false.
+
+
+
 
 7. TIPS AND TRICKS
 
