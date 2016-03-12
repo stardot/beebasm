@@ -545,3 +545,20 @@ void SourceCode::EndMacro( const string& line, int column )
 		m_currentMacro = NULL;
 	}
 }
+
+
+
+/*************************************************************************************************/
+/**
+	SourceCode::IsRealForLevel()
+
+	Is the relevant level in the for stack a real for loop or one of the special ones used
+        to implement braces?
+*/
+/*************************************************************************************************/
+bool SourceCode::IsRealForLevel( int level ) const
+{
+        assert( level > 0 );
+        assert( level <= m_forStackPtr );
+        return m_forStack[ level - 1 ].m_step != 0.0;
+}
