@@ -743,6 +743,9 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 	while(c--)
 		GetCharacter();
 
+	/* initialise this to 0 for use with automatic line numbering */
+	unsigned int LastLineNumber = 0;
+
 	while(!EndOfFile && !ErrorNum)
 	{
 		/* get line number */
@@ -753,19 +756,33 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 			/* end of file? */
 			if(EndOfFile) break;
 
-			/* now we should see a line number */
-			if(!NumberStart || (NumberValue >= 32768))
+			/* now we may see a line number */
+			if(NumberStart)
+			{
+				if (NumberValue <= LastLineNumber)
+				{
+					ErrorNum = -1;
+					sprintf(DynamicErrorText, "Out of sequence line numbers (%d followed by %d) at line %d", LastLineNumber, NumberValue, CurLine);
+					break;
+				}
+				LastLineNumber = NumberValue;
+				EatCharacters(NumberLength);
+			}
+			else
+			{
+				/* auto-number the line instead */
+				LastLineNumber += 1;
+			}
+			if(LastLineNumber >= 32768)
 			{
 				ErrorNum = -1;
 				sprintf(DynamicErrorText, "Malformed line number at line %d", CurLine);
 				break;
 			}
-
 			/* inject into memory */
 			WriteByte(0x0d);
-			WriteByte(NumberValue >> 8);
-			WriteByte(NumberValue&0xff);
-			EatCharacters(NumberLength);
+			WriteByte(LastLineNumber>> 8);
+			WriteByte(LastLineNumber&0xff);
 
 		/* read rest of line, record length */
 		Uint16 LengthAddr = Addr; WriteByte(0);
