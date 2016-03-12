@@ -763,6 +763,11 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
+12/03/2016	  Improved error handling in PUTFILE/PUTBASIC
+		  Added optional automatic line numbering for PUTBASIC
+                  Added ASSERT
+		  Show a call stack when an error occurs inside a macro
+		  Allow label scope-jumping using '.*label' and '.^label'
 19/01/2012  1.08  Fixed makefile for GCC (MinGW) builds.
                   Added COPYBLOCK command to manage blocks of memory.
 06/10/2011  1.07  Fixed mixed-case bug for keywords (so now oddities such as
