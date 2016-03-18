@@ -156,6 +156,7 @@ private:
 	void			HandleEndMacro();
 	void			HandleError();
 	void			HandleCopyBlock();
+	void			HandleRandomize();
 
 	// expression evaluating methods
 

@@ -74,7 +74,6 @@ private:
 	bool						m_bUseDiscImage;
 	DiscImage*					m_pDiscImage;
 	int							m_forId;
-	int							m_randomSeed;
 	bool						m_bSaved;
 	const char*					m_pOutputFile;
 	int							m_numAnonSaves;
