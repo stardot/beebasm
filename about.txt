@@ -657,6 +657,13 @@ ASSERT a [, b, c, ...]
   Abort assembly if any of the expressions is false.
 
 
+RANDOMIZE <n>
+
+  Seed the random number generator used by the RND() function.  If this is
+  not used, the random number generator is seeded based on the current time
+  and so each build of a program using RND() will be different.
+
+
 
 
 7. TIPS AND TRICKS
@@ -763,6 +770,7 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
+23/04/2016        Added RANDOMIZE
 12/03/2016	  Improved error handling in PUTFILE/PUTBASIC
 		  Added optional automatic line numbering for PUTBASIC
                   Added ASSERT

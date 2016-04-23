@@ -36,6 +36,7 @@
 #include "discimage.h"
 #include "BASIC.h"
 #include "macro.h"
+#include "random.h"
 
 
 using namespace std;
@@ -235,7 +236,7 @@ int main( int argc, char* argv[] )
 			GlobalData::Instance().SetPass( pass );
 			ObjectCode::Instance().InitialisePass();
 			GlobalData::Instance().ResetForId();
-			srand( static_cast< unsigned int >( randomSeed ) );
+			beebasm_srand( static_cast< unsigned long >( randomSeed ) );
 			SourceFile input( pInputFile );
 			input.Process();
 		}
