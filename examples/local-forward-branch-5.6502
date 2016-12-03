@@ -1,0 +1,30 @@
+org &2000
+
+\ Some buggy changes to the assembler caused the values emitted by equw
+\ to be incorrect; no obvious failure occurred. So it's important to check
+\ the output of this to see that it's right, unlike the earlier 
+\ local-forward-branch-n.6502 tests which simply failed to assemble.
+
+macro bar x
+	equw x
+endmacro
+
+macro foo x
+	bar x-1
+endmacro
+
+.start
+	
+	lda #65
+.baz
+
+	foo start ; should emit &ff &1f
+	foo baz   ; should emit &01 &20
+
+	ldx #42
+
+	foo end   ; should emit &09 &20
+
+.end
+
+save "test", start, end
