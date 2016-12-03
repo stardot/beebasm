@@ -26,6 +26,7 @@
 #include <iomanip>
 #include <string>
 #include <cstring>
+#include <ctime>
 
 #include "lineparser.h"
 #include "globaldata.h"
@@ -693,9 +694,54 @@ void LineParser::HandleEqub()
 			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 		}
 
+		// handle TIME$ (special case of string)
+
+		if ( m_column + 4 < m_line.length() && m_line.substr( m_column, 5 ) == "TIME$" )
+		{
+			m_column += 5;
+			std::string format = "%a,%d %b %Y.%H:%M:%S";
+			if ( m_column < m_line.length() && m_line[ m_column ] == '(' )
+			{
+				m_column++;
+				if ( !AdvanceAndCheckEndOfStatement() )
+				{
+					throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+				}
+				if ( m_line[ m_column ] != '\"' )
+				{
+					throw AsmException_SyntaxError_MissingValue( m_line, m_column ) ;
+				}
+				size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
+				if ( endQuotePos == string::npos )
+				{
+					throw AsmException_SyntaxError_MissingQuote( m_line, m_column );
+				}
+				format = m_line.substr( m_column + 1, endQuotePos - ( m_column + 1 ) );
+				m_column = endQuotePos + 1;
+				if ( !AdvanceAndCheckEndOfStatement() )
+				{
+					throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+				}
+				if ( m_line[ m_column ] != ')' )
+				{
+					throw AsmException_SyntaxError_MismatchedParentheses( m_line, m_column );
+				}
+				m_column++;
+			}
+
+			char timeString[256];
+			const time_t t = GlobalData::Instance().GetAssemblyTime();
+			const struct tm* t_tm = localtime( &t );
+			if ( strftime( timeString, sizeof( timeString ), format.c_str(), t_tm ) == 0 )
+			{
+				throw AsmException_SyntaxError_TimeResultTooBig( m_line, m_column );
+			}
+			HandleEqus( timeString );
+		}
+
 		// handle string
 
-		if ( m_column < m_line.length() && m_line[ m_column ] == '\"' )
+		else if ( m_column < m_line.length() && m_line[ m_column ] == '\"' )
 		{
 			size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
 
@@ -706,46 +752,7 @@ void LineParser::HandleEqub()
 			else
 			{
 				string equs( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
-
-				if ( GlobalData::Instance().ShouldOutputAsm() )
-				{
-					cout << uppercase << hex << setfill( '0' ) << "     ";
-					cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
-				}
-
-				for ( size_t i = 0; i < equs.length(); i++ )
-				{
-					int mappedchar = ObjectCode::Instance().GetMapping( equs[ i ] );
-
-					if ( GlobalData::Instance().ShouldOutputAsm() )
-					{
-						if ( i < 3 )
-						{
-							cout << setw(2) << mappedchar << " ";
-						}
-						else if ( i == 3 )
-						{
-							cout << "...";
-						}
-					}
-
-					try
-					{
-						// remap character from string as per character mapping table
-						ObjectCode::Instance().PutByte( mappedchar );
-					}
-					catch ( AsmException_AssembleError& e )
-					{
-						e.SetString( m_line );
-						e.SetColumn( m_column );
-						throw;
-					}
-				}
-
-				if ( GlobalData::Instance().ShouldOutputAsm() )
-				{
-					cout << endl << nouppercase << dec << setfill( ' ' );
-				}
+				HandleEqus( equs );
 			}
 
 			m_column = endQuotePos + 1;
@@ -810,6 +817,56 @@ void LineParser::HandleEqub()
 		m_column++;
 
 	} while ( true );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleEqus( const string& equs )
+*/
+/*************************************************************************************************/
+void LineParser::HandleEqus( const string& equs )
+{
+	if ( GlobalData::Instance().ShouldOutputAsm() )
+	{
+		cout << uppercase << hex << setfill( '0' ) << "     ";
+		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+	}
+
+	for ( size_t i = 0; i < equs.length(); i++ )
+	{
+		int mappedchar = ObjectCode::Instance().GetMapping( equs[ i ] );
+
+		if ( GlobalData::Instance().ShouldOutputAsm() )
+		{
+			if ( i < 3 )
+			{
+				cout << setw(2) << mappedchar << " ";
+			}
+			else if ( i == 3 )
+			{
+				cout << "...";
+			}
+		}
+
+		try
+		{
+			// remap character from string as per character mapping table
+			ObjectCode::Instance().PutByte( mappedchar );
+		}
+		catch ( AsmException_AssembleError& e )
+		{
+			e.SetString( m_line );
+			e.SetColumn( m_column );
+			throw;
+		}
+	}
+
+	if ( GlobalData::Instance().ShouldOutputAsm() )
+	{
+		cout << endl << nouppercase << dec << setfill( ' ' );
+	}
 }
 
 

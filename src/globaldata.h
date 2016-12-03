@@ -25,6 +25,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <ctime>
 #include <string>
 
 
@@ -65,6 +66,7 @@ public:
 	inline int GetDiscOption() const			{ return m_discOption; }
 	inline const std::string& GetDiscTitle() const
 												{ return m_discTitle; }
+	inline time_t GetAssemblyTime() const		{ return m_assemblyTime; }
 
 private:
 
@@ -84,6 +86,7 @@ private:
 	int							m_numAnonSaves;
 	int							m_discOption;
 	std::string					m_discTitle;
+	time_t						m_assemblyTime;
 };
 
 
