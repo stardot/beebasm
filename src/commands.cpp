@@ -73,6 +73,7 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "}",			&LineParser::HandleCloseBrace,			0 },
 	{ "MAPCHAR",	&LineParser::HandleMapChar,				0 },
 	{ "PUTFILE",	&LineParser::HandlePutFile,				0 },
+	{ "PUTTEXT",	&LineParser::HandlePutText,				0 },
 	{ "PUTBASIC",	&LineParser::HandlePutBasic,			0 },
 	{ "MACRO",		&LineParser::HandleMacro,				&SourceFile::StartMacro },
 	{ "ENDMACRO",	&LineParser::HandleEndMacro,			&SourceFile::EndMacro },
@@ -1570,13 +1571,37 @@ void LineParser::HandlePrint()
 
 /*************************************************************************************************/
 /**
+	LineParser::HandlePutText()
+*/
+/*************************************************************************************************/
+void LineParser::HandlePutText()
+{
+	HandlePutFileCommon(true);
+}
+
+
+
+/*************************************************************************************************/
+/**
 	LineParser::HandlePutFile()
 */
 /*************************************************************************************************/
 void LineParser::HandlePutFile()
 {
+	HandlePutFileCommon(false);
+}
+
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandlePutFileCommon()
+*/
+/*************************************************************************************************/
+void LineParser::HandlePutFileCommon( bool bText )
+{
 	// Syntax:
-	// PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
+	// PUTFILE/PUTTEXT <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
 
 	if ( !AdvanceAndCheckEndOfStatement() )
 	{
@@ -1719,7 +1744,35 @@ void LineParser::HandlePutFile()
 		inputFile.seekg( 0, ios_base::beg );
 
 		char* buffer = new char[ fileSize ];
-		inputFile.read( buffer, fileSize );
+		if ( bText )
+		{
+			fileSize = 0;
+			int c;
+			while ( ( c = inputFile.get() ) != EOF )
+			{
+				if ( c == '\n' || c == '\r' )
+				{
+					// swallow other half of CRLF/LFCR, if present
+					int other_half = ( c == '\n' ) ? '\r' : '\n';
+					ifstream::streampos p = inputFile.tellg();
+					if ( inputFile.get() != other_half )
+					{
+						inputFile.seekg( p );
+					}
+
+					buffer[ fileSize ] = '\r';
+				}
+				else
+				{
+					buffer[ fileSize ] = c;
+				}
+				++fileSize;
+			}
+		}
+		else
+		{
+			inputFile.read( buffer, fileSize );
+		}
 		inputFile.close();
 
 		if ( GlobalData::Instance().UsesDiscImage() )

@@ -594,6 +594,13 @@ PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
   filename will be used (and must therefore be 7 characters or less in length).
   A start address must be provided (and optionally an execution address can
   be provided too).
+
+
+PUTTEXT <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
+
+  This command is the same as PUTFILE, except that the host file is assumed to
+  be a text file and its line endings will be automatically converted to CR
+  (the BBC standard line ending) from any of CR, LF, CRLF or LFCR.
   
   
 PUTBASIC <host filename> [,<beeb filename>]
