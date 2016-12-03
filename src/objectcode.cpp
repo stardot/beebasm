@@ -82,6 +82,7 @@ ObjectCode::ObjectCode()
 {
 	memset( m_aMemory, 0, sizeof m_aMemory );
 	memset( m_aFlags, 0, sizeof m_aFlags );
+	SymbolTable::Instance().AddSymbol( "CPU", m_CPU );
 }
 
 
@@ -96,6 +97,22 @@ ObjectCode::ObjectCode()
 ObjectCode::~ObjectCode()
 {
 }
+
+
+
+/*************************************************************************************************/
+/**
+	ObjectCode::SetCPU()
+
+	Set the CPU type
+*/
+/*************************************************************************************************/
+void ObjectCode::SetCPU( int i )
+{
+	m_CPU = i;
+	SymbolTable::Instance().ChangeSymbol( "CPU", m_CPU );
+}
+
 
 
 /*************************************************************************************************/

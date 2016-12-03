@@ -38,7 +38,7 @@ public:
 	inline void SetPC( int i )		{ m_PC = i; }
 	inline int GetPC() const		{ return m_PC; }
 
-	inline void SetCPU( int i )		{ m_CPU = i; }
+	void SetCPU( int i );
 	inline int GetCPU() const		{ return m_CPU; }
 
 	inline const unsigned char* GetAddr( int i ) const { return m_aMemory + i; }
