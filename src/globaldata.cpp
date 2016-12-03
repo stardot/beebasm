@@ -76,7 +76,8 @@ GlobalData::GlobalData()
 		m_pOutputFile( NULL ),
 		m_numAnonSaves( 0 ),
 		m_discOption( 0 ),
-		m_assemblyTime( time( NULL ) )
+		m_assemblyTime( time( NULL ) ),
+		m_bRequireDistinctOpcodes( false )
 {
 	// We populate m_assemblyTime with a time on startup so that all uses of TIME$ during 
 	// assembly refer to the exact same time, however long we spend assembling.

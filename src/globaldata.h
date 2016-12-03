@@ -51,6 +51,8 @@ public:
 	inline void SetDiscOption( int opt )		{ m_discOption = opt; }
 	inline void SetDiscTitle( const std::string& t )  
 												{ m_discTitle = t; }
+	inline void SetRequireDistinctOpcodes ( bool b )
+												{ m_bRequireDistinctOpcodes = b; }
 
 	inline int GetPass() const					{ return m_pass; }
 	inline bool IsFirstPass() const				{ return ( m_pass == 0 ); }
@@ -67,6 +69,7 @@ public:
 	inline const std::string& GetDiscTitle() const
 												{ return m_discTitle; }
 	inline time_t GetAssemblyTime() const		{ return m_assemblyTime; }
+	inline bool RequireDistinctOpcodes() const  { return m_bRequireDistinctOpcodes; }
 
 private:
 
@@ -87,6 +90,7 @@ private:
 	int							m_discOption;
 	std::string					m_discTitle;
 	time_t						m_assemblyTime;
+	bool						m_bRequireDistinctOpcodes;
 };
 
 
