@@ -4,4 +4,4 @@ org &2000
 .end
 
 save "test", start, end
-putbasic "invalidbasic.bas", "ib"
+putbasic "invalidbasic1.bas", "ib1"
