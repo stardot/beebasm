@@ -191,6 +191,10 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 		throw AsmException_FileError_BadName( m_outputFilename );
 	}
 
+	char pPaddedName[ 7 ];
+	memset( pPaddedName, ' ', 7 );
+	memcpy( pPaddedName, pName, strlen( pName ) );
+
 	if ( m_aCatalog[ 0x105 ] == 31*8 )
 	{
 		// Catalog full
@@ -203,16 +207,16 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 	{
 		bool bTheSame = true;
 
-		for ( size_t j = 0; j < strlen( pName ); j++ )
+		for ( size_t j = 0; j < 7; j++ )
 		{
-			if ( toupper( pName[ j ] ) != toupper( m_aCatalog[ i + j ] ) )
+			if ( toupper( pPaddedName[ j ] ) != toupper( m_aCatalog[ i + j ] ) )
 			{
 				bTheSame = false;
 				break;
 			}
 		}
 
-		if ( bTheSame && ( m_aCatalog[ i + 7 ] & 0x7F ) == '$' )
+		if ( bTheSame && ( toupper( m_aCatalog[ i + 7 ] & 0x7F ) ) == toupper( dirName ) )
 		{
 			// File already exists
 			throw AsmException_FileError_FileExists( m_outputFilename );
@@ -264,10 +268,7 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 
 	// Write filename
 
-	for ( size_t j = 0; j < 7; j++ )
-	{
-		m_aCatalog[ j + 8 ] = ( j < strlen( pName ) ) ? pName[ j ] : ' ';
-	}
+	memcpy( m_aCatalog + 8, pPaddedName, 7 );
 
 	// Write directory name
 
