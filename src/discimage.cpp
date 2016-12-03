@@ -115,6 +115,13 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 		m_aCatalog[ 0x106 ] = 0x03 | ( ( GlobalData::Instance().GetDiscOption() & 3 ) << 4);
 		m_aCatalog[ 0x107 ] = 0x20;
 
+		const std::string& title = GlobalData::Instance().GetDiscTitle();
+		strncpy( reinterpret_cast< char* >( m_aCatalog ), title.substr(0, 8).c_str(), 8);
+		if ( title.length() > 8 )
+		{
+			strncpy( reinterpret_cast< char* >( m_aCatalog + 0x100 ), title.substr(8, 4).c_str(), 4);
+		}
+
 		if ( !m_outputFile.write( reinterpret_cast< char* >( m_aCatalog ), 0x200 ) )
 		{
 			// write error
