@@ -140,6 +140,8 @@ public:
 
 protected:
 
+	std::string	ErrorLocation( size_t i ) const;
+
 	std::string			m_line;
 	int				m_column;
 	std::vector<std::string>	m_filename;

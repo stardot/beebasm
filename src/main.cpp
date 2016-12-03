@@ -120,6 +120,10 @@ int main( int argc, char* argv[] )
 				{
 					GlobalData::Instance().SetRequireDistinctOpcodes( true );
 				}
+				else if ( strcmp( argv[i], "-vc" ) == 0 )
+				{
+					GlobalData::Instance().SetUseVisualCppErrorFormat( true );
+				}
 				else if ( strcmp( argv[i], "-v" ) == 0 )
 				{
 					GlobalData::Instance().SetVerbose( true );
@@ -142,6 +146,7 @@ int main( int argc, char* argv[] )
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " -w             Require whitespace between opcodes and labels" << endl;
+					cout << " -vc            Use Visual C++-style error messages" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
