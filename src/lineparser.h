@@ -151,7 +151,9 @@ private:
 	void			HandleGuard();
 	void			HandleClear();
 	void			HandleMapChar();
+	void			HandlePutText();
 	void			HandlePutFile();
+	void			HandlePutFileCommon( bool bText );
 	void			HandlePutBasic();
 	void			HandleMacro();
 	void			HandleEndMacro();
