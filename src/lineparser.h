@@ -135,6 +135,7 @@ private:
 	void			HandleInclude();
 	void			HandleIncBin();
 	void			HandleEqub();
+	void			HandleEqus(const std::string& equs);
 	void			HandleEquw();
 	void			HandleEqud();
 	void			HandleAssert();

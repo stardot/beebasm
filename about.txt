@@ -265,6 +265,13 @@ TRUE               Returns -1
 * or P%            A special symbol which returns the current address being
                    assembled at.
 
+Within EQUB/EQUS only you can also use the expressions:
+
+TIME$			   Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
+
+TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
+				   is the same format used by the C library strftime().
+
 Variables can be defined at any point using the BASIC syntax, i.e.
 addr = &70.
 
