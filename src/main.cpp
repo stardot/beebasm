@@ -71,7 +71,8 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_DISC_INPUT_FILENAME,
 		WAITING_FOR_DISC_OUTPUT_FILENAME,
 		WAITING_FOR_BOOT_FILENAME,
-		WAITING_FOR_DISC_OPTION
+		WAITING_FOR_DISC_OPTION,
+		WAITING_FOR_DISC_TITLE
 
 	} state = READY;
 
@@ -111,6 +112,10 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_DISC_OPTION;
 				}
+				else if ( strcmp( argv[i], "-title" ) == 0 )
+				{
+					state = WAITING_FOR_DISC_TITLE;
+				}
 				else if ( strcmp( argv[i], "-v" ) == 0 )
 				{
 					GlobalData::Instance().SetVerbose( true );
@@ -129,6 +134,7 @@ int main( int argc, char* argv[] )
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
+					cout << " -title <title> Specify the title for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " --help         See this help again" << endl;
@@ -182,6 +188,12 @@ int main( int argc, char* argv[] )
 			case WAITING_FOR_DISC_OPTION:
 
 				GlobalData::Instance().SetDiscOption( std::strtol( argv[i], NULL, 10 ) );
+				state = READY;
+				break;
+
+			case WAITING_FOR_DISC_TITLE:
+
+				GlobalData::Instance().SetDiscTitle( argv[i] );
 				state = READY;
 				break;
 		}

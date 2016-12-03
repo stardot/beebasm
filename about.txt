@@ -175,6 +175,11 @@ the command '*RUN <DFS filename>'.  The new disc image will already be set to
 If specified, this sets the disc option of the generated disc image (i.e. the
 *OPT 4,n value) to the value specified.  This overrides the -boot option.
 
+-title <title>
+
+If specified, this sets the disc title of the generated disc image (i.e. the
+string set by *TITLE) to the value specified.
+
 -di <filename>
 
 If specified, BeebAsm will use this disc image as a template for the new disc
