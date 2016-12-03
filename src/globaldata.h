@@ -53,6 +53,8 @@ public:
 												{ m_discTitle = t; }
 	inline void SetRequireDistinctOpcodes ( bool b )
 												{ m_bRequireDistinctOpcodes = b; }
+	inline void SetUseVisualCppErrorFormat( bool b )
+												{ m_bUseVisualCppErrorFormat = b; }
 
 	inline int GetPass() const					{ return m_pass; }
 	inline bool IsFirstPass() const				{ return ( m_pass == 0 ); }
@@ -70,6 +72,7 @@ public:
 												{ return m_discTitle; }
 	inline time_t GetAssemblyTime() const		{ return m_assemblyTime; }
 	inline bool RequireDistinctOpcodes() const  { return m_bRequireDistinctOpcodes; }
+	inline bool UseVisualCppErrorFormat() const { return m_bUseVisualCppErrorFormat; }
 
 private:
 
@@ -91,6 +94,7 @@ private:
 	std::string					m_discTitle;
 	time_t						m_assemblyTime;
 	bool						m_bRequireDistinctOpcodes;
+	bool						m_bUseVisualCppErrorFormat;
 };
 
 
