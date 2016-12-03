@@ -710,6 +710,18 @@ void LineParser::HandleAssembler( int instruction )
 	try
 	{
 		value = EvaluateExpressionAsInt();
+		
+		// If this is relative addressing and we're on the first pass, we don't
+		// use the value we just calculated. This is because we may have
+		// successfully evaluated the expression but obtained the wrong value
+		// because it's intended as a forward reference to a local label but
+		// there's an earlier definition in an outer scope - value would evaluate
+		// successfully to use the wrong label, and we might get a spurious branch
+		// out of range error. See local-forward-branch-1.6502 for an example.
+		if ( HasAddressingMode( instruction, REL ) && GlobalData::Instance().IsFirstPass() )
+		{
+			value = ObjectCode::Instance().GetPC();
+		}
 	}
 	catch ( AsmException_SyntaxError_SymbolNotDefined& )
 	{
