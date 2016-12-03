@@ -196,6 +196,19 @@ Verbose output.  Assembled code will be output to the screen.
 Dumps all global symbols in Swift-compatible format after assembly.
 This is used internally by Swift, and is just documented for completeness.
 
+-w
+
+If specified, there must be whitespace between opcodes and their labels. This
+introduces an incompatibility with the BBC BASIC assembler, which allows
+things like "ck_axy=&70:stack_axy" (i.e. STA &70), but makes it possible for
+macros to have names which being with an opcode name, e.g.:
+
+    MACRO stack_axy
+        PHA:TXA:PHA:TYA:PHA
+    ENDMACRO
+
+Things like "STA&4000" are permitted with or without -w.
+
 
 
 

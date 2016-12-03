@@ -116,6 +116,10 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_DISC_TITLE;
 				}
+				else if ( strcmp( argv[i], "-w" ) == 0 )
+				{
+					GlobalData::Instance().SetRequireDistinctOpcodes( true );
+				}
 				else if ( strcmp( argv[i], "-v" ) == 0 )
 				{
 					GlobalData::Instance().SetVerbose( true );
@@ -137,6 +141,7 @@ int main( int argc, char* argv[] )
 					cout << " -title <title> Specify the title for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
+					cout << " -w             Require whitespace between opcodes and labels" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
