@@ -140,6 +140,8 @@ public:
 
 protected:
 
+	std::string	ErrorLocation( size_t i ) const;
+
 	std::string			m_line;
 	int				m_column;
 	std::vector<std::string>	m_filename;
@@ -177,6 +179,7 @@ DEFINE_SYNTAX_EXCEPTION( DivisionByZero, "Division by zero." );
 DEFINE_SYNTAX_EXCEPTION( MissingQuote, "Unterminated string." );
 DEFINE_SYNTAX_EXCEPTION( MissingComma, "Missing comma." );
 DEFINE_SYNTAX_EXCEPTION( IllegalOperation, "Operation attempted with invalid or out of range values." );
+DEFINE_SYNTAX_EXCEPTION( TimeResultTooBig, "TIME$() result too big." );
 
 // assembler parsing exceptions
 DEFINE_SYNTAX_EXCEPTION( NoImplied, "Implied mode not allowed for this instruction." );

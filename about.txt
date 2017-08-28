@@ -100,8 +100,8 @@ ORG &2000         ; code origin (like P%=&2000)
 .start
     LDA #22:JSR oswrch
     LDA #7:JSR oswrch
-    LDX #mytext MOD 256:STA addr
-    LDY #mytext DIV 256:STA addr+1
+    LDA #mytext MOD 256:STA addr
+    LDA #mytext DIV 256:STA addr+1
     LDY #0
 .loop
     LDA (addr),Y
@@ -175,6 +175,11 @@ the command '*RUN <DFS filename>'.  The new disc image will already be set to
 If specified, this sets the disc option of the generated disc image (i.e. the
 *OPT 4,n value) to the value specified.  This overrides the -boot option.
 
+-title <title>
+
+If specified, this sets the disc title of the generated disc image (i.e. the
+string set by *TITLE) to the value specified.
+
 -di <filename>
 
 If specified, BeebAsm will use this disc image as a template for the new disc
@@ -190,6 +195,19 @@ Verbose output.  Assembled code will be output to the screen.
 
 Dumps all global symbols in Swift-compatible format after assembly.
 This is used internally by Swift, and is just documented for completeness.
+
+-w
+
+If specified, there must be whitespace between opcodes and their labels. This
+introduces an incompatibility with the BBC BASIC assembler, which allows
+things like "ck_axy=&70:stack_axy" (i.e. STA &70), but makes it possible for
+macros to have names which being with an opcode name, e.g.:
+
+    MACRO stack_axy
+        PHA:TXA:PHA:TYA:PHA
+    ENDMACRO
+
+Things like "STA&4000" are permitted with or without -w.
 
 
 
@@ -259,6 +277,14 @@ FALSE              Returns 0
 TRUE               Returns -1
 * or P%            A special symbol which returns the current address being
                    assembled at.
+CPU                The value set by the CPU assembler directive (see below)
+
+Within EQUB/EQUS only you can also use the expressions:
+
+TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
+
+TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
+                   is the same format used by the C library strftime().
 
 Variables can be defined at any point using the BASIC syntax, i.e.
 addr = &70.
@@ -581,6 +607,13 @@ PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
   filename will be used (and must therefore be 7 characters or less in length).
   A start address must be provided (and optionally an execution address can
   be provided too).
+
+
+PUTTEXT <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
+
+  This command is the same as PUTFILE, except that the host file is assumed to
+  be a text file and its line endings will be automatically converted to CR
+  (the BBC standard line ending) from any of CR, LF, CRLF or LFCR.
   
   
 PUTBASIC <host filename> [,<beeb filename>]

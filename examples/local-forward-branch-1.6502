@@ -1,0 +1,20 @@
+org &2000
+
+.start
+
+.ok
+	for i,1,65
+		lda #65
+	next
+	{
+		cmp #65:beq ok:jmp boom:.ok
+	}
+	rts
+
+.boom
+	lda #7:jsr &ffee
+	jmp boom
+
+.end
+
+save "test", start, end

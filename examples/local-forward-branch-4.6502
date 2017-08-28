@@ -1,0 +1,19 @@
+org &2000
+
+a = &70
+
+macro load_a_and_maybe_x i, do_x
+	lda #i
+	if do_x
+		ldx #i
+	endif
+endmacro
+
+.start
+
+	load_a_and_maybe_x 42, FALSE
+	load_a_and_maybe_x 65, TRUE
+
+.end
+
+save "test", start, end

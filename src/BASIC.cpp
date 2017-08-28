@@ -788,7 +788,15 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 		Uint16 LengthAddr = Addr; WriteByte(0);
 		if(!EncodeLine())
 			break;
-		Memory[LengthAddr] = static_cast<Uint8>(Addr - LengthAddr + 3);
+
+		Uint16 Length = Addr - LengthAddr + 3;
+		if(Length >= 256)
+		{
+			ErrorNum = -1;
+			sprintf(DynamicErrorText, "Overly long line at line %d", CurLine);
+			break;
+		}
+		Memory[LengthAddr] = static_cast<Uint8>(Length);
 	}
 
 	/* write "end of program" */

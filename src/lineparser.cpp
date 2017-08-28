@@ -213,13 +213,22 @@ void LineParser::Process()
 
 					try
 					{
-						double value = EvaluateExpression();
-
 						if ( !SymbolTable::Instance().IsSymbolDefined( paramName ) )
 						{
+							double value = EvaluateExpression();
 							SymbolTable::Instance().AddSymbol( paramName, value );
 						}
-
+						else if ( GlobalData::Instance().IsSecondPass() )
+						{
+							// We must remove the symbol before evaluating the expression,
+							// otherwise nested macros which share the same parameter name can
+							// evaluate the inner macro parameter using the old value of the inner
+							// macro parameter rather than the new value of the outer macro
+							// parameter. See local-forward-branch-5.6502 for an example.
+							SymbolTable::Instance().RemoveSymbol( paramName );
+							double value = EvaluateExpression();
+							SymbolTable::Instance().AddSymbol( paramName, value );
+						}
 					}
 					catch ( AsmException_SyntaxError_SymbolNotDefined& )
 					{

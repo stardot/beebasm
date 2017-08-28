@@ -135,6 +135,7 @@ private:
 	void			HandleInclude();
 	void			HandleIncBin();
 	void			HandleEqub();
+	void			HandleEqus(const std::string& equs);
 	void			HandleEquw();
 	void			HandleEqud();
 	void			HandleAssert();
@@ -150,7 +151,9 @@ private:
 	void			HandleGuard();
 	void			HandleClear();
 	void			HandleMapChar();
+	void			HandlePutText();
 	void			HandlePutFile();
+	void			HandlePutFileCommon( bool bText );
 	void			HandlePutBasic();
 	void			HandleMacro();
 	void			HandleEndMacro();
