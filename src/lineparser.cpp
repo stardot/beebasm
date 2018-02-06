@@ -152,6 +152,7 @@ void LineParser::Process()
 		if ( bIsSymbolAssignment )
 		{
 			// Deal here with symbol assignment
+			bool bIsConditionalAssignment = false;
 
 			string symbolName = GetSymbolName() + m_sourceCode->GetSymbolNameSuffix();
 
@@ -167,6 +168,12 @@ void LineParser::Process()
 
 			m_column++;
 
+			if ( m_line[ m_column ] == '?' )
+			{
+				bIsConditionalAssignment = true;
+				m_column++;
+			}
+
 			double value = EvaluateExpression();
 
 			if ( GlobalData::Instance().IsFirstPass() )
@@ -175,7 +182,10 @@ void LineParser::Process()
 
 				if ( SymbolTable::Instance().IsSymbolDefined( symbolName ) )
 				{
-					throw AsmException_SyntaxError_LabelAlreadyDefined( m_line, oldColumn );
+					if (!bIsConditionalAssignment)
+					{
+						throw AsmException_SyntaxError_LabelAlreadyDefined( m_line, oldColumn );
+					}
 				}
 				else
 				{
