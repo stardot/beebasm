@@ -151,7 +151,7 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 	if ( equalsIndex == std::string::npos )
 	{
 		symbol = expr;
-		valueString = "1";
+		valueString = "-1";
 	}
 	else
 	{
@@ -176,10 +176,42 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 		return false;
 	}
 
+	bool readHex = false;
+
+	if ( !valueString.compare( 0, 1, "&" ) || !valueString.compare( 0, 1, "$" ) )
+	{
+		readHex = true;
+		valueString = valueString.substr( 1 );
+	}
+	else if ( !valueString.compare( 0, 2, "0x" ) || !valueString.compare( 0, 2, "0X" ) )
+	{
+		readHex = true;
+		valueString = valueString.substr( 2 );
+	}
+
 	std::istringstream valueStream( valueString );
 	double value;
 	char c;
-	if ( ! ( valueStream >> value ) || valueStream.get( c ) )
+
+	valueStream >> noskipws;
+
+	if ( readHex )
+	{
+		int intValue;
+
+		if ( ! ( valueStream  >> hex >> intValue ) )
+		{
+			return false;
+		}
+
+		value = intValue;
+	}
+	else if ( ! ( valueStream >> value ) )
+	{
+		return false;
+	}
+
+	if ( valueStream.get( c ) )
 	{
 		return false;
 	}
