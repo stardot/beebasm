@@ -177,6 +177,7 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 	}
 
 	bool readHex = false;
+	bool readBinary = false;
 
 	if ( !valueString.compare( 0, 1, "&" ) || !valueString.compare( 0, 1, "$" ) )
 	{
@@ -187,6 +188,11 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 	{
 		readHex = true;
 		valueString = valueString.substr( 2 );
+	}
+	else if ( !valueString.compare( 0, 1, "%" ) )
+	{
+		readBinary = true;
+		valueString = valueString.substr( 1 );
 	}
 
 	std::istringstream valueStream( valueString );
@@ -205,6 +211,34 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 		}
 
 		value = intValue;
+	}
+	else if ( readBinary )
+	{
+		unsigned int intValue = 0;
+
+		int charOrEof = valueStream.get();
+
+		if ( charOrEof == EOF )
+		{
+			return false;
+		}
+
+		while ( ( charOrEof == '0' ) || ( charOrEof == '1' ) )
+		{
+			if ( intValue & 0x80000000 )
+			{
+				return false;
+			}
+			intValue = 2 * intValue + (charOrEof - '0');
+			charOrEof = valueStream.get();
+		}
+
+		if ( charOrEof != EOF )
+		{
+			return false;
+		}
+
+		value = (int)intValue;
 	}
 	else if ( ! ( valueStream >> value ) )
 	{
