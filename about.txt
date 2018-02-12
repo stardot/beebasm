@@ -286,6 +286,10 @@ TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS
 TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
                    is the same format used by the C library strftime().
 
+The assembly date/time is constant throughout the assembly; every use of TIME$
+will return the same date/time.
+
+
 Variables can be defined at any point using the BASIC syntax, i.e.
 addr = &70.
 
@@ -597,7 +601,7 @@ IF...ELIF...ELSE...ENDIF
 	  }
 	  JMP loop ; error, .loop is *not* visible here
 
-  For a more realistic example of the use of '.^label', see scopedemo2.6502.
+  For a more realistic example of the use of '.^label', see scopejumpdemo2.6502.
 
 
 PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
@@ -803,12 +807,20 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
-23/04/2016        Added RANDOMIZE
-12/03/2016	  Improved error handling in PUTFILE/PUTBASIC
-		  Added optional automatic line numbering for PUTBASIC
-                  Added ASSERT
-		  Show a call stack when an error occurs inside a macro
-		  Allow label scope-jumping using '.*label' and '.^label'
+??/??/????  1.09  Added ASSERT
+                  Added CPU (as a constant)
+                  Added PUTTEXT
+                  Added RANDOMIZE
+                  Added TIME$
+                  Added command line options: -title, -vc, -w
+                  Improved error handling in PUTFILE/PUTBASIC
+                  Added optional automatic line numbering for PUTBASIC
+                  Show a call stack when an error occurs inside a macro
+                  Allow label scope-jumping using '.*label' and '.^label'
+                  Allow high bits to be set on load/execution addresses
+                  Show branch displacement when "Branch out of range" occurs
+                  Fixed bugs in duplicate filename direction on disc image
+                  Fixed spurious "Branch out of range" error in rare case
 19/01/2012  1.08  Fixed makefile for GCC (MinGW) builds.
                   Added COPYBLOCK command to manage blocks of memory.
 06/10/2011  1.07  Fixed mixed-case bug for keywords (so now oddities such as
