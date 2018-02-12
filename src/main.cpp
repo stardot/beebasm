@@ -203,6 +203,11 @@ int main( int argc, char* argv[] )
 
 			case WAITING_FOR_DISC_TITLE:
 
+				if ( strlen( argv[i] ) > 12 )
+				{
+					cerr << "Disc title cannot be longer than 12 characters" << endl;
+					return EXIT_FAILURE;
+				}
 				GlobalData::Instance().SetDiscTitle( argv[i] );
 				state = READY;
 				break;
