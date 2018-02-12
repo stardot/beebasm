@@ -624,7 +624,9 @@ PUTBASIC <host filename> [,<beeb filename>]
 
   This takes a BASIC program as a plain text file on the host OS, tokenises it,
   and outputs it to the disc image as a native BASIC file.  Credit to Thomas
-  Harte for the BASIC tokenising routine.
+  Harte for the BASIC tokenising routine.  Line numbers can be provided in the
+  text file if desired, but if not present they will be automatically generated.
+  See autolinenumdemo.bas for an example.
   
   
 MACRO <name> [,<parameter list...>]
