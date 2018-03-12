@@ -63,7 +63,7 @@ void AsmException_SyntaxError::Print() const
 
 	cerr << ErrorLocation(0);
 	cerr << ": error: ";
-	cerr << Message() << endl << endl;
+	cerr << Message() << m_extra << endl << endl;
 	cerr << m_line << endl;
 	cerr << string( m_column, ' ' ) << "^" << endl;
 

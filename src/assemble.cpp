@@ -748,14 +748,24 @@ void LineParser::HandleAssembler( int instruction )
 		{
 			int branchAmount = value - ( ObjectCode::Instance().GetPC() + 2 );
 
-			if ( branchAmount >= -128 && branchAmount <= 127 )
+			if ( branchAmount < -128 )
 			{
-				Assemble2( instruction, REL, branchAmount & 0xFF );
-				return;
+				ostringstream extra;
+				extra << " (Branch distance is " << branchAmount << " bytes; " << 
+						 ( -branchAmount - 128 ) << " more than the maximum -128.)";
+				throw AsmException_SyntaxError_BranchOutOfRange( m_line, oldColumn, extra.str() );
+			}
+			else if ( branchAmount > 127 )
+			{
+				ostringstream extra;
+				extra << " (Branch distance is " << branchAmount << " bytes; " << 
+						 ( branchAmount - 127 ) << " more than the maximum 127.)";
+				throw AsmException_SyntaxError_BranchOutOfRange( m_line, oldColumn, extra.str() );
 			}
 			else
 			{
-				throw AsmException_SyntaxError_BranchOutOfRange( m_line, oldColumn );
+				Assemble2( instruction, REL, branchAmount & 0xFF );
+				return;
 			}
 		}
 
