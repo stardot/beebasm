@@ -37,6 +37,14 @@ void beebasm_srand(unsigned long seed)
         {
                 state = 1;
         }
+
+        // Generate and discard a few random numbers to avoid small changes to
+        // the seed typically not affecting the first few random numbers
+        // generated.
+        for ( int i = 0; i < 5; ++i )
+        {
+            (void) beebasm_rand();
+        }
 }
 
 unsigned long beebasm_rand()
