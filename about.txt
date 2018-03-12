@@ -100,8 +100,8 @@ ORG &2000         ; code origin (like P%=&2000)
 .start
     LDA #22:JSR oswrch
     LDA #7:JSR oswrch
-    LDA #mytext MOD 256:STA addr
-    LDA #mytext DIV 256:STA addr+1
+    LDX #mytext MOD 256:STA addr
+    LDY #mytext DIV 256:STA addr+1
     LDY #0
 .loop
     LDA (addr),Y
