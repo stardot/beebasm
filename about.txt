@@ -1,6 +1,6 @@
 *******************************************************************************
 *                                                                             *
-*                               BeebAsm V1.08                                 *
+*                               BeebAsm V1.09                                 *
 *                                                                             *
 *             A portable 6502 assembler with BBC Micro style syntax           *
 *                                                                             *
@@ -893,8 +893,10 @@ based on the above demo, but it runs at a low address (&300).
 
 10. REPORTING BUGS
 
-There are bound to be loads.  I wrote it quickly!  Please help me zap all the
-problems by reporting any bugs to me, Rich Talbot-Watkins, at
-<richtw1@gmail.com>, or join the forum at <http://www.retrosoftware.co.uk>.
+BeebAsm was writen by Rich Talbot-Watkins but is now maintained by the members
+of the 'stardot' forums. The official source repository is at
+https://github.com/stardot/beebasm. Please post any questions or comments
+relating to BeebAsm on the 'Development tools' forum at stardot:
+http://www.stardot.org.uk/forums/viewforum.php?f=55
 
 Thank you!
