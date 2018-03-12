@@ -72,13 +72,15 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_DISC_OUTPUT_FILENAME,
 		WAITING_FOR_BOOT_FILENAME,
 		WAITING_FOR_DISC_OPTION,
-		WAITING_FOR_DISC_TITLE
+		WAITING_FOR_DISC_TITLE,
+		WAITING_FOR_SYMBOL
 
 	} state = READY;
 
 	bool bDumpSymbols = false;
 
 	GlobalData::Create();
+	SymbolTable::Create();
 
 	// Parse command line parameters
 
@@ -132,6 +134,10 @@ int main( int argc, char* argv[] )
 				{
 					bDumpSymbols = true;
 				}
+				else if ( strcmp( argv[i], "-D" ) == 0 )
+				{
+					state = WAITING_FOR_SYMBOL;
+				}
 				else if ( strcmp( argv[i], "--help" ) == 0 )
 				{
 					cout << "beebasm " VERSION << endl << endl;
@@ -147,6 +153,7 @@ int main( int argc, char* argv[] )
 					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " -w             Require whitespace between opcodes and labels" << endl;
 					cout << " -vc            Use Visual C++-style error messages" << endl;
+					cout << " -D <sym>=<val> Define symbol prior to assembly" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
@@ -210,6 +217,16 @@ int main( int argc, char* argv[] )
 				}
 				GlobalData::Instance().SetDiscTitle( argv[i] );
 				state = READY;
+                                break;
+
+			case WAITING_FOR_SYMBOL:
+
+				if ( ! SymbolTable::Instance().AddCommandLineSymbol( argv[i] ) )
+				{
+					cerr << "Invalid -D expression: " << argv[i] << endl;
+					return EXIT_FAILURE;
+				}
+				state = READY;
 				break;
 		}
 	}
@@ -241,7 +258,6 @@ int main( int argc, char* argv[] )
 
 	int exitCode = EXIT_SUCCESS;
 
-	SymbolTable::Create();
 	ObjectCode::Create();
 	MacroTable::Create();
 	SetupBASICTables();
