@@ -38,6 +38,7 @@ public:
 	static inline SymbolTable& Instance() { assert( m_gInstance != NULL ); return *m_gInstance; }
 
 	void AddSymbol( const std::string& symbol, double value, bool isLabel = false );
+	bool AddCommandLineSymbol( const std::string& expr );
 	void ChangeSymbol( const std::string& symbol, double value );
 	double GetSymbol( const std::string& symbol ) const;
 	bool IsSymbolDefined( const std::string& symbol ) const;

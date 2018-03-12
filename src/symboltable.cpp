@@ -21,7 +21,9 @@
 /*************************************************************************************************/
 
 #include <cmath>
+#include <cstdio>
 #include <iostream>
+#include <sstream>
 
 #include "symboltable.h"
 
@@ -128,6 +130,130 @@ void SymbolTable::AddSymbol( const std::string& symbol, double value, bool isLab
 {
 	assert( !IsSymbolDefined( symbol ) );
 	m_map.insert( make_pair( symbol, Symbol( value, isLabel ) ) );
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SymbolTable::AddCommandLineSymbol()
+
+	Adds a symbol to the symbol table using a command line 'FOO=BAR' expression
+
+	@param		expr			Symbol name and value
+	@returns	bool
+*/
+/*************************************************************************************************/
+bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
+{
+	std::string::size_type equalsIndex = expr.find( '=' );
+	std::string symbol;
+	std::string valueString;
+	if ( equalsIndex == std::string::npos )
+	{
+		symbol = expr;
+		valueString = "-1";
+	}
+	else
+	{
+		symbol = expr.substr( 0, equalsIndex );
+		valueString = expr.substr( equalsIndex + 1 );
+	}
+	if ( symbol.empty() )
+	{
+		return false;
+	}
+	for ( std::string::size_type i = 0; i < symbol.length(); ++i )
+	{
+		bool valid = ( isalpha( symbol[ i ] ) || ( symbol[ i ] == '_' ) );
+		valid = valid || ( ( i > 0 ) && isdigit( symbol[ i ] ) );
+		if ( !valid )
+		{
+			return false;
+		}
+	}
+	if ( IsSymbolDefined( symbol ) )
+	{
+		return false;
+	}
+
+	bool readHex = false;
+	bool readBinary = false;
+
+	if ( !valueString.compare( 0, 1, "&" ) || !valueString.compare( 0, 1, "$" ) )
+	{
+		readHex = true;
+		valueString = valueString.substr( 1 );
+	}
+	else if ( !valueString.compare( 0, 2, "0x" ) || !valueString.compare( 0, 2, "0X" ) )
+	{
+		readHex = true;
+		valueString = valueString.substr( 2 );
+	}
+	else if ( !valueString.compare( 0, 1, "%" ) )
+	{
+		readBinary = true;
+		valueString = valueString.substr( 1 );
+	}
+
+	std::istringstream valueStream( valueString );
+	double value;
+	char c;
+
+	valueStream >> noskipws;
+
+	if ( readHex )
+	{
+		int intValue;
+
+		if ( ! ( valueStream  >> hex >> intValue ) )
+		{
+			return false;
+		}
+
+		value = intValue;
+	}
+	else if ( readBinary )
+	{
+		unsigned int intValue = 0;
+
+		int charOrEof = valueStream.get();
+
+		if ( charOrEof == EOF )
+		{
+			return false;
+		}
+
+		while ( ( charOrEof == '0' ) || ( charOrEof == '1' ) )
+		{
+			if ( intValue & 0x80000000 )
+			{
+				return false;
+			}
+			intValue = 2 * intValue + (charOrEof - '0');
+			charOrEof = valueStream.get();
+		}
+
+		if ( charOrEof != EOF )
+		{
+			return false;
+		}
+
+		value = static_cast<double>(intValue);
+	}
+	else if ( ! ( valueStream >> value ) )
+	{
+		return false;
+	}
+
+	if ( valueStream.get( c ) )
+	{
+		return false;
+	}
+
+	m_map.insert( make_pair( symbol, Symbol( value, false ) ) );
+
+	return true;
 }
 
 
