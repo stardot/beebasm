@@ -308,7 +308,7 @@ bool ExportBASIC(const char *Filename, Uint8 *Memory)
 		return false;
 	}
 
-	/* get the value of PAGE‚ start reading BASIC code from there */
+	/* get the value of PAGE, start reading BASIC code from there */
 	Uint16 Addr = Memory[0x18] << 8;
 
 	if(Addr >= 32768 - 4)
@@ -704,7 +704,7 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 	Addr = 0;
 
 #if 0
-	/* get the value of PAGE‚ insert BASIC code starting from there */
+	/* get the value of PAGE, insert BASIC code starting from there */
 	Addr = Memory[0x18] << 8;
 
 	/* validity check: does PAGE currently point to a 0x0d? */
