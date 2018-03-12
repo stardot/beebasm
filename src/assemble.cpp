@@ -25,6 +25,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <sstream>
 
 #include "lineparser.h"
 #include "globaldata.h"

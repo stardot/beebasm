@@ -21,6 +21,7 @@
 /*************************************************************************************************/
 
 #include <cmath>
+#include <cstdio>
 #include <iostream>
 #include <sstream>
 
@@ -238,7 +239,7 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 			return false;
 		}
 
-		value = (int)intValue;
+		value = static_cast<double>(intValue);
 	}
 	else if ( ! ( valueStream >> value ) )
 	{
