@@ -209,6 +209,17 @@ macros to have names which being with an opcode name, e.g.:
 
 Things like "STA&4000" are permitted with or without -w.
 
+-D <symbol> 
+-D <symbol>=<value>
+
+Define <symbol> before starting to assemble. If <value> is not given, -1 (TRUE)
+will be used by default. Note that there must be a space between '-D' and the
+symbol. <value> may be in decimal, hexadecimal (prefixed with $, & or 0x) or
+binary (prefixed with %).
+
+-D can be used in conjunction with conditional assignment to provide default
+values within the source which can be overridden from the command line.
+
 
 
 
@@ -286,11 +297,22 @@ TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS
 TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
                    is the same format used by the C library strftime().
 
+The assembly date/time is constant throughout the assembly; every use of TIME$
+will return the same date/time.
+
+
 Variables can be defined at any point using the BASIC syntax, i.e.
 addr = &70.
 
 Note that it is not possible to reassign variables once defined.
 However FOR...NEXT blocks have their own scope (more on this later).
+
+Variables can be defined if they are not already defined using the conditional
+assignment syntax =?, e.g. addr =? &70. This is useful in conjunction with the
+-D command line option to provide default values for variables in the source
+while allowing them to be overridden on the command line. (Because variables
+cannot be reassigned once defined, it is not possible to define a variable with -D
+*and* with non-conditional assignment.)
 
 
 
@@ -561,43 +583,43 @@ IF...ELIF...ELSE...ENDIF
   A label defined using '.*label' will be globally visible:
   
       .copy_10
-	  {
-	      LDX #10
-	  .*copy_x
-	      DEX
-	  .loop
-	      LDA from,X
-		  STA to,X
-		  DEX
-		  BPL loop
-		  RTS
-	  }
+      {
+          LDX #10
+      .*copy_x
+          DEX
+      .loop
+          LDA from,X
+          STA to,X
+          DEX
+          BPL loop
+          RTS
+      }
 
-	  JSR copy_10
-	  LDX #20
-	  JSR copy_x
+      JSR copy_10
+      LDX #20
+      JSR copy_x
 
   A label defined using '.^label' will be visible in the parent scope:
 
       .contrived
-	  {
-	      LDX #255
-		  {
-		      LDY #3
-		  .^loop
-			  DEX
-			  BEQ exit
-		      DEY
-			  BNE loop
-		  }
-		  LDY #7
-		  JMP loop ; .loop *is* visible here
-		  .exit
-		      RTS
-	  }
-	  JMP loop ; error, .loop is *not* visible here
+      {
+          LDX #255
+          {
+              LDY #3
+          .^loop
+              DEX
+              BEQ exit
+              DEY
+              BNE loop
+          }
+          LDY #7
+          JMP loop ; .loop *is* visible here
+      .exit
+          RTS
+      }
+      JMP loop ; error, .loop is *not* visible here
 
-  For a more realistic example of the use of '.^label', see scopedemo2.6502.
+  For a more realistic example of the use of '.^label', see scopejumpdemo2.6502.
 
 
 PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
@@ -620,7 +642,9 @@ PUTBASIC <host filename> [,<beeb filename>]
 
   This takes a BASIC program as a plain text file on the host OS, tokenises it,
   and outputs it to the disc image as a native BASIC file.  Credit to Thomas
-  Harte for the BASIC tokenising routine.
+  Harte for the BASIC tokenising routine.  Line numbers can be provided in the
+  text file if desired, but if not present they will be automatically generated.
+  See autolinenumdemo.bas for an example.
   
   
 MACRO <name> [,<parameter list...>]
@@ -803,12 +827,21 @@ based on the above demo, but it runs at a low address (&300).
 
 9. VERSION HISTORY
 
-23/04/2016        Added RANDOMIZE
-12/03/2016	  Improved error handling in PUTFILE/PUTBASIC
-		  Added optional automatic line numbering for PUTBASIC
-                  Added ASSERT
-		  Show a call stack when an error occurs inside a macro
-		  Allow label scope-jumping using '.*label' and '.^label'
+??/??/????  1.09  Added ASSERT
+                  Added CPU (as a constant)
+                  Added PUTTEXT
+                  Added RANDOMIZE
+                  Added TIME$
+                  Added command line options: -title, -vc, -w, -D
+		  Added conditional assignment (=?)
+                  Improved error handling in PUTFILE/PUTBASIC
+                  Added optional automatic line numbering for PUTBASIC
+                  Show a call stack when an error occurs inside a macro
+                  Allow label scope-jumping using '.*label' and '.^label'
+                  Allow high bits to be set on load/execution addresses
+                  Show branch displacement when "Branch out of range" occurs
+                  Fixed bugs in duplicate filename direction on disc image
+                  Fixed spurious "Branch out of range" error in rare case
 19/01/2012  1.08  Fixed makefile for GCC (MinGW) builds.
                   Added COPYBLOCK command to manage blocks of memory.
 06/10/2011  1.07  Fixed mixed-case bug for keywords (so now oddities such as
