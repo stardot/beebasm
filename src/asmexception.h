@@ -126,6 +126,13 @@ public:
 	{
 	}
 
+	AsmException_SyntaxError( std::string line, int column, std::string extra )
+		:	m_line( line ),
+			m_column( column ),
+			m_extra( extra )
+	{
+	}
+
 	virtual ~AsmException_SyntaxError() {}
 
 	void SetFilename( const std::string& filename )	{ m_filename.push_back( filename ); }
@@ -144,6 +151,7 @@ protected:
 
 	std::string			m_line;
 	int				m_column;
+	std::string			m_extra;
 	std::vector<std::string>	m_filename;
 	std::vector<int>                m_lineNumber;
 };
@@ -155,6 +163,19 @@ class AsmException_SyntaxError_##a : public AsmException_SyntaxError		\
 public:																		\
 	AsmException_SyntaxError_##a( std::string line, int column )			\
 		:	AsmException_SyntaxError( line, column ) {}						\
+																			\
+	virtual ~AsmException_SyntaxError_##a() {}								\
+																			\
+	virtual const char* Message() const { return msg; }						\
+}
+
+
+#define DEFINE_SYNTAX_EXCEPTION_EXTRA( a, msg )								\
+class AsmException_SyntaxError_##a : public AsmException_SyntaxError		\
+{																			\
+public:																		\
+	AsmException_SyntaxError_##a( std::string line, int column, std::string extra )			\
+		:	AsmException_SyntaxError( line, column, extra ) {}				\
 																			\
 	virtual ~AsmException_SyntaxError_##a() {}								\
 																			\
@@ -191,7 +212,7 @@ DEFINE_SYNTAX_EXCEPTION( NoIndirect, "Indirect mode not allowed for this instruc
 DEFINE_SYNTAX_EXCEPTION( 6502Bug, "JMP (addr) will not execute as intended due to the 6502 bug (addr = &xxFF)." );
 DEFINE_SYNTAX_EXCEPTION( BadIndirect, "Incorrectly formed indirect instruction." );
 DEFINE_SYNTAX_EXCEPTION( NotZeroPage, "Address is not in zero-page." );
-DEFINE_SYNTAX_EXCEPTION( BranchOutOfRange, "Branch out of range." );
+DEFINE_SYNTAX_EXCEPTION_EXTRA( BranchOutOfRange, "Branch out of range." );
 DEFINE_SYNTAX_EXCEPTION( NoAbsolute, "Absolute addressing mode not allowed for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( BadAbsolute, "Syntax error in absolute instruction." );
 DEFINE_SYNTAX_EXCEPTION( BadAddress, "Out of range address." );
