@@ -281,7 +281,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 				bool bMatch = true;
 				for ( unsigned int j = 0; j < len; j++ )
 				{
-					if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+					if ( ( m_column + j >= m_line.length() ) || ( token[ j ] != toupper( m_line[ m_column + j ] ) ) )
 					{
 						bMatch = false;
 						break;
