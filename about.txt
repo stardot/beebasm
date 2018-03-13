@@ -314,6 +314,8 @@ while allowing them to be overridden on the command line. (Because variables
 cannot be reassigned once defined, it is not possible to define a variable with -D
 *and* with non-conditional assignment.)
 
+(Thanks to Stephen Harris and "ctr" for the -D/conditional assignment support.)
+
 
 
 
@@ -620,6 +622,8 @@ IF...ELIF...ELSE...ENDIF
       JMP loop ; error, .loop is *not* visible here
 
   For a more realistic example of the use of '.^label', see scopejumpdemo2.6502.
+
+  (Thanks to Steven Flintham for the implementation of .* and .^.)
 
 
 PUTFILE <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
