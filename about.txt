@@ -191,6 +191,10 @@ the same as the -do filename!
 
 Verbose output.  Assembled code will be output to the screen.
 
+-vc
+
+Use Visual C++-style error messages.
+
 -d
 
 Dumps all global symbols in Swift-compatible format after assembly.
