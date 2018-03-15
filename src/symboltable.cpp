@@ -26,6 +26,7 @@
 #include <sstream>
 
 #include "symboltable.h"
+#include "constants.h"
 
 
 using namespace std;
@@ -78,7 +79,7 @@ SymbolTable::SymbolTable()
 {
 	// Add any constant symbols here
 
-	AddSymbol( "PI", M_PI );
+	AddSymbol( "PI", const_pi );
 	AddSymbol( "P%", 0 );
 	AddSymbol( "TRUE", -1 );
 	AddSymbol( "FALSE", 0 );
