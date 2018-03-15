@@ -37,8 +37,7 @@ using namespace std;
 */
 /*************************************************************************************************/
 DiscImage::DiscImage( const char* pOutput, const char* pInput )
-	:	m_outputFilename( pOutput ),
-		m_inputFilename( pInput )
+	:	m_outputFilename( pOutput )
 {
 	// open output file
 
