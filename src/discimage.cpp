@@ -22,6 +22,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 #include "discimage.h"
 #include "asmexception.h"
 #include "globaldata.h"
@@ -131,12 +132,10 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 
 		if ( GlobalData::Instance().GetBootFile() != NULL )
 		{
-			char pPlingBoot[ 64 ];
-			strcpy( pPlingBoot, "*BASIC\r*RUN " );
-			strcat( pPlingBoot, GlobalData::Instance().GetBootFile() );
-			strcat( pPlingBoot, "\r" );
-
-			AddFile( "!Boot", reinterpret_cast< unsigned char* >( pPlingBoot ), 0, 0xFFFFFF, strlen( pPlingBoot ) );
+                        ostringstream streamPlingBoot;
+                        streamPlingBoot << "*BASIC\r*RUN " << GlobalData::Instance().GetBootFile() << "\r";
+                        const std::string& strPlingBoot = streamPlingBoot.str();
+			AddFile( "!Boot", reinterpret_cast< const unsigned char* >( strPlingBoot.c_str() ), 0, 0xFFFFFF, strPlingBoot.length() );
 
 			m_aCatalog[ 0x106 ] = 0x33;		// force *OPT to 3 (EXEC)
 		}
