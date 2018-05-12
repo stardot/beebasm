@@ -24,6 +24,7 @@
 /*************************************************************************************************/
 
 #include "BASIC.h"
+#include <sstream>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -210,13 +211,15 @@ const char *ErrorTable[] =
 	"Malformed BASIC program or not running BASIC",
 	"BASIC program appears to run past the end of RAM"
 };
-char DynamicErrorText[256];
+std::ostringstream DynamicErrorText;
+std::string DynamicErrorTextString;
 
 int ErrorNum;
 
 const char *GetBASICError()
 {
-	return ErrorNum >= 0 ? ErrorTable[ErrorNum] : DynamicErrorText;
+	DynamicErrorTextString = DynamicErrorText.str();
+	return ErrorNum >= 0 ? ErrorTable[ErrorNum] : DynamicErrorTextString.c_str();
 }
 
 int GetBASICErrorNum()
@@ -308,7 +311,7 @@ bool ExportBASIC(const char *Filename, Uint8 *Memory)
 		return false;
 	}
 
-	/* get the value of PAGE‚ start reading BASIC code from there */
+	/* get the value of PAGE, start reading BASIC code from there */
 	Uint16 Addr = Memory[0x18] << 8;
 
 	if(Addr >= 32768 - 4)
@@ -490,7 +493,7 @@ bool CopyStringLiteral()
 	if(IncomingBuffer[0] != '"') // stopped going for some reason other than a close quote
 	{
 		ErrorNum = -1;
-		sprintf(DynamicErrorText, "Malformed string literal on line %d", CurLine);
+		DynamicErrorText << "Malformed string literal on line " << CurLine;
 		return false;
 	}
 
@@ -704,7 +707,7 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 	Addr = 0;
 
 #if 0
-	/* get the value of PAGE‚ insert BASIC code starting from there */
+	/* get the value of PAGE, insert BASIC code starting from there */
 	Addr = Memory[0x18] << 8;
 
 	/* validity check: does PAGE currently point to a 0x0d? */
@@ -743,6 +746,9 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 	while(c--)
 		GetCharacter();
 
+	/* initialise this to 0 for use with automatic line numbering */
+	unsigned int LastLineNumber = 0;
+
 	while(!EndOfFile && !ErrorNum)
 	{
 		/* get line number */
@@ -753,25 +759,47 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 			/* end of file? */
 			if(EndOfFile) break;
 
-			/* now we should see a line number */
-			if(!NumberStart || (NumberValue >= 32768))
+			/* now we may see a line number */
+			if(NumberStart)
+			{
+				if (NumberValue <= LastLineNumber)
+				{
+					ErrorNum = -1;
+					DynamicErrorText << "Out of sequence line numbers (" << LastLineNumber << " followed by " << NumberValue << ") at line " << CurLine;
+					break;
+				}
+				LastLineNumber = NumberValue;
+				EatCharacters(NumberLength);
+			}
+			else
+			{
+				/* auto-number the line instead */
+				LastLineNumber += 1;
+			}
+			if(LastLineNumber >= 32768)
 			{
 				ErrorNum = -1;
-				sprintf(DynamicErrorText, "Malformed line number at line %d", CurLine);
+				DynamicErrorText << "Malformed line number at line " << CurLine;
 				break;
 			}
-
 			/* inject into memory */
 			WriteByte(0x0d);
-			WriteByte(NumberValue >> 8);
-			WriteByte(NumberValue&0xff);
-			EatCharacters(NumberLength);
+			WriteByte(LastLineNumber>> 8);
+			WriteByte(LastLineNumber&0xff);
 
 		/* read rest of line, record length */
 		Uint16 LengthAddr = Addr; WriteByte(0);
 		if(!EncodeLine())
 			break;
-		Memory[LengthAddr] = static_cast<Uint8>(Addr - LengthAddr + 3);
+
+		Uint16 Length = Addr - LengthAddr + 3;
+		if(Length >= 256)
+		{
+			ErrorNum = -1;
+			DynamicErrorText << "Overly long line at line " << CurLine;
+			break;
+		}
+		Memory[LengthAddr] = static_cast<Uint8>(Length);
 	}
 
 	/* write "end of program" */

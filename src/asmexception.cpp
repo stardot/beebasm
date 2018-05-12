@@ -24,8 +24,10 @@
 
 #include <iostream>
 #include <cassert>
+#include <sstream>
 
 #include "asmexception.h"
+#include "globaldata.h"
 #include "stringutils.h"
 
 using namespace std;
@@ -55,12 +57,46 @@ void AsmException_FileError::Print() const
 /*************************************************************************************************/
 void AsmException_SyntaxError::Print() const
 {
-	assert( m_filename != "" );
-	assert( m_lineNumber != 0 );
+	assert( !m_filename.empty() );
+	assert( !m_lineNumber.empty() );
+	assert( m_filename.size() == m_lineNumber.size() ) ;
 
-	cerr << m_filename << ":" << m_lineNumber << ": error: ";
-	cerr << Message() << endl << endl;
+	cerr << ErrorLocation(0);
+	cerr << ": error: ";
+	cerr << Message() << m_extra << endl << endl;
 	cerr << m_line << endl;
 	cerr << string( m_column, ' ' ) << "^" << endl;
+
+	if ( m_filename.size() > 1 )
+	{
+		cerr << endl;
+		cerr << "Call stack:" << endl;
+		for (size_t i = 1; i < m_filename.size(); i++)
+		{
+			cerr << ErrorLocation(i) << endl;
+		}
+	}
 }
 
+
+
+/*************************************************************************************************/
+/**
+	AsmException_SyntaxError::ErrorLocation()
+
+	Formats filename and line number as a string in the appropriate format
+*/
+/*************************************************************************************************/
+std::string AsmException_SyntaxError::ErrorLocation( size_t i ) const
+{
+	std::stringstream s;
+	if ( GlobalData::Instance().UseVisualCppErrorFormat() )
+	{
+		s << m_filename[ i ] << "(" << m_lineNumber[ i ] << ")";
+	}
+	else
+	{
+		s << m_filename[ i ] << ":" << m_lineNumber[ i ];
+	}
+	return s.str();
+}

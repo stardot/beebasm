@@ -22,6 +22,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 #include "discimage.h"
 #include "asmexception.h"
 #include "globaldata.h"
@@ -37,8 +38,7 @@ using namespace std;
 */
 /*************************************************************************************************/
 DiscImage::DiscImage( const char* pOutput, const char* pInput )
-	:	m_outputFilename( pOutput ),
-		m_inputFilename( pInput )
+	:	m_outputFilename( pOutput )
 {
 	// open output file
 
@@ -115,6 +115,13 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 		m_aCatalog[ 0x106 ] = 0x03 | ( ( GlobalData::Instance().GetDiscOption() & 3 ) << 4);
 		m_aCatalog[ 0x107 ] = 0x20;
 
+		const std::string& title = GlobalData::Instance().GetDiscTitle();
+		strncpy( reinterpret_cast< char* >( m_aCatalog ), title.substr(0, 8).c_str(), 8);
+		if ( title.length() > 8 )
+		{
+			strncpy( reinterpret_cast< char* >( m_aCatalog + 0x100 ), title.substr(8, 4).c_str(), 4);
+		}
+
 		if ( !m_outputFile.write( reinterpret_cast< char* >( m_aCatalog ), 0x200 ) )
 		{
 			// write error
@@ -125,12 +132,10 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 
 		if ( GlobalData::Instance().GetBootFile() != NULL )
 		{
-			char pPlingBoot[ 64 ];
-			strcpy( pPlingBoot, "*BASIC\r*RUN " );
-			strcat( pPlingBoot, GlobalData::Instance().GetBootFile() );
-			strcat( pPlingBoot, "\r" );
-
-			AddFile( "!Boot", reinterpret_cast< unsigned char* >( pPlingBoot ), 0, 0xFFFFFF, strlen( pPlingBoot ) );
+			ostringstream streamPlingBoot;
+			streamPlingBoot << "*BASIC\r*RUN " << GlobalData::Instance().GetBootFile() << "\r";
+			const std::string& strPlingBoot = streamPlingBoot.str();
+			AddFile( "!Boot", reinterpret_cast< const unsigned char* >( strPlingBoot.c_str() ), 0, 0xFFFFFF, strPlingBoot.length() );
 
 			m_aCatalog[ 0x106 ] = 0x33;		// force *OPT to 3 (EXEC)
 		}
@@ -184,6 +189,10 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 		throw AsmException_FileError_BadName( m_outputFilename );
 	}
 
+	char pPaddedName[ 7 ];
+	memset( pPaddedName, ' ', 7 );
+	memcpy( pPaddedName, pName, strlen( pName ) );
+
 	if ( m_aCatalog[ 0x105 ] == 31*8 )
 	{
 		// Catalog full
@@ -196,16 +205,16 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 	{
 		bool bTheSame = true;
 
-		for ( size_t j = 0; j < strlen( pName ); j++ )
+		for ( size_t j = 0; j < 7; j++ )
 		{
-			if ( toupper( pName[ j ] ) != toupper( m_aCatalog[ i + j ] ) )
+			if ( toupper( pPaddedName[ j ] ) != toupper( m_aCatalog[ i + j ] ) )
 			{
 				bTheSame = false;
 				break;
 			}
 		}
 
-		if ( bTheSame && ( m_aCatalog[ i + 7 ] & 0x7F ) == '$' )
+		if ( bTheSame && ( toupper( m_aCatalog[ i + 7 ] & 0x7F ) ) == toupper( dirName ) )
 		{
 			// File already exists
 			throw AsmException_FileError_FileExists( m_outputFilename );
@@ -257,10 +266,7 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 
 	// Write filename
 
-	for ( size_t j = 0; j < 7; j++ )
-	{
-		m_aCatalog[ j + 8 ] = ( j < strlen( pName ) ) ? pName[ j ] : ' ';
-	}
+	memcpy( m_aCatalog + 8, pPaddedName, 7 );
 
 	// Write directory name
 

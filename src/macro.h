@@ -115,7 +115,7 @@ public:
 private:
 
 	std::istringstream				m_stream;
-	const Macro*					m_macro;
+	//const Macro*					m_macro;
 };
 
 

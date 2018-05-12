@@ -35,6 +35,8 @@
 #include "globaldata.h"
 #include "objectcode.h"
 #include "sourcefile.h"
+#include "random.h"
+#include "constants.h"
 
 
 using namespace std;
@@ -280,7 +282,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 				bool bMatch = true;
 				for ( unsigned int j = 0; j < len; j++ )
 				{
-					if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+					if ( ( m_column + j >= m_line.length() ) || ( token[ j ] != toupper( m_line[ m_column + j ] ) ) )
 					{
 						bMatch = false;
 						break;
@@ -1213,7 +1215,7 @@ void LineParser::EvalDegToRad()
 	{
 		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
 	}
-	m_valueStack[ m_valueStackPtr - 1 ] = m_valueStack[ m_valueStackPtr - 1 ] * M_PI / 180.0;
+	m_valueStack[ m_valueStackPtr - 1 ] = m_valueStack[ m_valueStackPtr - 1 ] * const_pi / 180.0;
 }
 
 
@@ -1229,7 +1231,7 @@ void LineParser::EvalRadToDeg()
 	{
 		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
 	}
-	m_valueStack[ m_valueStackPtr - 1 ] = m_valueStack[ m_valueStackPtr - 1 ] * 180.0 / M_PI;
+	m_valueStack[ m_valueStackPtr - 1 ] = m_valueStack[ m_valueStackPtr - 1 ] * 180.0 / const_pi;
 }
 
 
@@ -1306,11 +1308,11 @@ void LineParser::EvalRnd()
 	}
 	else if ( val == 1.0f )
 	{
-		result = rand() / ( static_cast< double >( RAND_MAX ) + 1.0 );
+		result = beebasm_rand() / ( static_cast< double >( BEEBASM_RAND_MAX ) + 1.0 );
 	}
 	else
 	{
-		result = static_cast< double >( static_cast< int >( rand() / ( static_cast< double >( RAND_MAX ) + 1.0 ) * val ) );
+		result = static_cast< double >( static_cast< int >( beebasm_rand() / ( static_cast< double >( BEEBASM_RAND_MAX ) + 1.0 ) * val ) );
 	}
 
 	m_valueStack[ m_valueStackPtr - 1 ] = result;

@@ -25,6 +25,7 @@
 
 
 #include <string>
+#include <vector>
 
 
 /*************************************************************************************************/
@@ -115,23 +116,27 @@ class AsmException_SyntaxError : public AsmException
 public:
 
 	AsmException_SyntaxError()
-		:	m_filename( "" ),
-			m_lineNumber( 0 )
+		:	m_column( 0 )
 	{
 	}
 
 	AsmException_SyntaxError( std::string line, int column )
 		:	m_line( line ),
+			m_column( column )
+	{
+	}
+
+	AsmException_SyntaxError( std::string line, int column, std::string extra )
+		:	m_line( line ),
 			m_column( column ),
-			m_filename( "" ),
-			m_lineNumber( 0 )
+			m_extra( extra )
 	{
 	}
 
 	virtual ~AsmException_SyntaxError() {}
 
-	void SetFilename( const std::string& filename )	{ if ( m_filename == "" ) m_filename = filename; }
-	void SetLineNumber( int lineNumber )		{ if ( m_lineNumber == 0 ) m_lineNumber = lineNumber; }
+	void SetFilename( const std::string& filename )	{ m_filename.push_back( filename ); }
+	void SetLineNumber( int lineNumber )		{ m_lineNumber.push_back( lineNumber ); }
 
 	virtual void Print() const;
 	virtual const char* Message() const
@@ -142,10 +147,13 @@ public:
 
 protected:
 
+	std::string	ErrorLocation( size_t i ) const;
+
 	std::string			m_line;
-	int					m_column;
-	std::string			m_filename;
-	int					m_lineNumber;
+	int				m_column;
+	std::string			m_extra;
+	std::vector<std::string>	m_filename;
+	std::vector<int>                m_lineNumber;
 };
 
 
@@ -155,6 +163,19 @@ class AsmException_SyntaxError_##a : public AsmException_SyntaxError		\
 public:																		\
 	AsmException_SyntaxError_##a( std::string line, int column )			\
 		:	AsmException_SyntaxError( line, column ) {}						\
+																			\
+	virtual ~AsmException_SyntaxError_##a() {}								\
+																			\
+	virtual const char* Message() const { return msg; }						\
+}
+
+
+#define DEFINE_SYNTAX_EXCEPTION_EXTRA( a, msg )								\
+class AsmException_SyntaxError_##a : public AsmException_SyntaxError		\
+{																			\
+public:																		\
+	AsmException_SyntaxError_##a( std::string line, int column, std::string extra )			\
+		:	AsmException_SyntaxError( line, column, extra ) {}				\
 																			\
 	virtual ~AsmException_SyntaxError_##a() {}								\
 																			\
@@ -179,6 +200,7 @@ DEFINE_SYNTAX_EXCEPTION( DivisionByZero, "Division by zero." );
 DEFINE_SYNTAX_EXCEPTION( MissingQuote, "Unterminated string." );
 DEFINE_SYNTAX_EXCEPTION( MissingComma, "Missing comma." );
 DEFINE_SYNTAX_EXCEPTION( IllegalOperation, "Operation attempted with invalid or out of range values." );
+DEFINE_SYNTAX_EXCEPTION( TimeResultTooBig, "TIME$() result too big." );
 
 // assembler parsing exceptions
 DEFINE_SYNTAX_EXCEPTION( NoImplied, "Implied mode not allowed for this instruction." );
@@ -190,7 +212,7 @@ DEFINE_SYNTAX_EXCEPTION( NoIndirect, "Indirect mode not allowed for this instruc
 DEFINE_SYNTAX_EXCEPTION( 6502Bug, "JMP (addr) will not execute as intended due to the 6502 bug (addr = &xxFF)." );
 DEFINE_SYNTAX_EXCEPTION( BadIndirect, "Incorrectly formed indirect instruction." );
 DEFINE_SYNTAX_EXCEPTION( NotZeroPage, "Address is not in zero-page." );
-DEFINE_SYNTAX_EXCEPTION( BranchOutOfRange, "Branch out of range." );
+DEFINE_SYNTAX_EXCEPTION_EXTRA( BranchOutOfRange, "Branch out of range." );
 DEFINE_SYNTAX_EXCEPTION( NoAbsolute, "Absolute addressing mode not allowed for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( BadAbsolute, "Syntax error in absolute instruction." );
 DEFINE_SYNTAX_EXCEPTION( BadAddress, "Out of range address." );
@@ -199,12 +221,15 @@ DEFINE_SYNTAX_EXCEPTION( NoIndexedX, "X indexed mode does not exist for this ins
 DEFINE_SYNTAX_EXCEPTION( NoIndexedY, "Y indexed mode does not exist for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( LabelAlreadyDefined, "Symbol already defined." );
 DEFINE_SYNTAX_EXCEPTION( InvalidSymbolName, "Invalid symbol name; must start with a letter and contain only letters, numbers and underscore." );
+DEFINE_SYNTAX_EXCEPTION( SymbolScopeOutsideMacro, "Symbol scope cannot promote outside current macro." );
+DEFINE_SYNTAX_EXCEPTION( SymbolScopeOutsideFor, "Symbol scope cannot promote outside current FOR loop." );
 DEFINE_SYNTAX_EXCEPTION( SecondPassProblem, "Fatal error: the second assembler pass has generated different code to the first." );
 DEFINE_SYNTAX_EXCEPTION( InvalidMacroName, "Invalid macro name; must start with a letter and contain only letters, numbers and underscore." );
 DEFINE_SYNTAX_EXCEPTION( NoNestedMacros, "Cannot define one macro inside another." );
 DEFINE_SYNTAX_EXCEPTION( EndMacroUnexpected, "ENDMACRO encountered without a matching MACRO directive." );
 DEFINE_SYNTAX_EXCEPTION( NoEndMacro, "Unterminated macro (ENDMACRO not found)." );
 DEFINE_SYNTAX_EXCEPTION( DuplicateMacroName, "Macro name already defined." );
+DEFINE_SYNTAX_EXCEPTION( AssertionFailed, "Assertion failed." );
 
 // meta-language parsing exceptions
 DEFINE_SYNTAX_EXCEPTION( NextWithoutFor, "NEXT without FOR." );

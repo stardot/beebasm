@@ -116,6 +116,7 @@ public:
 	void					CopyForStack( const SourceCode* copyFrom );
 
 	inline int 				GetForLevel() const { return m_forStackPtr; }
+	inline int 				GetInitialForStackPtr() const { return m_initialForStackPtr; }
 	inline Macro*			GetCurrentMacro() { return m_currentMacro; }
 
 	std::string				GetSymbolNameSuffix( int level = -1 ) const;
@@ -130,6 +131,7 @@ public:
 	void					RemoveIfLevel( const std::string& line, int column );
 	void					StartMacro( const std::string& line, int column );
 	void					EndMacro( const std::string& line, int column );
+	bool					IsRealForLevel( int level ) const;
 
 
 protected:
