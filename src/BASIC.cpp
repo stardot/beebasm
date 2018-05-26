@@ -694,7 +694,8 @@ bool EncodeLine()
 		}
 	}
 
-	EatCharacters(1);	//either eat a '\n' or have no effect at all
+	if (!EndOfFile && Token == '\n' && !ErrorNum)
+		EatCharacters(1);	// Eat a '\n'
 
 	return true;
 }
