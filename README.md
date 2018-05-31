@@ -288,6 +288,11 @@ Moves the address pointer to the specified address.  An error is generated if th
 Used to align the address pointer to the next boundary, e.g. use `ALIGN &100` to move to the next page (useful perhaps for positioning a table at a page boundary so that index accesses don't incur a "page crossed" penalty.
 
 
+`COPYBLOCK <start>,<end>,<dest>`
+
+Copies a block of assembled data from one location to another.  This is useful to copy code assembled at one location into a program's data area for relocation at run-time.
+
+
 `INCLUDE "filename"`
 
 Includes the specified source file in the code at this point.
