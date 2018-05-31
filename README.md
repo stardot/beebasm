@@ -711,7 +711,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
                   Allow label scope-jumping using '.*label' and '.^label'
                   Allow high bits to be set on load/execution addresses
                   Show branch displacement when "Branch out of range" occurs
-                  Fixed bugs in duplicate filename direction on disc image
+                  Fixed bugs in duplicate filename detection on disc image
                   Fixed spurious "Branch out of range" error in rare case
 19/01/2012  1.08  Fixed makefile for GCC (MinGW) builds.
                   Added COPYBLOCK command to manage blocks of memory.
