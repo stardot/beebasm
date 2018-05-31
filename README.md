@@ -1,5 +1,5 @@
 # BeebAsm
-**Version V1.09**
+**Version V1.10-pre**
 
 A portable 6502 assembler with BBC Micro style syntax
 
@@ -698,6 +698,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
+??/??/????  1.10  ?????
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
