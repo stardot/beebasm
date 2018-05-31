@@ -754,7 +754,7 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 	{
 		/* get line number */
 			/* skip white space and empty lines */
-			while(Token == ' ' || Token == '\t' || Token == '\r' || Token == '\n')
+			while(!EndOfFile && (Token == ' ' || Token == '\t' || Token == '\r' || Token == '\n'))
 				EatCharacters(1);
 				
 			/* end of file? */
