@@ -50,6 +50,11 @@ ORG 0
 .behindflag		SKIP 1
 
 
+\\ Seed the random number generator so the build is repeatable
+
+RANDOMIZE 42
+
+
 \\ Set start address
 
 ORG &1100

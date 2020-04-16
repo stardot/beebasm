@@ -1,9 +1,9 @@
 /*************************************************************************************************/
 /**
-	discimage.h
+	constants.h
 
 
-	Copyright (C) Rich Talbot-Watkins 2007 - 2012
+	Copyright (C) 2018
 
 	This file is part of BeebAsm.
 
@@ -20,31 +20,10 @@
 */
 /*************************************************************************************************/
 
-#ifndef DISCIMAGE_H_
-#define DISCIMAGE_H_
+#ifndef CONSTANTS_H_
+#define CONSTANTS_H_
 
-#include <fstream>
+// openbsd's M_PI contains a C-style cast, which clashes with gcc's -Wold-style-cast
+const double const_pi = 3.14159265358979323846;
 
-
-class DiscImage
-{
-public:
-
-	explicit DiscImage( const char* pOutput, const char* pInput = NULL );
-	~DiscImage();
-
-	void AddFile( const char* pName, const unsigned char* pAddr, int load, int exec, int len );
-
-
-private:
-
-	std::ofstream				m_outputFile;
-	std::ifstream				m_inputFile;
-	const char*					m_outputFilename;
-	unsigned char				m_aCatalog[ 0x200 ];
-
-};
-
-
-
-#endif // DISCIMAGE_H_
+#endif // CONSTANTS_H_

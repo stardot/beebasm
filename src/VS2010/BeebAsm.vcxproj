@@ -44,7 +44,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -59,7 +59,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -85,6 +85,7 @@
     <ClCompile Include="..\macro.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\objectcode.cpp" />
+    <ClCompile Include="..\random.cpp" />
     <ClCompile Include="..\sourcecode.cpp" />
     <ClCompile Include="..\sourcefile.cpp" />
     <ClCompile Include="..\stringutils.cpp" />
@@ -93,12 +94,14 @@
   <ItemGroup>
     <ClInclude Include="..\asmexception.h" />
     <ClInclude Include="..\BASIC.h" />
+    <ClInclude Include="..\constants.h" />
     <ClInclude Include="..\discimage.h" />
     <ClInclude Include="..\globaldata.h" />
     <ClInclude Include="..\lineparser.h" />
     <ClInclude Include="..\macro.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\objectcode.h" />
+    <ClInclude Include="..\random.h" />
     <ClInclude Include="..\sourcecode.h" />
     <ClInclude Include="..\sourcefile.h" />
     <ClInclude Include="..\stringutils.h" />

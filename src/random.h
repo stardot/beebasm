@@ -1,9 +1,10 @@
 /*************************************************************************************************/
 /**
-	discimage.h
+	random.h
 
 
 	Copyright (C) Rich Talbot-Watkins 2007 - 2012
+	Copyright (C) Steven Flintham 2016
 
 	This file is part of BeebAsm.
 
@@ -20,31 +21,15 @@
 */
 /*************************************************************************************************/
 
-#ifndef DISCIMAGE_H_
-#define DISCIMAGE_H_
+#ifndef RANDOM_H_
+#define RANDOM_H_
 
-#include <fstream>
+#define BEEBASM_RAND_MULTIPLIER (48271UL)
+#define BEEBASM_RAND_MODULUS (2147483647UL)
+#define BEEBASM_RAND_MAX (BEEBASM_RAND_MODULUS - 2UL)
 
+void beebasm_srand(unsigned long seed);
 
-class DiscImage
-{
-public:
+unsigned long beebasm_rand();
 
-	explicit DiscImage( const char* pOutput, const char* pInput = NULL );
-	~DiscImage();
-
-	void AddFile( const char* pName, const unsigned char* pAddr, int load, int exec, int len );
-
-
-private:
-
-	std::ofstream				m_outputFile;
-	std::ifstream				m_inputFile;
-	const char*					m_outputFilename;
-	unsigned char				m_aCatalog[ 0x200 ];
-
-};
-
-
-
-#endif // DISCIMAGE_H_
+#endif // RANDOM_H_

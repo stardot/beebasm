@@ -25,6 +25,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <sstream>
 
 #include "lineparser.h"
 #include "globaldata.h"
@@ -152,6 +153,21 @@ int LineParser::GetInstructionAndAdvanceColumn()
 			{
 				bMatch = false;
 				break;
+			}
+		}
+
+		// The token matches so far, but (optionally) check there's nothing after it; this prevents 
+		// false matches where a macro name begins with an opcode, at the cost of disallowing 
+		// things like "foo=&70:stafoo".
+		if ( GlobalData::Instance().RequireDistinctOpcodes() && bMatch )
+		{
+			std::string::size_type k = m_column + len;
+			if ( k < m_line.length() )
+			{
+				if ( isalpha( m_line[ k ] ) || m_line[ k ] == '_' )
+				{
+					bMatch = false;
+				}
 			}
 		}
 
@@ -695,6 +711,18 @@ void LineParser::HandleAssembler( int instruction )
 	try
 	{
 		value = EvaluateExpressionAsInt();
+		
+		// If this is relative addressing and we're on the first pass, we don't
+		// use the value we just calculated. This is because we may have
+		// successfully evaluated the expression but obtained the wrong value
+		// because it's intended as a forward reference to a local label but
+		// there's an earlier definition in an outer scope - value would evaluate
+		// successfully to use the wrong label, and we might get a spurious branch
+		// out of range error. See local-forward-branch-1.6502 for an example.
+		if ( HasAddressingMode( instruction, REL ) && GlobalData::Instance().IsFirstPass() )
+		{
+			value = ObjectCode::Instance().GetPC();
+		}
 	}
 	catch ( AsmException_SyntaxError_SymbolNotDefined& )
 	{
@@ -721,14 +749,24 @@ void LineParser::HandleAssembler( int instruction )
 		{
 			int branchAmount = value - ( ObjectCode::Instance().GetPC() + 2 );
 
-			if ( branchAmount >= -128 && branchAmount <= 127 )
+			if ( branchAmount < -128 )
 			{
-				Assemble2( instruction, REL, branchAmount & 0xFF );
-				return;
+				ostringstream extra;
+				extra << " (Branch distance is " << branchAmount << " bytes; " << 
+						 ( -branchAmount - 128 ) << " more than the maximum -128.)";
+				throw AsmException_SyntaxError_BranchOutOfRange( m_line, oldColumn, extra.str() );
+			}
+			else if ( branchAmount > 127 )
+			{
+				ostringstream extra;
+				extra << " (Branch distance is " << branchAmount << " bytes; " << 
+						 ( branchAmount - 127 ) << " more than the maximum 127.)";
+				throw AsmException_SyntaxError_BranchOutOfRange( m_line, oldColumn, extra.str() );
 			}
 			else
 			{
-				throw AsmException_SyntaxError_BranchOutOfRange( m_line, oldColumn );
+				Assemble2( instruction, REL, branchAmount & 0xFF );
+				return;
 			}
 		}
 

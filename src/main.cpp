@@ -36,12 +36,13 @@
 #include "discimage.h"
 #include "BASIC.h"
 #include "macro.h"
+#include "random.h"
 
 
 using namespace std;
 
 
-#define VERSION "1.08"
+#define VERSION "1.09"
 
 
 /*************************************************************************************************/
@@ -70,13 +71,16 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_DISC_INPUT_FILENAME,
 		WAITING_FOR_DISC_OUTPUT_FILENAME,
 		WAITING_FOR_BOOT_FILENAME,
-		WAITING_FOR_DISC_OPTION
+		WAITING_FOR_DISC_OPTION,
+		WAITING_FOR_DISC_TITLE,
+		WAITING_FOR_SYMBOL
 
 	} state = READY;
 
 	bool bDumpSymbols = false;
 
 	GlobalData::Create();
+	SymbolTable::Create();
 
 	// Parse command line parameters
 
@@ -110,6 +114,18 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_DISC_OPTION;
 				}
+				else if ( strcmp( argv[i], "-title" ) == 0 )
+				{
+					state = WAITING_FOR_DISC_TITLE;
+				}
+				else if ( strcmp( argv[i], "-w" ) == 0 )
+				{
+					GlobalData::Instance().SetRequireDistinctOpcodes( true );
+				}
+				else if ( strcmp( argv[i], "-vc" ) == 0 )
+				{
+					GlobalData::Instance().SetUseVisualCppErrorFormat( true );
+				}
 				else if ( strcmp( argv[i], "-v" ) == 0 )
 				{
 					GlobalData::Instance().SetVerbose( true );
@@ -117,6 +133,10 @@ int main( int argc, char* argv[] )
 				else if ( strcmp( argv[i], "-d" ) == 0 )
 				{
 					bDumpSymbols = true;
+				}
+				else if ( strcmp( argv[i], "-D" ) == 0 )
+				{
+					state = WAITING_FOR_SYMBOL;
 				}
 				else if ( strcmp( argv[i], "--help" ) == 0 )
 				{
@@ -128,8 +148,12 @@ int main( int argc, char* argv[] )
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
+					cout << " -title <title> Specify the title for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
+					cout << " -w             Require whitespace between opcodes and labels" << endl;
+					cout << " -vc            Use Visual C++-style error messages" << endl;
+					cout << " -D <sym>=<val> Define symbol prior to assembly" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
@@ -183,6 +207,27 @@ int main( int argc, char* argv[] )
 				GlobalData::Instance().SetDiscOption( std::strtol( argv[i], NULL, 10 ) );
 				state = READY;
 				break;
+
+			case WAITING_FOR_DISC_TITLE:
+
+				if ( strlen( argv[i] ) > 12 )
+				{
+					cerr << "Disc title cannot be longer than 12 characters" << endl;
+					return EXIT_FAILURE;
+				}
+				GlobalData::Instance().SetDiscTitle( argv[i] );
+				state = READY;
+                                break;
+
+			case WAITING_FOR_SYMBOL:
+
+				if ( ! SymbolTable::Instance().AddCommandLineSymbol( argv[i] ) )
+				{
+					cerr << "Invalid -D expression: " << argv[i] << endl;
+					return EXIT_FAILURE;
+				}
+				state = READY;
+				break;
 		}
 	}
 
@@ -213,7 +258,6 @@ int main( int argc, char* argv[] )
 
 	int exitCode = EXIT_SUCCESS;
 
-	SymbolTable::Create();
 	ObjectCode::Create();
 	MacroTable::Create();
 	SetupBASICTables();
@@ -235,7 +279,7 @@ int main( int argc, char* argv[] )
 			GlobalData::Instance().SetPass( pass );
 			ObjectCode::Instance().InitialisePass();
 			GlobalData::Instance().ResetForId();
-			srand( static_cast< unsigned int >( randomSeed ) );
+			beebasm_srand( static_cast< unsigned long >( randomSeed ) );
 			SourceFile input( pInputFile );
 			input.Process();
 		}
