@@ -693,6 +693,8 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
+??/??/????  1.10? Fixed incorrect line number for errors inside macros with
+				  blank lines inside them.
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
