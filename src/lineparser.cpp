@@ -73,8 +73,10 @@ LineParser::~LineParser()
 /*************************************************************************************************/
 void LineParser::Process()
 {
+	bool bProcessedSomething = false;
 	while ( AdvanceAndCheckEndOfLine() )	// keep going until we reach the end of the line
 	{
+		bProcessedSomething = true;
 //		cout << m_line << endl << string( m_column, ' ' ) << "^" << endl;
 
 		int oldColumn = m_column;
@@ -281,6 +283,18 @@ void LineParser::Process()
 		// If we got this far, we didn't recognise anything, so throw an error
 
 		throw AsmException_SyntaxError_UnrecognisedToken( m_line, oldColumn );
+	}
+
+	// If we didn't process anything, i.e. this is a blank line, we must still call SkipStatement()
+	// if we're defining a macro, otherwise blank lines inside macro definitions cause incorrect
+	// line numbers to be reported for errors when expanding a macro definition.
+	if ( !bProcessedSomething )
+	{
+		if ( !m_sourceCode->IsIfConditionTrue() )
+		{
+			m_column = 0;
+			SkipStatement();
+		}
 	}
 }
 
