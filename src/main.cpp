@@ -153,6 +153,7 @@ int main( int argc, char* argv[] )
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
+					cout << " -writes <n>    Specify the write count for the generated disc image" << endl;
 					cout << " -title <title> Specify the title for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;

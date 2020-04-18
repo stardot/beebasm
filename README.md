@@ -131,6 +131,10 @@ If specifed, BeebAsm will create a !Boot file on the new disc image, containing 
 
 If specified, this sets the disc option of the generated disc image (i.e. the `*OPT 4,n` value) to the value specified.  This overrides the -boot option.
 
+`-writes <value>`
+
+If specified, this sets the write count of the generated disc image (i.e. the value show in brackets after the disc title in a catalogue) to the value specified.  This defaults to 0 if not specified.
+
 `-title <title>`
 
 If specified, this sets the disc title of the generated disc image (i.e. the string set by `*TITLE`) to the value specified.
@@ -693,6 +697,8 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
+??/??/????  1.10?
+                  Added command line option: -writes
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
