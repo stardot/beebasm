@@ -76,6 +76,7 @@ GlobalData::GlobalData()
 		m_pOutputFile( NULL ),
 		m_numAnonSaves( 0 ),
 		m_discOption( 0 ),
+		m_discWrites( -1 ),
 		m_assemblyTime( time( NULL ) ),
 		m_bRequireDistinctOpcodes( false ),
 		m_bUseVisualCppErrorFormat( false )

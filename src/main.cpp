@@ -73,6 +73,7 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_BOOT_FILENAME,
 		WAITING_FOR_DISC_OPTION,
 		WAITING_FOR_DISC_TITLE,
+		WAITING_FOR_DISC_WRITES,
 		WAITING_FOR_SYMBOL
 
 	} state = READY;
@@ -117,6 +118,10 @@ int main( int argc, char* argv[] )
 				else if ( strcmp( argv[i], "-title" ) == 0 )
 				{
 					state = WAITING_FOR_DISC_TITLE;
+				}
+				else if ( strcmp( argv[i], "-writes" ) == 0 )
+				{
+					state = WAITING_FOR_DISC_WRITES;
 				}
 				else if ( strcmp( argv[i], "-w" ) == 0 )
 				{
@@ -218,6 +223,12 @@ int main( int argc, char* argv[] )
 				GlobalData::Instance().SetDiscTitle( argv[i] );
 				state = READY;
                                 break;
+
+			case WAITING_FOR_DISC_WRITES:
+
+				GlobalData::Instance().SetDiscWrites( std::strtol( argv[i], NULL, 10 ) );
+				state = READY;
+				break;
 
 			case WAITING_FOR_SYMBOL:
 
