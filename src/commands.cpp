@@ -1754,7 +1754,7 @@ void LineParser::HandlePutFileCommon( bool bText )
 				{
 					// swallow other half of CRLF/LFCR, if present
 					int other_half = ( c == '\n' ) ? '\r' : '\n';
-					ifstream::streampos p = inputFile.tellg();
+					std::streampos p = inputFile.tellg();
 					if ( inputFile.get() != other_half )
 					{
 						inputFile.seekg( p );
