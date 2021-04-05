@@ -129,6 +129,11 @@ double LineParser::GetValue()
 		istringstream str( m_line );
 		str.seekg( m_column );
 		str >> value;
+		if (str.fail())
+		{
+			// A decimal point with no number will cause this
+			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+		}
 		m_column = static_cast< size_t >( str.tellg() );
 	}
 	else if ( m_column < m_line.length() && ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' ) )
