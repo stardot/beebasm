@@ -1,0 +1,10 @@
+# https://editorconfig.org/
+
+root = true
+
+[*]
+end_of_line = crlf
+insert_final_newline = true
+
+[*.{c,h,cpp}]
+indent_style = tab
