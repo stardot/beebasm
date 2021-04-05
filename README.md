@@ -706,6 +706,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Fixed tokenisation of BASIC pseudo-variables in some cases.
 		  Fixed incorrect line number for errors inside macros with
 		  blank lines inside them.
+		  Fixed incorrect line numbers from PUTBASIC in some cases.
 		  TODO: OTHER CHANGES
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
