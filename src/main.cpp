@@ -42,7 +42,7 @@
 using namespace std;
 
 
-#define VERSION "1.09"
+#define VERSION "1.10-pre"
 
 
 /*************************************************************************************************/
@@ -138,7 +138,9 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_SYMBOL;
 				}
-				else if ( strcmp( argv[i], "--help" ) == 0 )
+				else if ( ( strcmp( argv[i], "--help" ) == 0 ) ||
+					  ( strcmp( argv[i], "-help" ) == 0 ) ||
+					  ( strcmp( argv[i], "-h" ) == 0 ) )
 				{
 					cout << "beebasm " VERSION << endl << endl;
 					cout << "Possible options:" << endl;

@@ -1,5 +1,5 @@
 # BeebAsm
-**Version V1.09**
+**Version V1.10-pre**
 
 A portable 6502 assembler with BBC Micro style syntax
 
@@ -182,7 +182,7 @@ Instructions can be written one-per-line, or many on one line, separated by colo
 
 Comments are introduced by a semicolon or backslash.  Unlike the BBC Micro assembler, these continue to the end of the line, and are not terminated by a colon (because this BBC Micro feature is horrible!).
 
-Numeric literals are in decimal by default, and can be integers or reals. Hex literals are prefixed with `"&"`. A character in single quotes (e.g. `'A'`) returns its ASCII code.
+Numeric literals are in decimal by default, and can be integers or reals. Hex literals are prefixed with `"&"` or `"$"`, binary literals are prefixed with `"%"`. A character in single quotes (e.g. `'A'`) returns its ASCII code.
 
 BeebAsm can accept complex expressions, using a wide variety of operators and functions.  Here's a summary:
 
@@ -286,6 +286,11 @@ Moves the address pointer to the specified address.  An error is generated if th
 `ALIGN <alignment>`
 
 Used to align the address pointer to the next boundary, e.g. use `ALIGN &100` to move to the next page (useful perhaps for positioning a table at a page boundary so that index accesses don't incur a "page crossed" penalty.
+
+
+`COPYBLOCK <start>,<end>,<dest>`
+
+Copies a block of assembled data from one location to another.  This is useful to copy code assembled at one location into a program's data area for relocation at run-time.
 
 
 `INCLUDE "filename"`
@@ -693,8 +698,15 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
-??/??/????  1.10? Fixed incorrect line number for errors inside macros with
+??/??/????  1.10  Documented "$" and "%" as literal prefixes (thanks to
+                  cardboardguru76 for pointing this out)
+		  Fixed silently treating label references starting with "."
+		  as 0 (thanks to mungre for this fix)
+		  Allowed "-h" and "-help" options to see help
+		  Fixed tokenisation of BASIC pseudo-variables in some cases
+      Fixed incorrect line number for errors inside macros with
 				  blank lines inside them.
+		  TODO: OTHER CHANGES
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
@@ -708,7 +720,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
                   Allow label scope-jumping using '.*label' and '.^label'
                   Allow high bits to be set on load/execution addresses
                   Show branch displacement when "Branch out of range" occurs
-                  Fixed bugs in duplicate filename direction on disc image
+                  Fixed bugs in duplicate filename detection on disc image
                   Fixed spurious "Branch out of range" error in rare case
 19/01/2012  1.08  Fixed makefile for GCC (MinGW) builds.
                   Added COPYBLOCK command to manage blocks of memory.
