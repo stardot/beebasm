@@ -699,13 +699,13 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 ## 9. VERSION HISTORY
 ```
 ??/??/????  1.10  Documented "$" and "%" as literal prefixes (thanks to
-                  cardboardguru76 for pointing this out)
+                  cardboardguru76 for pointing this out).
 		  Fixed silently treating label references starting with "."
-		  as 0 (thanks to mungre for this fix)
-		  Allowed "-h" and "-help" options to see help
-		  Fixed tokenisation of BASIC pseudo-variables in some cases
-      Fixed incorrect line number for errors inside macros with
-				  blank lines inside them.
+		  as 0 (thanks to mungre for this fix).
+		  Allowed "-h" and "-help" options to see help.
+		  Fixed tokenisation of BASIC pseudo-variables in some cases.
+		  Fixed incorrect line number for errors inside macros with
+		  blank lines inside them.
 		  TODO: OTHER CHANGES
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
