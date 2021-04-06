@@ -383,6 +383,8 @@ Examples:
 PRINT "Value of label 'start' =", ~start
 PRINT "numdots =", numdots, "dottable size =", dotend-dotstart
 ```
+
+You can use `FILELINE$` in PRINT commands to show the current file and line number. `CALLSTACK$` will do the same but for all the parent macro and include files as well. See `examples/filelinecallstackdemo.6502` for an example of their use.
 			
 `ERROR "message"`
 
@@ -708,7 +710,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Fixed incorrect line number for errors inside macros with
 		  blank lines inside them.
 		  Fixed incorrect line numbers from PUTBASIC in some cases.
-		  TODO: OTHER CHANGES
+		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
