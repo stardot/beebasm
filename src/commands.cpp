@@ -618,7 +618,7 @@ void LineParser::HandleInclude()
 			cerr << "Including file " << filename << endl;
 		}
 
-		SourceFile input( filename.c_str() );
+		SourceFile input( filename.c_str(), m_sourceCode );
 		input.Process();
 	}
 
@@ -1538,6 +1538,8 @@ void LineParser::HandlePrint()
 			StringUtils::EatWhitespace( m_line, m_column );
 			const char* filelineKeyword = "FILELINE$";
 			const int filelineKeywordLength = 9;
+			const char* callstackKeyword = "CALLSTACK$";
+			const int callstackKeywordLength = 10;
 
 			if ( !strncmp( m_line.c_str() + m_column, filelineKeyword, filelineKeywordLength ) )
 			{
@@ -1546,6 +1548,18 @@ void LineParser::HandlePrint()
 					cout << StringUtils::FormattedErrorLocation( m_sourceCode->GetFilename(), m_sourceCode->GetLineNumber() );
 				}
 				m_column += filelineKeywordLength ;
+			}
+			else if ( !strncmp( m_line.c_str() + m_column, callstackKeyword, callstackKeywordLength ) )
+			{
+				if ( !GlobalData::Instance().IsFirstPass() )
+				{
+					cout << StringUtils::FormattedErrorLocation( m_sourceCode->GetFilename(), m_sourceCode->GetLineNumber() );
+					for ( const SourceCode* s = m_sourceCode->GetParent(); s; s = s->GetParent() )
+					{
+						cout << endl << StringUtils::FormattedErrorLocation( s->GetFilename(), s->GetLineNumber() );
+					}
+				}
+				m_column += callstackKeywordLength;
 			}
 			else
 			{

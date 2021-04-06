@@ -282,7 +282,7 @@ int main( int argc, char* argv[] )
 			ObjectCode::Instance().InitialisePass();
 			GlobalData::Instance().ResetForId();
 			beebasm_srand( static_cast< unsigned long >( randomSeed ) );
-			SourceFile input( pInputFile );
+			SourceFile input( pInputFile, 0 );
 			input.Process();
 		}
 	}
