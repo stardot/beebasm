@@ -21,6 +21,8 @@
 /*************************************************************************************************/
 
 #include <iostream>
+#include <sstream>
+#include "globaldata.h"
 #include "stringutils.h"
 
 using namespace std;
@@ -87,6 +89,34 @@ bool EatWhitespace( const string& line, size_t& column )
 		column = newColumn;
 		return true;
 	}
+}
+
+
+
+/*************************************************************************************************/
+/**
+	FormttedErrorLocation()
+
+	Return an error location formatted according to the command line options.
+
+	@param		filename		Filename
+	@param		lineNumber		Line number
+
+	@return		string			Error location string
+*/
+/*************************************************************************************************/
+std::string FormattedErrorLocation( const std::string& filename, int lineNumber )
+{
+	std::stringstream s;
+	if ( GlobalData::Instance().UseVisualCppErrorFormat() )
+	{
+		s << filename << "(" << lineNumber << ")";
+	}
+	else
+	{
+		s << filename << ":" << lineNumber;
+	}
+	return s.str();
 }
 
 
