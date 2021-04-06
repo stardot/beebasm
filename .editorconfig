@@ -8,3 +8,4 @@ insert_final_newline = true
 
 [*.{c,h,cpp}]
 indent_style = tab
+tab_width = 4
