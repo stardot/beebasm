@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <map>
 #include <string>
+#include <vector>
 
 
 class SymbolTable
@@ -44,8 +45,12 @@ public:
 	bool IsSymbolDefined( const std::string& symbol ) const;
 	void RemoveSymbol( const std::string& symbol );
 
-	void Dump() const;
+	void Dump(bool global, bool all, const char * labels_file) const; // labels_file == nullptr -> stdout
 
+	void PushBrace();
+	void PushFor(std::string symbol, double value);
+	void AddLabel(const std::string & symbol);
+	void PopScope();
 
 private:
 
@@ -71,6 +76,17 @@ private:
 	std::map<std::string, Symbol>	m_map;
 
 	static SymbolTable*				m_gInstance;
+
+	int m_labelScopes;
+	struct Label
+	{
+		int         m_addr;
+		int         m_scope;
+		std::string m_identifier; // "" -> using label from parent scope
+		Label(int addr = 0, int scope = 0, const std::string & identifier = "") : m_addr(addr), m_scope(scope), m_identifier(identifier) {}
+	} last_label;
+	std::vector<Label> m_labelStack;
+	std::vector<Label> m_labelList;
 };
 
 

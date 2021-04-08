@@ -155,6 +155,14 @@ Use Visual C++-style error messages.
 
 Dumps all global symbols in Swift-compatible format after assembly. This is used internally by Swift, and is just documented for completeness.
 
+`-dd`
+
+Dumps all global and local symbols in Swift-compatible format after assembly.
+
+`-labels <file>`
+
+Write the output of `-d` or `-dd` to the specified file instead of standard output.
+
 `-w`
 
 If specified, there must be whitespace between opcodes and their labels. This introduces an incompatibility with the BBC BASIC assembler, which allows things like `ck_axy=&70:stack_axy` (i.e. `STA &70`), but makes it possible for macros to have names which begin with an opcode name, e.g.:
@@ -715,7 +723,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  blank lines inside them.
 		  Fixed incorrect line numbers from PUTBASIC in some cases.
 		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
-		  Added -writes option (thanks to tricky for this)
+		  Added -writes, -dd and -labels options (thanks to tricky for these)
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT

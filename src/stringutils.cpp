@@ -95,7 +95,7 @@ bool EatWhitespace( const string& line, size_t& column )
 
 /*************************************************************************************************/
 /**
-	FormttedErrorLocation()
+	FormattedErrorLocation()
 
 	Return an error location formatted according to the command line options.
 
