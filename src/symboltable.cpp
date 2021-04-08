@@ -355,14 +355,14 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 
 	if (all)
 	{
-		for (const Label & label : m_labelList)
+		for ( std::vector<Label>::const_iterator it = m_labelList.begin(); it != m_labelList.end(); ++it )
 		{
 			if ( !bFirst )
 			{
 				cout << ",";
 			}
 
-			cout << "'" << label.m_identifier << "':" << label.m_addr << "L";
+			cout << "'" << it->m_identifier << "':" << it->m_addr << "L";
 
 			bFirst = false;
 		}
@@ -376,14 +376,14 @@ void SymbolTable::PushBrace()
 	if (GlobalData::Instance().IsSecondPass())
 	{
 		int addr = ObjectCode::Instance().GetPC();
-		if (last_label.m_addr != addr)
+		if (m_lastLabel.m_addr != addr)
 		{
-			std::ostringstream label; label << "._" << (m_labelScopes - last_label.m_scope);
-			last_label.m_identifier = (m_labelStack.empty() ? "" : m_labelStack.back().m_identifier) + label.str();
-			last_label.m_addr = addr;
+			std::ostringstream label; label << "._" << (m_labelScopes - m_lastLabel.m_scope);
+			m_lastLabel.m_identifier = (m_labelStack.empty() ? "" : m_labelStack.back().m_identifier) + label.str();
+			m_lastLabel.m_addr = addr;
 		}
-		last_label.m_scope = m_labelScopes++;
-		m_labelStack.push_back(last_label);
+		m_lastLabel.m_scope = m_labelScopes++;
+		m_labelStack.push_back(m_lastLabel);
 	}
 }
 
@@ -394,10 +394,10 @@ void SymbolTable::PushFor(std::string symbol, double value)
 		int addr = ObjectCode::Instance().GetPC();
 		symbol = symbol.substr(0, symbol.find_first_of('@'));
 		std::ostringstream label; label << "._" << symbol << "_" << value;
-		last_label.m_identifier += label.str();
-		last_label.m_addr  = addr;
-		last_label.m_scope = m_labelScopes++;
-		m_labelStack.push_back(last_label);
+		m_lastLabel.m_identifier += label.str();
+		m_lastLabel.m_addr  = addr;
+		m_lastLabel.m_scope = m_labelScopes++;
+		m_labelStack.push_back(m_lastLabel);
 	}
 }
 
@@ -406,9 +406,9 @@ void SymbolTable::AddLabel(const std::string& symbol)
 	if (GlobalData::Instance().IsSecondPass())
 	{
 		int addr = ObjectCode::Instance().GetPC();
-		last_label.m_identifier = (m_labelStack.empty() ? "" : m_labelStack.back().m_identifier) + "." + symbol;
-		last_label.m_addr = addr;
-		m_labelList.emplace_back(last_label);
+		m_lastLabel.m_identifier = (m_labelStack.empty() ? "" : m_labelStack.back().m_identifier) + "." + symbol;
+		m_lastLabel.m_addr = addr;
+		m_labelList.push_back(m_lastLabel);
 	}
 }
 
@@ -417,6 +417,6 @@ void SymbolTable::PopScope()
 	if (GlobalData::Instance().IsSecondPass())
 	{
 		m_labelStack.pop_back();
-		last_label = m_labelStack.empty() ? Label() : m_labelStack.back();
+		m_lastLabel = m_labelStack.empty() ? Label() : m_labelStack.back();
 	}
 }

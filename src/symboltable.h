@@ -84,7 +84,7 @@ private:
 		int         m_scope;
 		std::string m_identifier; // "" -> using label from parent scope
 		Label(int addr = 0, int scope = 0, const std::string & identifier = "") : m_addr(addr), m_scope(scope), m_identifier(identifier) {}
-	} last_label;
+	} m_lastLabel;
 	std::vector<Label> m_labelStack;
 	std::vector<Label> m_labelList;
 };
