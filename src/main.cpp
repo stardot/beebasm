@@ -73,6 +73,7 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_BOOT_FILENAME,
 		WAITING_FOR_DISC_OPTION,
 		WAITING_FOR_DISC_TITLE,
+		WAITING_FOR_DISC_WRITES,
 		WAITING_FOR_SYMBOL
 
 	} state = READY;
@@ -118,6 +119,10 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_DISC_TITLE;
 				}
+				else if ( strcmp( argv[i], "-writes" ) == 0 )
+				{
+					state = WAITING_FOR_DISC_WRITES;
+				}
 				else if ( strcmp( argv[i], "-w" ) == 0 )
 				{
 					GlobalData::Instance().SetRequireDistinctOpcodes( true );
@@ -151,6 +156,7 @@ int main( int argc, char* argv[] )
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
 					cout << " -title <title> Specify the title for the generated disc image" << endl;
+					cout << " -writes <n>    Specify the number of writes for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " -w             Require whitespace between opcodes and labels" << endl;
@@ -220,6 +226,12 @@ int main( int argc, char* argv[] )
 				GlobalData::Instance().SetDiscTitle( argv[i] );
 				state = READY;
                                 break;
+
+			case WAITING_FOR_DISC_WRITES:
+
+				GlobalData::Instance().SetDiscWrites( std::strtol( argv[i], NULL, 10 ) );
+				state = READY;
+				break;
 
 			case WAITING_FOR_SYMBOL:
 

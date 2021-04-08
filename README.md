@@ -135,6 +135,10 @@ If specified, this sets the disc option of the generated disc image (i.e. the `*
 
 If specified, this sets the disc title of the generated disc image (i.e. the string set by `*TITLE`) to the value specified.
 
+`-writes <n>`
+
+If specified, this sets the number of writes for the generated disc image (i.e. the number shown next to the title in the disc catalogue) to the value specified.
+
 `-di <filename>`
 
 If specified, BeebAsm will use this disc image as a template for the new disc image, rather than creating a new blank one.  This is useful if you have a BASIC loader which you want to run before your executable.  Note this cannot be the same as the `-do` filename!
@@ -708,6 +712,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Fixed incorrect line number for errors inside macros with
 		  blank lines inside them.
 		  Fixed incorrect line numbers from PUTBASIC in some cases.
+		  Added -writes option (thanks to tricky for this)
 		  TODO: OTHER CHANGES
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)

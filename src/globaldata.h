@@ -49,6 +49,7 @@ public:
 	inline void SetOutputFile( const char* p )	{ m_pOutputFile = p; }
 	inline void IncNumAnonSaves()				{ m_numAnonSaves++; }
 	inline void SetDiscOption( int opt )		{ m_discOption = opt; }
+	inline void SetDiscWrites( int num )		{ m_discWrites = num; }
 	inline void SetDiscTitle( const std::string& t )  
 												{ m_discTitle = t; }
 	inline void SetRequireDistinctOpcodes ( bool b )
@@ -68,6 +69,7 @@ public:
 	inline const char* GetOutputFile() const	{ return m_pOutputFile; }
 	inline int GetNumAnonSaves() const			{ return m_numAnonSaves; }
 	inline int GetDiscOption() const			{ return m_discOption; }
+	inline int GetDiscWrites() const			{ return m_discWrites; }
 	inline const std::string& GetDiscTitle() const
 												{ return m_discTitle; }
 	inline time_t GetAssemblyTime() const		{ return m_assemblyTime; }
@@ -91,6 +93,7 @@ private:
 	const char*					m_pOutputFile;
 	int							m_numAnonSaves;
 	int							m_discOption;
+	int							m_discWrites;
 	std::string					m_discTitle;
 	time_t						m_assemblyTime;
 	bool						m_bRequireDistinctOpcodes;
