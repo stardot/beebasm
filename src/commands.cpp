@@ -31,6 +31,7 @@
 #include "lineparser.h"
 #include "globaldata.h"
 #include "objectcode.h"
+#include "stringutils.h"
 #include "symboltable.h"
 #include "sourcefile.h"
 #include "asmexception.h"
@@ -617,7 +618,7 @@ void LineParser::HandleInclude()
 			cerr << "Including file " << filename << endl;
 		}
 
-		SourceFile input( filename.c_str() );
+		SourceFile input( filename.c_str(), m_sourceCode );
 		input.Process();
 	}
 
@@ -1534,29 +1535,58 @@ void LineParser::HandlePrint()
 		}
 		else
 		{
-			// print in dec
+			StringUtils::EatWhitespace( m_line, m_column );
+			const char* filelineKeyword = "FILELINE$";
+			const int filelineKeywordLength = 9;
+			const char* callstackKeyword = "CALLSTACK$";
+			const int callstackKeywordLength = 10;
 
-			double value;
-
-			try
+			if ( !strncmp( m_line.c_str() + m_column, filelineKeyword, filelineKeywordLength ) )
 			{
-				value = EvaluateExpression();
-			}
-			catch ( AsmException_SyntaxError_SymbolNotDefined& )
-			{
-				if ( GlobalData::Instance().IsFirstPass() )
+				if ( !GlobalData::Instance().IsFirstPass() )
 				{
-					value = 0.0;
+					cout << StringUtils::FormattedErrorLocation( m_sourceCode->GetFilename(), m_sourceCode->GetLineNumber() );
 				}
-				else
-				{
-					throw;
-				}
+				m_column += filelineKeywordLength ;
 			}
-
-			if ( GlobalData::Instance().IsSecondPass() )
+			else if ( !strncmp( m_line.c_str() + m_column, callstackKeyword, callstackKeywordLength ) )
 			{
-				cout << value << " ";
+				if ( !GlobalData::Instance().IsFirstPass() )
+				{
+					cout << StringUtils::FormattedErrorLocation( m_sourceCode->GetFilename(), m_sourceCode->GetLineNumber() );
+					for ( const SourceCode* s = m_sourceCode->GetParent(); s; s = s->GetParent() )
+					{
+						cout << endl << StringUtils::FormattedErrorLocation( s->GetFilename(), s->GetLineNumber() );
+					}
+				}
+				m_column += callstackKeywordLength;
+			}
+			else
+			{
+				// print in dec
+
+				double value;
+
+				try
+				{
+					value = EvaluateExpression();
+				}
+				catch ( AsmException_SyntaxError_SymbolNotDefined& )
+				{
+					if ( GlobalData::Instance().IsFirstPass() )
+					{
+						value = 0.0;
+					}
+					else
+					{
+						throw;
+					}
+				}
+
+				if ( GlobalData::Instance().IsSecondPass() )
+				{
+					cout << value << " ";
+				}
 			}
 		}
 	}

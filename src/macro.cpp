@@ -60,7 +60,7 @@ Macro::Macro( const string& filename, int lineNumber )
 */
 /*************************************************************************************************/
 MacroInstance::MacroInstance( const Macro* macro, const SourceCode* sourceCode )
-	:	SourceCode( macro->GetFilename(), macro->GetLineNumber() ),
+	:	SourceCode( macro->GetFilename(), macro->GetLineNumber(), sourceCode ),
 		m_stream( macro->GetBody() )
 		//,m_macro( macro )
 {

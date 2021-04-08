@@ -30,6 +30,7 @@ namespace StringUtils
 {
 	void ExpandTabsToSpaces( std::string& line, size_t tabWidth );
 	bool EatWhitespace( const std::string& line, size_t& column );
+	std::string FormattedErrorLocation ( const std::string& filename, int lineNumber );
 }
 
 

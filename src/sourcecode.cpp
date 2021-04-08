@@ -44,12 +44,14 @@ using namespace std;
 
 	Constructor for SourceCode
 
-	@param		pFilename		Filename of source file to open
+	@param		filename		Filename of source file to open
+	@param		lineNumber		Line number
+	@param		parent  		Parent SourceCode object (or null)
 
 	The supplied file will be opened.  If there is a problem, an AsmException will be thrown.
 */
 /*************************************************************************************************/
-SourceCode::SourceCode( const string& filename, int lineNumber )
+SourceCode::SourceCode( const string& filename, int lineNumber, const SourceCode* parent )
 	:	m_forStackPtr( 0 ),
 		m_initialForStackPtr( 0 ),
 		m_ifStackPtr( 0 ),
@@ -57,6 +59,7 @@ SourceCode::SourceCode( const string& filename, int lineNumber )
 		m_currentMacro( NULL ),
 		m_filename( filename ),
 		m_lineNumber( lineNumber ),
+		m_parent( parent ),
 		m_lineStartPointer( 0 )
 {
 }
