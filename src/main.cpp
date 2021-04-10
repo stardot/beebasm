@@ -165,7 +165,7 @@ int main( int argc, char* argv[] )
 					cout << " -di <file>     Specify a disc image file to be added to" << endl;
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
-					cout << " -labels <file> Specify a filename to export any labels dumpted with -d or -dd to" << endl;
+					cout << " -labels <file> Specify a filename to export any labels dumped with -d or -dd to" << endl;
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
 					cout << " -title <title> Specify the title for the generated disc image" << endl;
 					cout << " -writes <n>    Specify the number of writes for the generated disc image" << endl;
