@@ -135,6 +135,10 @@ If specified, this sets the disc option of the generated disc image (i.e. the `*
 
 If specified, this sets the disc title of the generated disc image (i.e. the string set by `*TITLE`) to the value specified.
 
+`-writes <n>`
+
+If specified, this sets the number of writes for the generated disc image (i.e. the number shown next to the title in the disc catalogue) to the value specified.
+
 `-di <filename>`
 
 If specified, BeebAsm will use this disc image as a template for the new disc image, rather than creating a new blank one.  This is useful if you have a BASIC loader which you want to run before your executable.  Note this cannot be the same as the `-do` filename!
@@ -150,6 +154,14 @@ Use Visual C++-style error messages.
 `-d`
 
 Dumps all global symbols in Swift-compatible format after assembly. This is used internally by Swift, and is just documented for completeness.
+
+`-dd`
+
+Dumps all global and local symbols in Swift-compatible format after assembly.
+
+`-labels <file>`
+
+Write the output of `-d` or `-dd` to the specified file instead of standard output.
 
 `-w`
 
@@ -383,6 +395,8 @@ Examples:
 PRINT "Value of label 'start' =", ~start
 PRINT "numdots =", numdots, "dottable size =", dotend-dotstart
 ```
+
+You can use `FILELINE$` in PRINT commands to show the current file and line number. `CALLSTACK$` will do the same but for all the parent macro and include files as well. See `examples/filelinecallstackdemo.6502` for an example of their use.
 			
 `ERROR "message"`
 
@@ -708,7 +722,8 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Fixed incorrect line number for errors inside macros with
 		  blank lines inside them.
 		  Fixed incorrect line numbers from PUTBASIC in some cases.
-		  TODO: OTHER CHANGES
+		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
+		  Added -writes, -dd and -labels options (thanks to tricky for these)
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT

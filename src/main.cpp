@@ -62,6 +62,7 @@ int main( int argc, char* argv[] )
 	const char* pOutputFile = NULL;
 	const char* pDiscInputFile = NULL;
 	const char* pDiscOutputFile = NULL;
+	const char* pLabelsOutputFile = NULL;
 
 	enum STATES
 	{
@@ -73,11 +74,14 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_BOOT_FILENAME,
 		WAITING_FOR_DISC_OPTION,
 		WAITING_FOR_DISC_TITLE,
-		WAITING_FOR_SYMBOL
+		WAITING_FOR_DISC_WRITES,
+		WAITING_FOR_SYMBOL,
+		WAITING_FOR_LABELS_FILE
 
 	} state = READY;
 
 	bool bDumpSymbols = false;
+	bool bDumpAllSymbols = false;
 
 	GlobalData::Create();
 	SymbolTable::Create();
@@ -110,6 +114,10 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_BOOT_FILENAME;
 				}
+				else if ( strcmp( argv[i], "-labels" ) == 0 )
+				{
+					state = WAITING_FOR_LABELS_FILE;
+				}
 				else if ( strcmp( argv[i], "-opt" ) == 0 )
 				{
 					state = WAITING_FOR_DISC_OPTION;
@@ -117,6 +125,10 @@ int main( int argc, char* argv[] )
 				else if ( strcmp( argv[i], "-title" ) == 0 )
 				{
 					state = WAITING_FOR_DISC_TITLE;
+				}
+				else if ( strcmp( argv[i], "-writes" ) == 0 )
+				{
+					state = WAITING_FOR_DISC_WRITES;
 				}
 				else if ( strcmp( argv[i], "-w" ) == 0 )
 				{
@@ -134,6 +146,10 @@ int main( int argc, char* argv[] )
 				{
 					bDumpSymbols = true;
 				}
+				else if ( strcmp( argv[i], "-dd" ) == 0 )
+				{
+					bDumpAllSymbols = true;
+				}
 				else if ( strcmp( argv[i], "-D" ) == 0 )
 				{
 					state = WAITING_FOR_SYMBOL;
@@ -149,10 +165,13 @@ int main( int argc, char* argv[] )
 					cout << " -di <file>     Specify a disc image file to be added to" << endl;
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
+					cout << " -labels <file> Specify a filename to export any labels dumped with -d or -dd to" << endl;
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
 					cout << " -title <title> Specify the title for the generated disc image" << endl;
+					cout << " -writes <n>    Specify the number of writes for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
+					cout << " -dd            Dump all global and local symbols after assembly" << endl;
 					cout << " -w             Require whitespace between opcodes and labels" << endl;
 					cout << " -vc            Use Visual C++-style error messages" << endl;
 					cout << " -D <sym>=<val> Define symbol prior to assembly" << endl;
@@ -221,6 +240,12 @@ int main( int argc, char* argv[] )
 				state = READY;
                                 break;
 
+			case WAITING_FOR_DISC_WRITES:
+
+				GlobalData::Instance().SetDiscWrites( std::strtol( argv[i], NULL, 10 ) );
+				state = READY;
+				break;
+
 			case WAITING_FOR_SYMBOL:
 
 				if ( ! SymbolTable::Instance().AddCommandLineSymbol( argv[i] ) )
@@ -228,6 +253,12 @@ int main( int argc, char* argv[] )
 					cerr << "Invalid -D expression: " << argv[i] << endl;
 					return EXIT_FAILURE;
 				}
+				state = READY;
+				break;
+
+			case WAITING_FOR_LABELS_FILE:
+
+				pLabelsOutputFile = argv[i];
 				state = READY;
 				break;
 		}
@@ -282,7 +313,7 @@ int main( int argc, char* argv[] )
 			ObjectCode::Instance().InitialisePass();
 			GlobalData::Instance().ResetForId();
 			beebasm_srand( static_cast< unsigned long >( randomSeed ) );
-			SourceFile input( pInputFile );
+			SourceFile input( pInputFile, 0 );
 			input.Process();
 		}
 	}
@@ -294,9 +325,9 @@ int main( int argc, char* argv[] )
 
 	delete pDiscIm;
 
-	if ( bDumpSymbols && exitCode == EXIT_SUCCESS )
+	if ( (bDumpSymbols || bDumpAllSymbols) && exitCode == EXIT_SUCCESS )
 	{
-		SymbolTable::Instance().Dump();
+		SymbolTable::Instance().Dump(bDumpSymbols, bDumpAllSymbols, pLabelsOutputFile);
 	}
 
 	if ( !GlobalData::Instance().IsSaved() && exitCode == EXIT_SUCCESS )
