@@ -4,10 +4,14 @@ project(beebasm)
 
 add_compile_options(-Wall -W -Wcast-qual -Wshadow -Wcast-align -Wold-style-cast -Woverloaded-virtual)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Existing Makefile does a glob to find source files, so we do the same.
 FILE(GLOB CPPSources src/*.cpp)
 
 add_executable(beebasm ${CPPSources})
+target_link_libraries(beebasm stdc++ m)
 
 install(TARGETS beebasm DESTINATION bin)
 install(FILES ${CMAKE_SOURCE_DIR}/beebasm.1 DESTINATION share/man/man1)
