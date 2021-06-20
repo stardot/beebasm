@@ -325,9 +325,9 @@ void SymbolTable::RemoveSymbol( const std::string& symbol )
 void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 {
 	std::ofstream labels;
-	std::ostream & cout = (labels_file && (labels.open(labels_file), !labels.bad())) ? labels : std::cout;
+	std::ostream & our_cout = (labels_file && (labels.open(labels_file), !labels.bad())) ? labels : std::cout;
 
-	cout << "[{";
+	our_cout << "[{";
 
 	bool bFirst = true;
 
@@ -343,10 +343,10 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 			{
 				if ( !bFirst )
 				{
-					cout << ",";
+					our_cout << ",";
 				}
 
-				cout << "'" << symbolName << "':" << symbol.GetValue() << "L";
+				our_cout << "'" << symbolName << "':" << symbol.GetValue() << "L";
 
 				bFirst = false;
 			}
@@ -359,16 +359,16 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 		{
 			if ( !bFirst )
 			{
-				cout << ",";
+				our_cout << ",";
 			}
 
-			cout << "'" << it->m_identifier << "':" << it->m_addr << "L";
+			our_cout << "'" << it->m_identifier << "':" << it->m_addr << "L";
 
 			bFirst = false;
 		}
 	}
 
-	cout << "}]" << endl;
+	our_cout << "}]" << endl;
 }
 
 void SymbolTable::PushBrace()
