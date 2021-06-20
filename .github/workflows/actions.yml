@@ -10,6 +10,7 @@ jobs:
     name: Compile via CMakeLists.txt on ${{ matrix.os }} using ${{ matrix.cc }}
     env:
       CFLAGS: '-Wextra -Werror'
+      CXXFLAGS: '-Wextra -Werror'
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cc }}
     steps:
