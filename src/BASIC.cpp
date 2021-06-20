@@ -694,7 +694,8 @@ bool EncodeLine()
 		}
 	}
 
-	EatCharacters(1);	//either eat a '\n' or have no effect at all
+	if (!EndOfFile && Token == '\n' && !ErrorNum)
+		EatCharacters(1);	// Eat a '\n'
 
 	return true;
 }
@@ -753,7 +754,7 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 	{
 		/* get line number */
 			/* skip white space and empty lines */
-			while(Token == ' ' || Token == '\t' || Token == '\r' || Token == '\n')
+			while(!EndOfFile && (Token == ' ' || Token == '\t' || Token == '\r' || Token == '\n'))
 				EatCharacters(1);
 				
 			/* end of file? */
