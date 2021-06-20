@@ -724,6 +724,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Fixed incorrect line numbers from PUTBASIC in some cases.
 		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
 		  Added -writes, -dd and -labels options (thanks to tricky for these)
+		  Added CMake support and man page (thanks to Dave Lambley)
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
