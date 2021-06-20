@@ -135,6 +135,10 @@ If specified, this sets the disc option of the generated disc image (i.e. the `*
 
 If specified, this sets the disc title of the generated disc image (i.e. the string set by `*TITLE`) to the value specified.
 
+`-writes <n>`
+
+If specified, this sets the number of writes for the generated disc image (i.e. the number shown next to the title in the disc catalogue) to the value specified.
+
 `-di <filename>`
 
 If specified, BeebAsm will use this disc image as a template for the new disc image, rather than creating a new blank one.  This is useful if you have a BASIC loader which you want to run before your executable.  Note this cannot be the same as the `-do` filename!
@@ -150,6 +154,14 @@ Use Visual C++-style error messages.
 `-d`
 
 Dumps all global symbols in Swift-compatible format after assembly. This is used internally by Swift, and is just documented for completeness.
+
+`-dd`
+
+Dumps all global and local symbols in Swift-compatible format after assembly.
+
+`-labels <file>`
+
+Write the output of `-d` or `-dd` to the specified file instead of standard output.
 
 `-w`
 
@@ -182,7 +194,7 @@ Instructions can be written one-per-line, or many on one line, separated by colo
 
 Comments are introduced by a semicolon or backslash.  Unlike the BBC Micro assembler, these continue to the end of the line, and are not terminated by a colon (because this BBC Micro feature is horrible!).
 
-Numeric literals are in decimal by default, and can be integers or reals. Hex literals are prefixed with `"&"`. A character in single quotes (e.g. `'A'`) returns its ASCII code.
+Numeric literals are in decimal by default, and can be integers or reals. Hex literals are prefixed with `"&"` or `"$"`, binary literals are prefixed with `"%"`. A character in single quotes (e.g. `'A'`) returns its ASCII code.
 
 BeebAsm can accept complex expressions, using a wide variety of operators and functions.  Here's a summary:
 
@@ -383,6 +395,8 @@ Examples:
 PRINT "Value of label 'start' =", ~start
 PRINT "numdots =", numdots, "dottable size =", dotend-dotstart
 ```
+
+You can use `FILELINE$` in PRINT commands to show the current file and line number. `CALLSTACK$` will do the same but for all the parent macro and include files as well. See `examples/filelinecallstackdemo.6502` for an example of their use.
 			
 `ERROR "message"`
 
@@ -698,7 +712,18 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
-??/??/????  1.10  ?????
+??/??/????  1.10  Documented "$" and "%" as literal prefixes (thanks to
+                  cardboardguru76 for pointing this out).
+		  Fixed silently treating label references starting with "."
+		  as 0 (thanks to mungre for this fix).
+		  Allowed "-h" and "-help" options to see help.
+		  Fixed tokenisation of BASIC pseudo-variables in some cases.
+		  (Thanks to Richard Russell for advice on this.)
+		  Fixed incorrect line number for errors inside macros with
+		  blank lines inside them.
+		  Fixed incorrect line numbers from PUTBASIC in some cases.
+		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
+		  Added -writes, -dd and -labels options (thanks to tricky for these)
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT

@@ -24,7 +24,6 @@
 
 #include <iostream>
 #include <cassert>
-#include <sstream>
 
 #include "asmexception.h"
 #include "globaldata.h"
@@ -89,14 +88,5 @@ void AsmException_SyntaxError::Print() const
 /*************************************************************************************************/
 std::string AsmException_SyntaxError::ErrorLocation( size_t i ) const
 {
-	std::stringstream s;
-	if ( GlobalData::Instance().UseVisualCppErrorFormat() )
-	{
-		s << m_filename[ i ] << "(" << m_lineNumber[ i ] << ")";
-	}
-	else
-	{
-		s << m_filename[ i ] << ":" << m_lineNumber[ i ];
-	}
-	return s.str();
+	return StringUtils::FormattedErrorLocation( m_filename[ i ], m_lineNumber[ i ] );
 }

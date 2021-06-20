@@ -493,6 +493,10 @@ bool CopyStringLiteral()
 	if(IncomingBuffer[0] != '"') // stopped going for some reason other than a close quote
 	{
 		ErrorNum = -1;
+		if(IncomingBuffer[0] == '\n')
+		{
+			--CurLine;
+		}
 		DynamicErrorText << "Malformed string literal on line " << CurLine;
 		return false;
 	}
@@ -587,6 +591,8 @@ bool EncodeLine()
 
 					if(Token == ':') // a colon always switches the tokeniser back to "start of statement" mode
 						StartOfStatement = true;
+					else if(Token == '=') // an equals sign always switches the tokeniser back to "middle of statement" mode
+						StartOfStatement = false;
 
 					// grab entire variables rather than allowing bits to be tokenised
 					if
@@ -676,9 +682,7 @@ bool EncodeLine()
 				}
 			}
 
-			if(
-				(Flags & 0x40) && StartOfStatement
-			)
+			if((Flags & 0x40) && StartOfStatement)
 			{
 				/* pseudo-variable flag */
 				Memory[Addr-1] += 0x40;	//adjust just-written token
@@ -797,7 +801,8 @@ bool ImportBASIC(const char *Filename, Uint8 *Mem, int* Size)
 		if(Length >= 256)
 		{
 			ErrorNum = -1;
-			DynamicErrorText << "Overly long line at line " << CurLine;
+			/* CurLine - 1 because we've incremented it on seeing '\n' */
+			DynamicErrorText << "Overly long line at line " << CurLine - 1;
 			break;
 		}
 		Memory[LengthAddr] = static_cast<Uint8>(Length);

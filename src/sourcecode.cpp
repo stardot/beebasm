@@ -44,12 +44,14 @@ using namespace std;
 
 	Constructor for SourceCode
 
-	@param		pFilename		Filename of source file to open
+	@param		filename		Filename of source file to open
+	@param		lineNumber		Line number
+	@param		parent  		Parent SourceCode object (or null)
 
 	The supplied file will be opened.  If there is a problem, an AsmException will be thrown.
 */
 /*************************************************************************************************/
-SourceCode::SourceCode( const string& filename, int lineNumber )
+SourceCode::SourceCode( const string& filename, int lineNumber, const SourceCode* parent )
 	:	m_forStackPtr( 0 ),
 		m_initialForStackPtr( 0 ),
 		m_ifStackPtr( 0 ),
@@ -57,6 +59,7 @@ SourceCode::SourceCode( const string& filename, int lineNumber )
 		m_currentMacro( NULL ),
 		m_filename( filename ),
 		m_lineNumber( lineNumber ),
+		m_parent( parent ),
 		m_lineStartPointer( 0 )
 {
 }
@@ -215,6 +218,7 @@ void SourceCode::AddFor( const string& varName,
 	m_forStack[ m_forStackPtr ].m_column		= column;
 	m_forStack[ m_forStackPtr ].m_lineNumber	= m_lineNumber;
 
+	SymbolTable::Instance().PushFor(m_forStack[ m_forStackPtr ].m_varName, m_forStack[ m_forStackPtr ].m_current);
 	m_forStackPtr++;
 }
 
@@ -247,6 +251,7 @@ void SourceCode::OpenBrace( const string& line, int column )
 	m_forStack[ m_forStackPtr ].m_column		= column;
 	m_forStack[ m_forStackPtr ].m_lineNumber	= m_lineNumber;
 
+	SymbolTable::Instance().PushBrace();
 	m_forStackPtr++;
 }
 
@@ -280,6 +285,7 @@ void SourceCode::UpdateFor( const string& line, int column )
 	{
 		// we have reached the end of the FOR
 		SymbolTable::Instance().RemoveSymbol( thisFor.m_varName );
+		SymbolTable::Instance().PopScope();
 		m_forStackPtr--;
 	}
 	else
@@ -287,6 +293,8 @@ void SourceCode::UpdateFor( const string& line, int column )
 		// reloop
 		SymbolTable::Instance().ChangeSymbol( thisFor.m_varName, thisFor.m_current );
 		SetFilePointer( thisFor.m_filePtr );
+		SymbolTable::Instance().PopScope();
+		SymbolTable::Instance().PushFor(thisFor.m_varName, thisFor.m_current);
 		thisFor.m_count++;
 		m_lineNumber = thisFor.m_lineNumber - 1;
 	}
@@ -325,6 +333,7 @@ void SourceCode::CloseBrace( const string& line, int column )
 		throw AsmException_SyntaxError_MismatchedBraces( line, column );
 	}
 
+	SymbolTable::Instance().PopScope();
 	m_forStackPtr--;
 }
 

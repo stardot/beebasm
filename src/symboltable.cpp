@@ -22,9 +22,12 @@
 
 #include <cmath>
 #include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
+#include "globaldata.h"
+#include "objectcode.h"
 #include "symboltable.h"
 #include "constants.h"
 
@@ -76,6 +79,7 @@ void SymbolTable::Destroy()
 */
 /*************************************************************************************************/
 SymbolTable::SymbolTable()
+	:	m_labelScopes( 0 )
 {
 	// Add any constant symbols here
 
@@ -318,30 +322,101 @@ void SymbolTable::RemoveSymbol( const std::string& symbol )
 	Dumps all global symbols in the symbol table
 */
 /*************************************************************************************************/
-void SymbolTable::Dump() const
+void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 {
+	std::ofstream labels;
+	std::ostream & cout = (labels_file && (labels.open(labels_file), !labels.bad())) ? labels : std::cout;
+
 	cout << "[{";
 
 	bool bFirst = true;
 
-	for ( map<string, Symbol>::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
+	if (global)
 	{
-		const string&	symbolName = it->first;
-		const Symbol&	symbol = it->second;
+		for ( map<string, Symbol>::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
+		{
+			const string&	symbolName = it->first;
+			const Symbol&	symbol = it->second;
 
-		if ( symbol.IsLabel() &&
-			 symbolName.find_first_of( '@' ) == string::npos )
+			if ( symbol.IsLabel() &&
+				 symbolName.find_first_of( '@' ) == string::npos )
+			{
+				if ( !bFirst )
+				{
+					cout << ",";
+				}
+
+				cout << "'" << symbolName << "':" << symbol.GetValue() << "L";
+
+				bFirst = false;
+			}
+		}
+	}
+
+	if (all)
+	{
+		for ( std::vector<Label>::const_iterator it = m_labelList.begin(); it != m_labelList.end(); ++it )
 		{
 			if ( !bFirst )
 			{
 				cout << ",";
 			}
 
-			cout << "'" << symbolName << "':" << symbol.GetValue() << "L";
+			cout << "'" << it->m_identifier << "':" << it->m_addr << "L";
 
 			bFirst = false;
 		}
 	}
 
 	cout << "}]" << endl;
+}
+
+void SymbolTable::PushBrace()
+{
+	if (GlobalData::Instance().IsSecondPass())
+	{
+		int addr = ObjectCode::Instance().GetPC();
+		if (m_lastLabel.m_addr != addr)
+		{
+			std::ostringstream label; label << "._" << (m_labelScopes - m_lastLabel.m_scope);
+			m_lastLabel.m_identifier = (m_labelStack.empty() ? "" : m_labelStack.back().m_identifier) + label.str();
+			m_lastLabel.m_addr = addr;
+		}
+		m_lastLabel.m_scope = m_labelScopes++;
+		m_labelStack.push_back(m_lastLabel);
+	}
+}
+
+void SymbolTable::PushFor(std::string symbol, double value)
+{
+	if (GlobalData::Instance().IsSecondPass())
+	{
+		int addr = ObjectCode::Instance().GetPC();
+		symbol = symbol.substr(0, symbol.find_first_of('@'));
+		std::ostringstream label; label << "._" << symbol << "_" << value;
+		m_lastLabel.m_identifier += label.str();
+		m_lastLabel.m_addr  = addr;
+		m_lastLabel.m_scope = m_labelScopes++;
+		m_labelStack.push_back(m_lastLabel);
+	}
+}
+
+void SymbolTable::AddLabel(const std::string& symbol)
+{
+	if (GlobalData::Instance().IsSecondPass())
+	{
+		int addr = ObjectCode::Instance().GetPC();
+		m_lastLabel.m_identifier = (m_labelStack.empty() ? "" : m_labelStack.back().m_identifier) + "." + symbol;
+		m_lastLabel.m_addr = addr;
+		m_labelList.push_back(m_lastLabel);
+	}
+}
+
+void SymbolTable::PopScope()
+{
+	if (GlobalData::Instance().IsSecondPass())
+	{
+		m_labelStack.pop_back();
+		m_lastLabel = m_labelStack.empty() ? Label() : m_labelStack.back();
+	}
 }
