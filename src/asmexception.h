@@ -201,6 +201,7 @@ DEFINE_SYNTAX_EXCEPTION( MissingQuote, "Unterminated string." );
 DEFINE_SYNTAX_EXCEPTION( MissingComma, "Missing comma." );
 DEFINE_SYNTAX_EXCEPTION( IllegalOperation, "Operation attempted with invalid or out of range values." );
 DEFINE_SYNTAX_EXCEPTION( TimeResultTooBig, "TIME$() result too big." );
+DEFINE_SYNTAX_EXCEPTION( ParameterCount, "Wrong number of parameters." );
 
 // assembler parsing exceptions
 DEFINE_SYNTAX_EXCEPTION( NoImplied, "Implied mode not allowed for this instruction." );

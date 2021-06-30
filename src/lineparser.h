@@ -91,6 +91,7 @@ private:
 	{
 		const char*			token;
 		int					precedence;
+		int					parameterCount;
 		OperatorHandler		handler;
 	};
 
@@ -110,7 +111,7 @@ private:
 	bool			MoveToNextAtom( const char* pTerminators = NULL );
 	bool			AdvanceAndCheckEndOfLine();
 	bool			AdvanceAndCheckEndOfStatement();
-	bool			AdvanceAndCheckEndOfSubStatement();
+	bool			AdvanceAndCheckEndOfSubStatement(bool includeComma);
 	void			SkipStatement();
 	void			SkipExpression( int bracketCount, bool bAllowOneMismatchedCloseBracket );
 	std::string		GetSymbolName();
@@ -220,6 +221,11 @@ private:
 	void			EvalTime();
 	void			EvalStr();
 	void			EvalVal();
+	void			EvalLen();
+	void			EvalChr();
+	void			EvalAsc();
+	void			EvalMid();
+	void			EvalString();
 
 	Value			FormatAssemblyTime(const char* formatString);
 

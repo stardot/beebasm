@@ -371,7 +371,7 @@ void LineParser::SkipStatement()
 /*************************************************************************************************/
 void LineParser::SkipExpression( int bracketCount, bool bAllowOneMismatchedCloseBracket )
 {
-	while ( AdvanceAndCheckEndOfSubStatement() )
+	while ( AdvanceAndCheckEndOfSubStatement(bracketCount == 0) )
 	{
 		if ( bAllowOneMismatchedCloseBracket )
 		{
@@ -514,9 +514,16 @@ bool LineParser::AdvanceAndCheckEndOfStatement()
 	@return		bool		true if we are not yet at the end of the substatement
 */
 /*************************************************************************************************/
-bool LineParser::AdvanceAndCheckEndOfSubStatement()
+bool LineParser::AdvanceAndCheckEndOfSubStatement(bool includeComma)
 {
-	return MoveToNextAtom( ";:\\,{}" );
+	if (includeComma)
+	{
+		return MoveToNextAtom( ";:\\,{}" );
+	}
+	else
+	{
+		return MoveToNextAtom( ";:\\{}" );
+	}
 }
 
 

@@ -45,65 +45,71 @@ using namespace std;
 
 const LineParser::Operator	LineParser::m_gaBinaryOperatorTable[] =
 {
-	{ ")",		-1,	NULL },		// special case
-	{ "]",		-1,	NULL },		// special case
+	{ ")",		-1,	0,	NULL },		// special case
+	{ "]",		-1,	0,	NULL },		// special case
+	{ ",",		-1,	0,	NULL },		// special case
 
-	{ "^",		7,	&LineParser::EvalPower },
-	{ "*",		6,	&LineParser::EvalMultiply },
-	{ "/",		6,	&LineParser::EvalDivide },
-	{ "%",		6,	&LineParser::EvalMod },
-	{ "DIV",	6,	&LineParser::EvalDiv },
-	{ "MOD",	6,	&LineParser::EvalMod },
-	{ "<<",		6,	&LineParser::EvalShiftLeft },
-	{ ">>",		6,	&LineParser::EvalShiftRight },
-	{ "+",		5,	&LineParser::EvalAdd },
-	{ "-",		5,	&LineParser::EvalSubtract },
-	{ "==",		4,	&LineParser::EvalEqual },
-	{ "=",		4,	&LineParser::EvalEqual },
-	{ "<>",		4,	&LineParser::EvalNotEqual },
-	{ "!=",		4,	&LineParser::EvalNotEqual },
-	{ "<=",		4,	&LineParser::EvalLessThanOrEqual },
-	{ ">=",		4,	&LineParser::EvalMoreThanOrEqual },
-	{ "<",		4,	&LineParser::EvalLessThan },
-	{ ">",		4,	&LineParser::EvalMoreThan },
-	{ "AND",	3,	&LineParser::EvalAnd },
-	{ "OR",		2,	&LineParser::EvalOr },
-	{ "EOR",	2,	&LineParser::EvalEor }
+	{ "^",		7,	0,	&LineParser::EvalPower },
+	{ "*",		6,	0,	&LineParser::EvalMultiply },
+	{ "/",		6,	0,	&LineParser::EvalDivide },
+	{ "%",		6,	0,	&LineParser::EvalMod },
+	{ "DIV",	6,	0,	&LineParser::EvalDiv },
+	{ "MOD",	6,	0,	&LineParser::EvalMod },
+	{ "<<",		6,	0,	&LineParser::EvalShiftLeft },
+	{ ">>",		6,	0,	&LineParser::EvalShiftRight },
+	{ "+",		5,	0,	&LineParser::EvalAdd },
+	{ "-",		5,	0,	&LineParser::EvalSubtract },
+	{ "==",		4,	0,	&LineParser::EvalEqual },
+	{ "=",		4,	0,	&LineParser::EvalEqual },
+	{ "<>",		4,	0,	&LineParser::EvalNotEqual },
+	{ "!=",		4,	0,	&LineParser::EvalNotEqual },
+	{ "<=",		4,	0,	&LineParser::EvalLessThanOrEqual },
+	{ ">=",		4,	0,	&LineParser::EvalMoreThanOrEqual },
+	{ "<",		4,	0,	&LineParser::EvalLessThan },
+	{ ">",		4,	0,	&LineParser::EvalMoreThan },
+	{ "AND",	3,	0,	&LineParser::EvalAnd },
+	{ "OR",		2,	0,	&LineParser::EvalOr },
+	{ "EOR",	2,	0,	&LineParser::EvalEor }
 };
 
 
 
 const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 {
-	{ "(",		-1,	NULL },		// special case
-	{ "[",		-1,	NULL },		// special case
+	{ "(",		-1,	0, NULL },		// special case
+	{ "[",		-1,	0, NULL },		// special case
 
-	{ "-",		8,	&LineParser::EvalNegate },
-	{ "+",		8,	&LineParser::EvalPosate },
-	{ "HI(",	10,	&LineParser::EvalHi },
-	{ "LO(",	10,	&LineParser::EvalLo },
-	{ ">",		10,	&LineParser::EvalHi },
-	{ "<",		10,	&LineParser::EvalLo },
-	{ "SIN(",	10, &LineParser::EvalSin },
-	{ "COS(",	10, &LineParser::EvalCos },
-	{ "TAN(",	10, &LineParser::EvalTan },
-	{ "ASN(",	10, &LineParser::EvalArcSin },
-	{ "ACS(",	10, &LineParser::EvalArcCos },
-	{ "ATN(",	10, &LineParser::EvalArcTan },
-	{ "SQR(",	10, &LineParser::EvalSqrt },
-	{ "RAD(",	10, &LineParser::EvalDegToRad },
-	{ "DEG(",	10, &LineParser::EvalRadToDeg },
-	{ "INT(",	10,	&LineParser::EvalInt },
-	{ "ABS(",	10, &LineParser::EvalAbs },
-	{ "SGN(",	10, &LineParser::EvalSgn },
-	{ "RND(",	10,	&LineParser::EvalRnd },
-	{ "NOT(",	10, &LineParser::EvalNot },
-	{ "LOG(",	10, &LineParser::EvalLog },
-	{ "LN(",	10,	&LineParser::EvalLn },
-	{ "EXP(",	10,	&LineParser::EvalExp },
-	{ "TIME$(",	10,	&LineParser::EvalTime },
-	{ "STR$(",	10,	&LineParser::EvalStr },
-	{ "VAL(",	10,	&LineParser::EvalVal }
+	{ "-",		8,	0,	&LineParser::EvalNegate },
+	{ "+",		8,	0,	&LineParser::EvalPosate },
+	{ "HI(",	10,	1,	&LineParser::EvalHi },
+	{ "LO(",	10,	1,	&LineParser::EvalLo },
+	{ ">",		10,	0,	&LineParser::EvalHi },
+	{ "<",		10,	0,	&LineParser::EvalLo },
+	{ "SIN(",	10, 1,	&LineParser::EvalSin },
+	{ "COS(",	10, 1,	&LineParser::EvalCos },
+	{ "TAN(",	10, 1,	&LineParser::EvalTan },
+	{ "ASN(",	10, 1,	&LineParser::EvalArcSin },
+	{ "ACS(",	10, 1,	&LineParser::EvalArcCos },
+	{ "ATN(",	10, 1,	&LineParser::EvalArcTan },
+	{ "SQR(",	10, 1,	&LineParser::EvalSqrt },
+	{ "RAD(",	10, 1,	&LineParser::EvalDegToRad },
+	{ "DEG(",	10, 1,	&LineParser::EvalRadToDeg },
+	{ "INT(",	10,	1,	&LineParser::EvalInt },
+	{ "ABS(",	10, 1,	&LineParser::EvalAbs },
+	{ "SGN(",	10, 1,	&LineParser::EvalSgn },
+	{ "RND(",	10,	1,	&LineParser::EvalRnd },
+	{ "NOT(",	10, 1,	&LineParser::EvalNot },
+	{ "LOG(",	10, 1,	&LineParser::EvalLog },
+	{ "LN(",	10,	1,	&LineParser::EvalLn },
+	{ "EXP(",	10,	1,	&LineParser::EvalExp },
+	{ "TIME$(",	10,	1,	&LineParser::EvalTime },
+	{ "STR$(",	10,	1,	&LineParser::EvalStr },
+	{ "VAL(",	10,	1,	&LineParser::EvalVal },
+	{ "LEN(",	10,	1,	&LineParser::EvalLen },
+	{ "CHR$(",	10,	1,	&LineParser::EvalChr },
+	{ "ASC(",	10,	1,	&LineParser::EvalAsc },
+	{ "MID$(",	10,	3,	&LineParser::EvalMid },
+	{ "STRING$(",	10,	2,	&LineParser::EvalString }
 };
 
 
@@ -318,11 +324,15 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 
 	int bracketCount = 0;
 
+	// When we know a '(' is coming (because it was the end of a token) this is the number of commas to expect
+	// in the parameter list, i.e. one less than the number of parameters.
+	int pendingCommaCount = 0;
+
 	TYPE expected = VALUE_OR_UNARY;
 
 	// Iterate through the expression
 
-	while ( AdvanceAndCheckEndOfSubStatement() )
+	while ( AdvanceAndCheckEndOfSubStatement(bracketCount == 0) )
 	{
 		if ( expected == VALUE_OR_UNARY )
 		{
@@ -360,6 +370,7 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 
 					if ( len > 1 && token[ len - 1 ] == '(' )
 					{
+						pendingCommaCount = m_gaUnaryOperatorTable[ matchedToken ].parameterCount - 1;
 						m_column--;
 						assert( m_line[ m_column ] == '(' );
 					}
@@ -406,7 +417,7 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 			{
 				// If unary operator *was* found...
 
-				const Operator& thisOp = m_gaUnaryOperatorTable[ matchedToken ];
+				Operator thisOp = m_gaUnaryOperatorTable[ matchedToken ];
 
 				if ( thisOp.handler != NULL )
 				{
@@ -425,6 +436,9 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 				}
 				else
 				{
+					// The open bracket's parameterCount counts down the number of commas expected.
+					thisOp.parameterCount = pendingCommaCount;
+					pendingCommaCount = 0;
 					bracketCount++;
 				}
 
@@ -504,9 +518,14 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 			}
 			else
 			{
-				// is a close bracket
+				// is a close bracket or parameter separator
 
-				bracketCount--;
+				bool separator = strcmp(thisOp.token, ",") == 0;
+
+				if (!separator)
+				{
+					bracketCount--;
+				}
 
 				bool bFoundMatchingBracket = false;
 
@@ -526,8 +545,39 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 					}
 				}
 
-				if ( !bFoundMatchingBracket )
+				if ( bFoundMatchingBracket )
 				{
+					if (separator)
+					{
+						// parameter separator
+
+						// check we are expecting multiple parameters
+						if (m_operatorStack[ m_operatorStackPtr ].parameterCount == 0)
+						{
+							throw AsmException_SyntaxError_ParameterCount( m_line, m_column - 1 );
+						}
+						m_operatorStack[ m_operatorStackPtr ].parameterCount--;
+
+						// put the open bracket back on the stack
+						m_operatorStackPtr++;
+
+						// expect the next parameter
+						expected = VALUE_OR_UNARY;
+					}
+					else
+					{
+						// close par
+
+						// check all parameters have been supplied
+						if (m_operatorStack[ m_operatorStackPtr ].parameterCount != 0)
+						{
+							throw AsmException_SyntaxError_ParameterCount( m_line, m_column - 1 );
+						}
+					}
+				}
+				else
+				{
+					// did not find matching bracket
 					if ( bAllowOneMismatchedCloseBracket )
 					{
 						// this is a hack which allows an extra close bracket to terminate an expression,
@@ -1421,4 +1471,113 @@ void LineParser::EvalVal()
 	double value = strtod(str.Text(), &end);
 
 	m_valueStack[ m_valueStackPtr - 1 ] = value;
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLen()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLen()
+{
+	String str = StackTopString();
+	m_valueStack[ m_valueStackPtr - 1 ] = str.Length();
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalChr()
+*/
+/*************************************************************************************************/
+void LineParser::EvalChr()
+{
+	double value = StackTopNumber();
+	int ascii = static_cast<int>(value);
+	if ((ascii < 0) || (ascii > 255))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+	char buffer = ascii;
+	m_valueStack[ m_valueStackPtr - 1 ] = String(&buffer, 1);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalAsc()
+*/
+/*************************************************************************************************/
+void LineParser::EvalAsc()
+{
+	String str = StackTopString();
+	if (str.Length() == 0)
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = static_cast<unsigned char>(str[0]);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalMid()
+*/
+/*************************************************************************************************/
+void LineParser::EvalMid()
+{
+	if ( m_valueStackPtr < 3 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 3 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value3 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::StringValue) || (value2.GetType() != Value::NumberValue) || (value3.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 2;
+
+	String text = value1.GetString();
+	int index = static_cast<int>(value2.GetNumber()) - 1;
+	int length = static_cast<int>(value3.GetNumber());
+	if ((index < 0) || (static_cast<unsigned int>(index) > text.Length()) || (length < 0))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(index, length);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalString()
+*/
+/*************************************************************************************************/
+void LineParser::EvalString()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::NumberValue) || (value2.GetType() != Value::StringValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 1;
+
+	int count = static_cast<int>(value1.GetNumber());
+	String text = value2.GetString();
+	if ((count < 0) || (count >= 0x10000) || (text.Length() >= 0x10000) || (static_cast<unsigned int>(count) * text.Length() >= 0x10000))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = text.Repeat(count);
 }

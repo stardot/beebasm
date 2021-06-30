@@ -235,7 +235,22 @@ NOT(val)           Return the bitwise 1's complement of val
 LOG(val)           Return the base 10 log of val
 LN(val)            Return the natural log of val
 EXP(val)           Return e raised to the power of val
+VAL(str)           Return the value of a decimal number in a string
+STR$(val)          Return the number val converted to a string
+LEN(str)           Return the length of str
+CHR$(val)          Return a string with a single character with ASCII value val
+ASC(str)           Return the ASCII value of the first character of str
+MID$(str,index,length)
+                   Return length characters of str starting at (one-based) index
+STRINGS$(count,str)
+                   Return str repeated count times
+TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
+TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
+                   is the same format used by the C library strftime()
 ```
+
+The assembly date/time is constant throughout the assembly; every use of `TIME$`
+will return the same date/time.
 
 Also, some constants are defined:
 
@@ -248,19 +263,7 @@ TRUE               Returns -1
 CPU                The value set by the CPU assembler directive (see below)
 ```
 
-Within `EQUB/EQUS` only you can also use the expressions:
-
-```
-TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
-
-TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
-                   is the same format used by the C library strftime().
-```
-
-The assembly date/time is constant throughout the assembly; every use of `TIME$`
-will return the same date/time.
-
-Variables can be defined at any point using the BASIC syntax, i.e. `addr = &70`.
+Variables can be defined at any point using the BASIC syntax, i.e. `addr = &70` or `name = "Bob"`.  Quotes in strings are quoted by doubling, e.g. `"a""b"` for the string `a"b`.
 
 Note that it is not possible to reassign variables once defined. However `FOR...NEXT` blocks have their own scope (more on this later).
 

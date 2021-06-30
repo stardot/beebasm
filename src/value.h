@@ -87,6 +87,38 @@ public:
 		buffer[length] = 0;
 		return header;
 	}
+
+	static StringHeader* SubString(StringHeader* source, unsigned int index, unsigned int length)
+	{
+		assert(index <= Length(source));
+		unsigned int realLength = std::min(length, Length(source) - index);
+		if ((index == 0) && (realLength == Length(source)))
+		{
+			return source;
+		}
+		return Allocate(StringData(source) + index, realLength);
+	}
+
+	static StringHeader* Repeat(StringHeader* source, unsigned int count)
+	{
+		int sourceLength = Length(source);
+		const char* sourceData = StringData(source);
+
+		assert((sourceLength < 0x10000) && (count < 0x10000));
+		unsigned int length = sourceLength * count;
+		assert(length < 0x10000);
+
+		StringHeader* header = Allocate(length);
+		char* buffer = StringBuffer(header);
+		for (unsigned int i = 0; i != count; ++i)
+		{
+			memcpy(buffer, sourceData, sourceLength);
+			buffer += sourceLength;
+		}
+		*buffer = 0;
+		return header;
+	}
+
 private:
 	static char* StringBuffer(StringHeader* header)
 	{
@@ -146,6 +178,16 @@ public:
 	String operator+(const String& that)
 	{
 		StringHeader* header = StringHeader::Concat(m_header, that.m_header);
+		return String(header);
+	}
+	String SubString(unsigned int index, unsigned int length)
+	{
+		StringHeader* header = StringHeader::SubString(m_header, index, length);
+		return String(header);
+	}
+	String Repeat(unsigned int count)
+	{
+		StringHeader* header = StringHeader::Repeat(m_header, count);
 		return String(header);
 	}
 	unsigned int Length() const
