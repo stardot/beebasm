@@ -172,6 +172,7 @@ private:
 
 	// convenience functions for getting operator parameters from the stack
 	std::pair<Value, Value> StackTopTwoValues();
+	String LineParser::StackTopString();
 	double LineParser::StackTopNumber();
 	std::pair<double, double> StackTopTwoNumbers();
 	std::pair<int, int> StackTopTwoInts();
@@ -217,6 +218,8 @@ private:
 	void			EvalLn();
 	void			EvalExp();
 	void			EvalTime();
+	void			EvalStr();
+	void			EvalVal();
 
 	Value			FormatAssemblyTime(const char* formatString);
 

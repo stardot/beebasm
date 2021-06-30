@@ -101,7 +101,9 @@ const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	{ "LOG(",	10, &LineParser::EvalLog },
 	{ "LN(",	10,	&LineParser::EvalLn },
 	{ "EXP(",	10,	&LineParser::EvalExp },
-	{ "TIME$(",	10,	&LineParser::EvalTime }
+	{ "TIME$(",	10,	&LineParser::EvalTime },
+	{ "STR$(",	10,	&LineParser::EvalStr },
+	{ "VAL(",	10,	&LineParser::EvalVal }
 };
 
 
@@ -639,6 +641,28 @@ std::pair<Value, Value> LineParser::StackTopTwoValues()
 		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
 	}
 	return std::pair<Value, Value>(value1, value2);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::StackTopString()
+
+	Retrieve a string from the top of the stack, or throw an exception
+*/
+/*************************************************************************************************/
+String LineParser::StackTopString()
+{
+	if ( m_valueStackPtr < 1 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value = m_valueStack[ m_valueStackPtr - 1 ];
+	if (value.GetType() != Value::StringValue)
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	return value.GetString();
 }
 
 
@@ -1345,16 +1369,7 @@ void LineParser::EvalRnd()
 /*************************************************************************************************/
 void LineParser::EvalTime()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	Value value = m_valueStack[ m_valueStackPtr - 1 ];
-	if (value.GetType() != Value::StringValue)
-	{
-		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = FormatAssemblyTime(value.GetString().Text());
+	m_valueStack[ m_valueStackPtr - 1 ] = FormatAssemblyTime(StackTopString().Text());
 }
 
 
@@ -1376,4 +1391,34 @@ Value LineParser::FormatAssemblyTime(const char* formatString)
 		throw AsmException_SyntaxError_TimeResultTooBig( m_line, m_column );
 	}
 	return String(timeString, length);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalStr()
+*/
+/*************************************************************************************************/
+void LineParser::EvalStr()
+{
+	ostringstream stream;
+	stream << StackTopNumber();
+	string result = stream.str();
+
+	m_valueStack[ m_valueStackPtr - 1 ] = String(result.data(), result.length());
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalVal()
+*/
+/*************************************************************************************************/
+void LineParser::EvalVal()
+{
+	String str = StackTopString();
+	char* end;
+	double value = strtod(str.Text(), &end);
+
+	m_valueStack[ m_valueStackPtr - 1 ] = value;
 }
