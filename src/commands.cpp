@@ -203,9 +203,10 @@ void LineParser::HandleDefineLabel()
 		}
 		else
 		{
-			// on the second pass, check that the label would be assigned the same value
+			// on the second pass, check that the label would be assigned the same numeric value
 
-			if ( SymbolTable::Instance().GetSymbol( fullSymbolName ) != ObjectCode::Instance().GetPC() )
+			Value value = SymbolTable::Instance().GetSymbol( fullSymbolName );
+			if ((value.GetType() != Value::NumberValue) || (value.GetNumber() != ObjectCode::Instance().GetPC() ))
 			{
 				throw AsmException_SyntaxError_SecondPassProblem( m_line, oldColumn );
 			}
@@ -699,92 +700,35 @@ void LineParser::HandleEqub()
 			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 		}
 
-		// handle TIME$ (special case of string)
+		Value value;
 
-		if ( m_column + 4 < m_line.length() && m_line.substr( m_column, 5 ) == "TIME$" )
+		try
 		{
-			m_column += 5;
-			std::string format = "%a,%d %b %Y.%H:%M:%S";
-			if ( m_column < m_line.length() && m_line[ m_column ] == '(' )
-			{
-				m_column++;
-				if ( !AdvanceAndCheckEndOfStatement() )
-				{
-					throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-				}
-				if ( m_line[ m_column ] != '\"' )
-				{
-					throw AsmException_SyntaxError_MissingValue( m_line, m_column ) ;
-				}
-				size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-				if ( endQuotePos == string::npos )
-				{
-					throw AsmException_SyntaxError_MissingQuote( m_line, m_column );
-				}
-				format = m_line.substr( m_column + 1, endQuotePos - ( m_column + 1 ) );
-				m_column = endQuotePos + 1;
-				if ( !AdvanceAndCheckEndOfStatement() )
-				{
-					throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-				}
-				if ( m_line[ m_column ] != ')' )
-				{
-					throw AsmException_SyntaxError_MismatchedParentheses( m_line, m_column );
-				}
-				m_column++;
-			}
-
-			char timeString[256];
-			const time_t t = GlobalData::Instance().GetAssemblyTime();
-			const struct tm* t_tm = localtime( &t );
-			if ( strftime( timeString, sizeof( timeString ), format.c_str(), t_tm ) == 0 )
-			{
-				throw AsmException_SyntaxError_TimeResultTooBig( m_line, m_column );
-			}
-			HandleEqus( timeString );
+			value = EvaluateExpression();
 		}
-
-		// handle string
-
-		else if ( m_column < m_line.length() && m_line[ m_column ] == '\"' )
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
 		{
-			size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-			if ( endQuotePos == string::npos )
+			if ( GlobalData::Instance().IsFirstPass() )
 			{
-				throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+				value = 0;
 			}
 			else
 			{
-				string equs( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
-				HandleEqus( equs );
+				throw;
 			}
-
-			m_column = endQuotePos + 1;
 		}
-		else
+
+		if (value.GetType() == Value::StringValue)
+		{
+			// handle equs
+			HandleEqus( value.GetString() );
+		}
+		else if (value.GetType() == Value::NumberValue)
 		{
 			// handle byte
+			int number = static_cast<int>(value.GetNumber());
 
-			int value;
-
-			try
-			{
-				value = EvaluateExpressionAsInt();
-			}
-			catch ( AsmException_SyntaxError_SymbolNotDefined& )
-			{
-				if ( GlobalData::Instance().IsFirstPass() )
-				{
-					value = 0;
-				}
-				else
-				{
-					throw;
-				}
-			}
-
-			if ( value > 0xFF )
+			if ( number > 0xFF )
 			{
 				throw AsmException_SyntaxError_NumberTooBig( m_line, m_column );
 			}
@@ -793,13 +737,13 @@ void LineParser::HandleEqub()
 			{
 				cout << uppercase << hex << setfill( '0' ) << "     ";
 				cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
-				cout << setw(2) << ( value & 0xFF );
+				cout << setw(2) << ( number & 0xFF );
 				cout << endl << nouppercase << dec << setfill( ' ' );
 			}
 
 			try
 			{
-				ObjectCode::Instance().PutByte( value & 0xFF );
+				ObjectCode::Instance().PutByte( number & 0xFF );
 			}
 			catch ( AsmException_AssembleError& e )
 			{
@@ -807,6 +751,11 @@ void LineParser::HandleEqub()
 				e.SetColumn( m_column );
 				throw;
 			}
+		}
+		else
+		{
+			// Unknown value type; this should never happen.
+			assert(false);
 		}
 
 		if ( !AdvanceAndCheckEndOfStatement() )
@@ -828,10 +777,10 @@ void LineParser::HandleEqub()
 
 /*************************************************************************************************/
 /**
-	LineParser::HandleEqus( const string& equs )
+	LineParser::HandleEqus( const String& equs )
 */
 /*************************************************************************************************/
-void LineParser::HandleEqus( const string& equs )
+void LineParser::HandleEqus( const String& equs )
 {
 	if ( GlobalData::Instance().ShouldOutputAsm() )
 	{
@@ -839,7 +788,7 @@ void LineParser::HandleEqus( const string& equs )
 		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
 	}
 
-	for ( size_t i = 0; i < equs.length(); i++ )
+	for ( size_t i = 0; i < equs.Length(); i++ )
 	{
 		int mappedchar = ObjectCode::Instance().GetMapping( equs[ i ] );
 
@@ -1333,7 +1282,7 @@ void LineParser::HandleFor()
 
 	// look for start value
 
-	double start = EvaluateExpression();
+	double start = EvaluateExpressionAsDouble();
 
 	// look for comma
 
@@ -1352,7 +1301,7 @@ void LineParser::HandleFor()
 
 	// look for end value
 
-	double end = EvaluateExpression();
+	double end = EvaluateExpressionAsDouble();
 
 	double step = 1.0;
 
@@ -1367,7 +1316,7 @@ void LineParser::HandleFor()
 
 		m_column++;
 
-		step = EvaluateExpression();
+		step = EvaluateExpressionAsDouble();
 
 		if ( step == 0.0 )
 		{
@@ -1566,9 +1515,9 @@ void LineParser::HandlePrint()
 			}
 			else
 			{
-				// print in dec
+				// print number in decimal or string
 
-				double value;
+				Value value;
 
 				try
 				{
@@ -1576,11 +1525,7 @@ void LineParser::HandlePrint()
 				}
 				catch ( AsmException_SyntaxError_SymbolNotDefined& )
 				{
-					if ( GlobalData::Instance().IsFirstPass() )
-					{
-						value = 0.0;
-					}
-					else
+					if ( GlobalData::Instance().IsSecondPass() )
 					{
 						throw;
 					}
@@ -1588,7 +1533,20 @@ void LineParser::HandlePrint()
 
 				if ( GlobalData::Instance().IsSecondPass() )
 				{
-					cout << value << " ";
+					if (value.GetType() == Value::NumberValue)
+					{
+						cout << value.GetNumber() << " ";
+					}
+					else if (value.GetType() == Value::StringValue)
+					{
+						String text = value.GetString();
+						const char* pstr = text.Text();
+						for (int i = 0; i != text.Length(); ++i)
+						{
+							cout << *pstr;
+							++pstr;
+						}
+					}
 				}
 			}
 		}

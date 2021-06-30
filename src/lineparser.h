@@ -24,6 +24,7 @@
 #define LINEPARSER_H_
 
 #include <string>
+#include "value.h"
 
 class SourceCode;
 
@@ -135,7 +136,7 @@ private:
 	void			HandleInclude();
 	void			HandleIncBin();
 	void			HandleEqub();
-	void			HandleEqus(const std::string& equs);
+	void			HandleEqus(const String& equs);
 	void			HandleEquw();
 	void			HandleEqud();
 	void			HandleAssert();
@@ -163,10 +164,17 @@ private:
 
 	// expression evaluating methods
 
-	double			EvaluateExpression( bool bAllowOneMismatchedCloseBracket = false );
+	Value			EvaluateExpression( bool bAllowOneMismatchedCloseBracket = false );
+	double			EvaluateExpressionAsDouble( bool bAllowOneMismatchedCloseBracket = false );
 	int				EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket = false );
 	unsigned int	EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatchedCloseBracket = false );
-	double			GetValue();
+	Value			GetValue();
+
+	// convenience functions for getting operator parameters from the stack
+	std::pair<Value, Value> StackTopTwoValues();
+	double LineParser::StackTopNumber();
+	std::pair<double, double> StackTopTwoNumbers();
+	std::pair<int, int> StackTopTwoInts();
 
 	void			EvalAdd();
 	void			EvalSubtract();
@@ -208,7 +216,9 @@ private:
 	void			EvalLog();
 	void			EvalLn();
 	void			EvalExp();
+	void			EvalTime();
 
+	Value			FormatAssemblyTime(const char* formatString);
 
 	SourceCode*				m_sourceCode;
 	std::string				m_line;
@@ -222,7 +232,7 @@ private:
 	#define MAX_VALUES		128
 	#define MAX_OPERATORS	32
 
-	double					m_valueStack[ MAX_VALUES ];
+	Value					m_valueStack[ MAX_VALUES ];
 	Operator				m_operatorStack[ MAX_OPERATORS ];
 	int						m_valueStackPtr;
 	int						m_operatorStackPtr;

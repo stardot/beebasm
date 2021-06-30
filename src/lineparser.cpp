@@ -176,7 +176,7 @@ void LineParser::Process()
 				m_column++;
 			}
 
-			double value = EvaluateExpression();
+			Value value = EvaluateExpression();
 
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
@@ -227,7 +227,7 @@ void LineParser::Process()
 					{
 						if ( !SymbolTable::Instance().IsSymbolDefined( paramName ) )
 						{
-							double value = EvaluateExpression();
+							Value value = EvaluateExpression();
 							SymbolTable::Instance().AddSymbol( paramName, value );
 						}
 						else if ( GlobalData::Instance().IsSecondPass() )
@@ -238,7 +238,7 @@ void LineParser::Process()
 							// macro parameter rather than the new value of the outer macro
 							// parameter. See local-forward-branch-5.6502 for an example.
 							SymbolTable::Instance().RemoveSymbol( paramName );
-							double value = EvaluateExpression();
+							Value value = EvaluateExpression();
 							SymbolTable::Instance().AddSymbol( paramName, value );
 						}
 					}

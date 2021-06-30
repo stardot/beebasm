@@ -128,10 +128,10 @@ bool SymbolTable::IsSymbolDefined( const std::string& symbol ) const
 	Adds a symbol to the symbol table with the supplied value
 
 	@param		symbol			The symbol to add
-	@param		int				Its value
+	@param		value			Its value
 */
 /*************************************************************************************************/
-void SymbolTable::AddSymbol( const std::string& symbol, double value, bool isLabel )
+void SymbolTable::AddSymbol( const std::string& symbol, Value value, bool isLabel )
 {
 	assert( !IsSymbolDefined( symbol ) );
 	m_map.insert( make_pair( symbol, Symbol( value, isLabel ) ) );
@@ -272,7 +272,7 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 	@param		symbol			The name of the symbol to look for
 */
 /*************************************************************************************************/
-double SymbolTable::GetSymbol( const std::string& symbol ) const
+Value SymbolTable::GetSymbol( const std::string& symbol ) const
 {
 	assert( IsSymbolDefined( symbol ) );
 	return m_map.find( symbol )->second.GetValue();
@@ -341,14 +341,19 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 			if ( symbol.IsLabel() &&
 				 symbolName.find_first_of( '@' ) == string::npos )
 			{
-				if ( !bFirst )
+				// This doesn't output string valued symbols
+				Value value = symbol.GetValue();
+				if (value.GetType() == Value::NumberValue)
 				{
-					our_cout << ",";
+					if ( !bFirst )
+					{
+						our_cout << ",";
+					}
+
+					our_cout << "'" << symbolName << "':" << value.GetNumber() << "L";
+
+					bFirst = false;
 				}
-
-				our_cout << "'" << symbolName << "':" << symbol.GetValue() << "L";
-
-				bFirst = false;
 			}
 		}
 	}

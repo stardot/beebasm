@@ -110,6 +110,7 @@
     <ClInclude Include="..\sourcefile.h" />
     <ClInclude Include="..\stringutils.h" />
     <ClInclude Include="..\symboltable.h" />
+    <ClInclude Include="..\value.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
