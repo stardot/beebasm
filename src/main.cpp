@@ -76,6 +76,7 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_DISC_TITLE,
 		WAITING_FOR_DISC_WRITES,
 		WAITING_FOR_SYMBOL,
+		WAITING_FOR_STRING_SYMBOL,
 		WAITING_FOR_LABELS_FILE
 
 	} state = READY;
@@ -154,6 +155,10 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_SYMBOL;
 				}
+				else if ( strcmp( argv[i], "-S" ) == 0 )
+				{
+					state = WAITING_FOR_STRING_SYMBOL;
+				}
 				else if ( ( strcmp( argv[i], "--help" ) == 0 ) ||
 					  ( strcmp( argv[i], "-help" ) == 0 ) ||
 					  ( strcmp( argv[i], "-h" ) == 0 ) )
@@ -174,7 +179,8 @@ int main( int argc, char* argv[] )
 					cout << " -dd            Dump all global and local symbols after assembly" << endl;
 					cout << " -w             Require whitespace between opcodes and labels" << endl;
 					cout << " -vc            Use Visual C++-style error messages" << endl;
-					cout << " -D <sym>=<val> Define symbol prior to assembly" << endl;
+					cout << " -D <sym>=<val> Define numeric symbol prior to assembly" << endl;
+					cout << " -S <sym>=<str> Define string symbol prior to assembly" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
@@ -251,6 +257,16 @@ int main( int argc, char* argv[] )
 				if ( ! SymbolTable::Instance().AddCommandLineSymbol( argv[i] ) )
 				{
 					cerr << "Invalid -D expression: " << argv[i] << endl;
+					return EXIT_FAILURE;
+				}
+				state = READY;
+				break;
+
+			case WAITING_FOR_STRING_SYMBOL:
+
+				if ( ! SymbolTable::Instance().AddCommandLineStringSymbol( argv[i] ) )
+				{
+					cerr << "Invalid -S expression: " << argv[i] << endl;
 					return EXIT_FAILURE;
 				}
 				state = READY;

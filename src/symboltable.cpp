@@ -265,6 +265,42 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 
 /*************************************************************************************************/
 /**
+	SymbolTable::AddCommandLineStringSymbol()
+
+	Adds a string symbol to the symbol table using a command line 'FOO=BAR' expression
+
+	@param		expr			Symbol name and value
+	@returns	bool
+*/
+/*************************************************************************************************/
+bool SymbolTable::AddCommandLineStringSymbol( const std::string& expr )
+{
+	std::string::size_type equalsIndex = expr.find( '=' );
+	std::string symbol;
+	std::string valueString;
+	if ( equalsIndex == std::string::npos )
+	{
+		return false;
+	}
+
+	symbol = expr.substr( 0, equalsIndex );
+	valueString = expr.substr( equalsIndex + 1 );
+
+	if ( symbol.empty() )
+	{
+		return false;
+	}
+
+	String value = String(valueString.data(), valueString.length());
+
+	m_map.insert( make_pair( symbol, Symbol( value, false ) ) );
+
+	return true;
+}
+
+
+/*************************************************************************************************/
+/**
 	SymbolTable::GetSymbol()
 
 	Gets the value of a symbol which already exists in the symbol table

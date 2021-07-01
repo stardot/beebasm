@@ -179,10 +179,12 @@ Things like `STA&4000` are permitted with or without `-w`.
 
 `-D <symbol>=<value>`
 
-Define `<symbol>` before starting to assemble. If `<value>` is not given, `-1` (`TRUE`)
-will be used by default. Note that there must be a space between `-D` and the symbol. `<value>` may be in decimal, hexadecimal (prefixed with $, & or 0x) or binary (prefixed with %).
+`-S <symbol>=<string>'
 
-`-D` can be used in conjunction with conditional assignment to provide default values within the source which can be overridden from the command line.
+Define `<symbol>` before starting to assemble. If `<value>` is not given, `-1` (`TRUE`)
+will be used by default. Note that there must be a space between `-D` or `-S` and the symbol. `<value>` may be in decimal, hexadecimal (prefixed with $, & or 0x) or binary (prefixed with %).  `<string>` may be quoted.
+
+`-D` and '-S' can be used in conjunction with conditional assignment to provide default values within the source which can be overridden from the command line.
 
 ## 5. SOURCE FILE SYNTAX
 
