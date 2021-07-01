@@ -173,8 +173,8 @@ private:
 
 	// convenience functions for getting operator parameters from the stack
 	std::pair<Value, Value> StackTopTwoValues();
-	String LineParser::StackTopString();
-	double LineParser::StackTopNumber();
+	String StackTopString();
+	double StackTopNumber();
 	std::pair<double, double> StackTopTwoNumbers();
 	std::pair<int, int> StackTopTwoInts();
 
