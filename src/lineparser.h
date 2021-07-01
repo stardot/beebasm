@@ -107,6 +107,7 @@ private:
 	int				GetTokenAndAdvanceColumn();
 	void			HandleToken( int i, int oldColumn );
 	int				GetInstructionAndAdvanceColumn();
+	int				GetInstructionExact(const char* instr);
 	int				CheckMacroMatches();
 	bool			MoveToNextAtom( const char* pTerminators = NULL );
 	bool			AdvanceAndCheckEndOfLine();
@@ -162,6 +163,7 @@ private:
 	void			HandleError();
 	void			HandleCopyBlock();
 	void			HandleRandomize();
+	void			HandleAsm();
 
 	// expression evaluating methods
 

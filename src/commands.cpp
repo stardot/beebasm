@@ -81,7 +81,8 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "ENDMACRO",	&LineParser::HandleEndMacro,			&SourceFile::EndMacro },
 	{ "ERROR",		&LineParser::HandleError,				0 },
 	{ "COPYBLOCK",	&LineParser::HandleCopyBlock,			0 },
-	{ "RANDOMIZE",  &LineParser::HandleRandomize,			0 }
+	{ "RANDOMIZE",  &LineParser::HandleRandomize,			0 },
+	{ "ASM",		&LineParser::HandleAsm,					0 }
 };
 
 
@@ -2123,4 +2124,63 @@ void LineParser::HandleRandomize()
 		// Unexpected comma (remembering that an expression can validly end with a comma)
 		throw AsmException_SyntaxError_UnexpectedComma( m_line, m_column );
 	}
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleAsm()
+*/
+/*************************************************************************************************/
+void LineParser::HandleAsm()
+{
+	// look for mnemonic
+
+	Value mnemonic = EvaluateExpression();
+
+	if (mnemonic.GetType() != Value::StringValue)
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+
+	int instruction = GetInstructionExact(mnemonic.GetString().Text());
+	if (instruction < 0)
+	{
+		throw AsmException_SyntaxError_UnrecognisedToken( m_line, m_column );
+	}
+
+	// look for comma
+
+	if ( !AdvanceAndCheckEndOfStatement() )
+	{
+		// found nothing
+		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+	}
+
+	if ( m_line[ m_column ] != ',' )
+	{
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+
+	m_column++;
+
+	// look for end value
+
+	Value paramsValue = EvaluateExpression();
+
+	if (paramsValue.GetType() != Value::StringValue)
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+
+	// check this is now the end
+
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+
+	String params = paramsValue.GetString();
+	LineParser parser(m_sourceCode, string(params.Text(), params.Length()));
+	parser.HandleAssembler(instruction);
 }

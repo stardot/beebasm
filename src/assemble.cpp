@@ -182,6 +182,39 @@ int LineParser::GetInstructionAndAdvanceColumn()
 }
 
 
+/*************************************************************************************************/
+/**
+	LineParser::GetInstructionExact()
+
+	Searches for an exact match for the supplied instruction.
+
+	@param		instr			The string containing an instruction
+
+	@return		The token number, or -1 for "not found"
+
+*/
+/*************************************************************************************************/
+int LineParser::GetInstructionExact(const char* instr)
+{
+	for ( int i = 0; i < static_cast<int>( sizeof m_gaOpcodeTable / sizeof( OpcodeData ) ); i++ )
+	{
+		int			cpu		= m_gaOpcodeTable[ i ].m_cpu;
+		const char*	token	= m_gaOpcodeTable[ i ].m_pName;
+
+		// ignore instructions not for current cpu
+		if ( cpu > ObjectCode::Instance().GetCPU() )
+			continue;
+
+		// see if token matches
+		if (stricmp(instr, token) == 0)
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 
 /*************************************************************************************************/
 /**
