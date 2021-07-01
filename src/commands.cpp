@@ -1541,7 +1541,7 @@ void LineParser::HandlePrint()
 					{
 						String text = value.GetString();
 						const char* pstr = text.Text();
-						for (int i = 0; i != text.Length(); ++i)
+						for (unsigned int i = 0; i != text.Length(); ++i)
 						{
 							cout << *pstr;
 							++pstr;
