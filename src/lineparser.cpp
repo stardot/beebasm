@@ -98,8 +98,10 @@ void LineParser::Process()
 					  ( isalpha( m_line[ m_column ] ) ||
 						isdigit( m_line[ m_column ] ) ||
 						m_line[ m_column ] == '_' ||
-						m_line[ m_column ] == '%' ) &&
-						m_line[ m_column - 1 ] != '%' );
+						m_line[ m_column ] == '%' ||
+						m_line[ m_column ] == '$' ) &&
+						m_line[ m_column - 1 ] != '%' &&
+						m_line[ m_column - 1 ] != '$' );
 
 			if ( AdvanceAndCheckEndOfStatement() )
 			{
@@ -550,8 +552,10 @@ string LineParser::GetSymbolName()
 			  ( isalpha( m_line[ m_column ] ) ||
 				isdigit( m_line[ m_column ] ) ||
 				m_line[ m_column ] == '_' ||
-				m_line[ m_column ] == '%' ) &&
-				m_line[ m_column - 1 ] != '%' );
+				m_line[ m_column ] == '%' ||
+				m_line[ m_column ] == '$' ) &&
+				m_line[ m_column - 1 ] != '%' &&
+				m_line[ m_column - 1 ] != '$' );
 
 	return symbolName;
 }

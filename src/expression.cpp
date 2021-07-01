@@ -262,7 +262,7 @@ Value LineParser::GetValue()
 		int oldColumn = m_column;
 		string symbolName = GetSymbolName();
 
-		if ((m_column < m_line.length()) && (m_line[m_column] == '$') && (symbolName == "TIME"))
+		if (symbolName == "TIME$")
 		{
 			// Handle TIME$ with no parameters
 
