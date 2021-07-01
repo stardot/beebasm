@@ -206,7 +206,7 @@ int LineParser::GetInstructionExact(const char* instr)
 			continue;
 
 		// see if token matches
-		if (stricmp(instr, token) == 0)
+		if (_stricmp(instr, token) == 0)
 		{
 			return i;
 		}
