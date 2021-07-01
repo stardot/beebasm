@@ -200,13 +200,23 @@ int LineParser::GetInstructionExact(const char* instr)
 	{
 		int			cpu		= m_gaOpcodeTable[ i ].m_cpu;
 		const char*	token	= m_gaOpcodeTable[ i ].m_pName;
+		size_t		len		= strlen( token );
 
 		// ignore instructions not for current cpu
 		if ( cpu > ObjectCode::Instance().GetCPU() )
 			continue;
 
-		// see if token matches
-		if (_stricmp(instr, token) == 0)
+		bool bMatch = true;
+		for ( unsigned int j = 0; j <= len; j++ )
+		{
+			if ( token[ j ] != toupper( instr[ j ] ) )
+			{
+				bMatch = false;
+				break;
+			}
+		}
+
+		if (bMatch)
 		{
 			return i;
 		}
