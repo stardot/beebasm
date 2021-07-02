@@ -2134,8 +2134,6 @@ void LineParser::HandleRandomize()
 /*************************************************************************************************/
 void LineParser::HandleAsm()
 {
-	// TODO: Better error reporting
-
 	// look for assembly language string
 
 	Value asmValue = EvaluateExpression();

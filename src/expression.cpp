@@ -1484,8 +1484,6 @@ void LineParser::EvalVal()
 /*************************************************************************************************/
 void LineParser::EvalEval()
 {
-	// TODO: Better error reporting
-
 	String expr = StackTopString();
 	LineParser parser(m_sourceCode, string(expr.Text(), expr.Length()));
 	Value result = parser.EvaluateExpression();
