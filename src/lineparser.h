@@ -107,7 +107,7 @@ private:
 	int				GetTokenAndAdvanceColumn();
 	void			HandleToken( int i, int oldColumn );
 	int				GetInstructionAndAdvanceColumn();
-	int				GetInstructionExact(const char* instr);
+	int				GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes);
 	int				CheckMacroMatches();
 	bool			MoveToNextAtom( const char* pTerminators = NULL );
 	bool			AdvanceAndCheckEndOfLine();

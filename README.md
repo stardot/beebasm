@@ -632,9 +632,9 @@ Abort assembly if any of the expressions is false.
 
 Seed the random number generator used by the RND() function.  If this is not used, the random number generator is seeded based on the current time and so each build of a program using `RND()` will be different.
 
-`ASM <instr>, <params>`
+`ASM <str>`
 
-Assemble the instruction with the supplied parameters.  For example `ASM "LDA", "#&41"`.
+Assemble the supplied assembly language string.  For example `ASM "LDA #&41"`.
 
 ## 7. TIPS AND TRICKS
 

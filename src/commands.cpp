@@ -2134,41 +2134,11 @@ void LineParser::HandleRandomize()
 /*************************************************************************************************/
 void LineParser::HandleAsm()
 {
-	// look for mnemonic
+	// look for assembly language string
 
-	Value mnemonic = EvaluateExpression();
+	Value asmValue = EvaluateExpression();
 
-	if (mnemonic.GetType() != Value::StringValue)
-	{
-		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
-	}
-
-	int instruction = GetInstructionExact(mnemonic.GetString().Text());
-	if (instruction < 0)
-	{
-		throw AsmException_SyntaxError_UnrecognisedToken( m_line, m_column );
-	}
-
-	// look for comma
-
-	if ( !AdvanceAndCheckEndOfStatement() )
-	{
-		// found nothing
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
-
-	if ( m_line[ m_column ] != ',' )
-	{
-		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
-	}
-
-	m_column++;
-
-	// look for end value
-
-	Value paramsValue = EvaluateExpression();
-
-	if (paramsValue.GetType() != Value::StringValue)
+	if (asmValue.GetType() != Value::StringValue)
 	{
 		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
 	}
@@ -2180,7 +2150,15 @@ void LineParser::HandleAsm()
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 	}
 
-	String params = paramsValue.GetString();
-	LineParser parser(m_sourceCode, string(params.Text(), params.Length()));
+	String assembly = asmValue.GetString();
+	LineParser parser(m_sourceCode, string(assembly.Text(), assembly.Length()));
+
+	// Parse the mnemonic, don't require a non-alpha after it.
+	int instruction = parser.GetInstructionAndAdvanceColumn(false);
+	if (instruction < 0)
+	{
+		throw AsmException_SyntaxError_UnrecognisedToken( m_line, m_column );
+	}
+
 	parser.HandleAssembler(instruction);
 }
