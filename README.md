@@ -238,6 +238,7 @@ LOG(val)           Return the base 10 log of val
 LN(val)            Return the natural log of val
 EXP(val)           Return e raised to the power of val
 VAL(str)           Return the value of a decimal number in a string
+EVAL(str)          Return the value of an expression in a string
 STR$(val)          Return the number val converted to a string
 LEN(str)           Return the length of str
 CHR$(val)          Return a string with a single character with ASCII value val

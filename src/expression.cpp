@@ -1484,12 +1484,12 @@ void LineParser::EvalVal()
 /*************************************************************************************************/
 void LineParser::EvalEval()
 {
-	String str = StackTopString();
-	// TODO: Evaluate full expression
-	char* end;
-	double value = strtod(str.Text(), &end);
+	// TODO: Better error reporting
 
-	m_valueStack[ m_valueStackPtr - 1 ] = value;
+	String expr = StackTopString();
+	LineParser parser(m_sourceCode, string(expr.Text(), expr.Length()));
+	Value result = parser.EvaluateExpression();
+	m_valueStack[ m_valueStackPtr - 1 ] = result;
 }
 
 
