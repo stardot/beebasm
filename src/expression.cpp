@@ -105,11 +105,14 @@ const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	{ "TIME$(",	10,	1,	&LineParser::EvalTime },
 	{ "STR$(",	10,	1,	&LineParser::EvalStr },
 	{ "VAL(",	10,	1,	&LineParser::EvalVal },
+	{ "EVAL(",	10,	1,	&LineParser::EvalEval },
 	{ "LEN(",	10,	1,	&LineParser::EvalLen },
 	{ "CHR$(",	10,	1,	&LineParser::EvalChr },
 	{ "ASC(",	10,	1,	&LineParser::EvalAsc },
 	{ "MID$(",	10,	3,	&LineParser::EvalMid },
-	{ "STRING$(",	10,	2,	&LineParser::EvalString }
+	{ "STRING$(",	10,	2,	&LineParser::EvalString },
+	{ "UPPER(",	10,	1,	&LineParser::EvalUpper },
+	{ "LOWER(",	10,	1,	&LineParser::EvalLower }
 };
 
 
@@ -1476,6 +1479,22 @@ void LineParser::EvalVal()
 
 /*************************************************************************************************/
 /**
+	LineParser::EvalEval()
+*/
+/*************************************************************************************************/
+void LineParser::EvalEval()
+{
+	String str = StackTopString();
+	// TODO: Evaluate full expression
+	char* end;
+	double value = strtod(str.Text(), &end);
+
+	m_valueStack[ m_valueStackPtr - 1 ] = value;
+}
+
+
+/*************************************************************************************************/
+/**
 	LineParser::EvalLen()
 */
 /*************************************************************************************************/
@@ -1580,4 +1599,26 @@ void LineParser::EvalString()
 	}
 
 	m_valueStack[ m_valueStackPtr - 1 ] = text.Repeat(count);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalUpper()
+*/
+/*************************************************************************************************/
+void LineParser::EvalUpper()
+{
+	m_valueStack[ m_valueStackPtr - 1 ] = StackTopString().Upper();
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLower()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLower()
+{
+	m_valueStack[ m_valueStackPtr - 1 ] = StackTopString().Lower();
 }

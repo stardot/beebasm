@@ -82,10 +82,13 @@ public:
 	{
 		int length = header1->m_length + header2->m_length;
 		StringHeader* header = Allocate(length);
-		char* buffer = StringBuffer(header);
-		memcpy(buffer, StringData(header1), header1->m_length);
-		memcpy(buffer + header1->m_length, StringData(header2), header2->m_length);
-		buffer[length] = 0;
+		if (header)
+		{
+			char* buffer = StringBuffer(header);
+			memcpy(buffer, StringData(header1), header1->m_length);
+			memcpy(buffer + header1->m_length, StringData(header2), header2->m_length);
+			buffer[length] = 0;
+		}
 		return header;
 	}
 
@@ -110,14 +113,49 @@ public:
 		assert(length < 0x10000);
 
 		StringHeader* header = Allocate(length);
-		char* buffer = StringBuffer(header);
-		for (unsigned int i = 0; i != count; ++i)
+		if (header)
 		{
-			memcpy(buffer, sourceData, sourceLength);
-			buffer += sourceLength;
+			char* buffer = StringBuffer(header);
+			for (unsigned int i = 0; i != count; ++i)
+			{
+				memcpy(buffer, sourceData, sourceLength);
+				buffer += sourceLength;
+			}
+			*buffer = 0;
 		}
-		*buffer = 0;
 		return header;
+	}
+
+	static StringHeader* Upper(StringHeader* source)
+	{
+		StringHeader* result = Copy(source);
+		if (result)
+		{
+			unsigned int length = Length(result);
+			char* pdata = StringBuffer(result);
+			for (unsigned int i = 0; i != length; ++i)
+			{
+				*pdata = ascii_upper(*pdata);
+				++pdata;
+			}
+		}
+		return result;
+	}
+
+	static StringHeader* Lower(StringHeader* source)
+	{
+		StringHeader* result = Copy(source);
+		if (result)
+		{
+			unsigned int length = Length(result);
+			char* pdata = StringBuffer(result);
+			for (unsigned int i = 0; i != length; ++i)
+			{
+				*pdata = ascii_lower(*pdata);
+				++pdata;
+			}
+		}
+		return result;
 	}
 
 private:
@@ -137,6 +175,11 @@ private:
 		return header;
 	}
 
+	static StringHeader* Copy(StringHeader* source)
+	{
+		return Allocate(StringData(source), Length(source));
+	}
+
 	static int Compare(unsigned int a, unsigned int b)
 	{
 		if (a == b)
@@ -146,6 +189,25 @@ private:
 		else
 			return 1;
 	}
+
+	static char ascii_lower(char c)
+	{
+		if (('A' <= c) && (c <= 'Z'))
+		{
+			c += 'a' - 'A';
+		}
+		return c;
+	}
+
+	static char ascii_upper(char c)
+	{
+		if (('a' <= c) && (c <= 'z'))
+		{
+			c -= 'a' - 'A';
+		}
+		return c;
+	}
+
 };
 
 // A simple immutable string.
@@ -191,6 +253,14 @@ public:
 		StringHeader* header = StringHeader::Repeat(m_header, count);
 		return String(header);
 	}
+	String Upper()
+	{
+		return String(StringHeader::Upper(m_header));
+	}
+	String Lower()
+	{
+		return String(StringHeader::Lower(m_header));
+	}
 	unsigned int Length() const
 	{
 		return StringHeader::Length(m_header);
@@ -210,6 +280,10 @@ private:
 
 	String(StringHeader* header)
 	{
+		if (!header)
+		{
+			throw std::bad_alloc();
+		}
 		m_header = header;
 		StringHeader::AddRef(m_header);
 	}

@@ -223,11 +223,14 @@ private:
 	void			EvalTime();
 	void			EvalStr();
 	void			EvalVal();
+	void			EvalEval();
 	void			EvalLen();
 	void			EvalChr();
 	void			EvalAsc();
 	void			EvalMid();
 	void			EvalString();
+	void			EvalUpper();
+	void			EvalLower();
 
 	Value			FormatAssemblyTime(const char* formatString);
 
