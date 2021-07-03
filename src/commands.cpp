@@ -1967,7 +1967,7 @@ void LineParser::HandleAsm()
 	int instruction = parser.GetInstructionAndAdvanceColumn(false);
 	if (instruction < 0)
 	{
-		throw AsmException_SyntaxError_UnrecognisedToken( m_line, m_column );
+		throw AsmException_SyntaxError_MissingAssemblyInstruction( parser.m_line, parser.m_column );
 	}
 
 	parser.HandleAssembler(instruction);

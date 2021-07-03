@@ -220,6 +220,7 @@ DEFINE_SYNTAX_EXCEPTION( BadAddress, "Out of range address." );
 DEFINE_SYNTAX_EXCEPTION( BadIndexed, "Syntax error in indexed instruction." );
 DEFINE_SYNTAX_EXCEPTION( NoIndexedX, "X indexed mode does not exist for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( NoIndexedY, "Y indexed mode does not exist for this instruction." );
+DEFINE_SYNTAX_EXCEPTION( MissingAssemblyInstruction, "Expected an assembly language instruction." );
 DEFINE_SYNTAX_EXCEPTION( LabelAlreadyDefined, "Symbol already defined." );
 DEFINE_SYNTAX_EXCEPTION( InvalidSymbolName, "Invalid symbol name; must start with a letter and contain only letters, numbers and underscore." );
 DEFINE_SYNTAX_EXCEPTION( SymbolScopeOutsideMacro, "Symbol scope cannot promote outside current macro." );
