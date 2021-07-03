@@ -377,20 +377,17 @@ void LineParser::SkipExpression( int bracketCount, bool bAllowOneMismatchedClose
 {
 	while ( AdvanceAndCheckEndOfSubStatement(bracketCount == 0) )
 	{
-		if ( bAllowOneMismatchedCloseBracket )
+		if ( m_line[ m_column ] == '(' )
 		{
-			if ( m_line[ m_column ] == '(' )
-			{
-				bracketCount++;
-			}
-			else if ( m_line[ m_column ] == ')' )
-			{
-				bracketCount--;
+			bracketCount++;
+		}
+		else if ( m_line[ m_column ] == ')' )
+		{
+			bracketCount--;
 
-				if ( bracketCount < 0 )
-				{
-					break;
-				}
+			if (bAllowOneMismatchedCloseBracket && ( bracketCount < 0 ) )
+			{
+				break;
 			}
 		}
 
