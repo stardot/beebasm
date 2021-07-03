@@ -104,6 +104,7 @@ const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	{ "EXP(",	10,	1,	&LineParser::EvalExp },
 	{ "TIME$(",	10,	1,	&LineParser::EvalTime },
 	{ "STR$(",	10,	1,	&LineParser::EvalStr },
+	{ "STR$~(",	10,	1,	&LineParser::EvalStrHex },
 	{ "VAL(",	10,	1,	&LineParser::EvalVal },
 	{ "EVAL(",	10,	1,	&LineParser::EvalEval },
 	{ "LEN(",	10,	1,	&LineParser::EvalLen },
@@ -111,8 +112,8 @@ const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	{ "ASC(",	10,	1,	&LineParser::EvalAsc },
 	{ "MID$(",	10,	3,	&LineParser::EvalMid },
 	{ "STRING$(",	10,	2,	&LineParser::EvalString },
-	{ "UPPER(",	10,	1,	&LineParser::EvalUpper },
-	{ "LOWER(",	10,	1,	&LineParser::EvalLower }
+	{ "UPPER$(",	10,	1,	&LineParser::EvalUpper },
+	{ "LOWER$(",	10,	1,	&LineParser::EvalLower }
 };
 
 
@@ -1456,6 +1457,21 @@ void LineParser::EvalStr()
 {
 	ostringstream stream;
 	stream << StackTopNumber();
+	string result = stream.str();
+
+	m_valueStack[ m_valueStackPtr - 1 ] = String(result.data(), result.length());
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalStrHex()
+*/
+/*************************************************************************************************/
+void LineParser::EvalStrHex()
+{
+	ostringstream stream;
+	stream << std::hex << std::uppercase << static_cast<int>(StackTopNumber());
 	string result = stream.str();
 
 	m_valueStack[ m_valueStackPtr - 1 ] = String(result.data(), result.length());

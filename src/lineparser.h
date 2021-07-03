@@ -222,6 +222,7 @@ private:
 	void			EvalExp();
 	void			EvalTime();
 	void			EvalStr();
+	void			EvalStrHex();
 	void			EvalVal();
 	void			EvalEval();
 	void			EvalLen();

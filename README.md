@@ -240,6 +240,7 @@ EXP(val)           Return e raised to the power of val
 VAL(str)           Return the value of a decimal number in a string
 EVAL(str)          Return the value of an expression in a string
 STR$(val)          Return the number val converted to a string
+STR$~(val)         Return the number val converted to a string in hexadecimal
 LEN(str)           Return the length of str
 CHR$(val)          Return a string with a single character with ASCII value val
 ASC(str)           Return the ASCII value of the first character of str
@@ -247,6 +248,8 @@ MID$(str,index,length)
                    Return length characters of str starting at (one-based) index
 STRINGS$(count,str)
                    Return str repeated count times
+LOWER$(str)        Return str converted to lowercase
+UPPER$(str)        Return str converted to uppercase
 TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
 TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
                    is the same format used by the C library strftime()
