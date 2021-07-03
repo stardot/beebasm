@@ -998,6 +998,7 @@ void LineParser::HandleAssert()
 /*************************************************************************************************/
 void LineParser::HandleSave()
 {
+	string saveFile;
 	int start = 0;
 	int end = 0;
 	int exec = 0;
@@ -1005,27 +1006,35 @@ void LineParser::HandleSave()
 
 	int oldColumn = m_column;
 
-	// syntax is SAVE "filename", start, end [, exec [, reload] ]
+	// syntax is SAVE ["filename"], start, end [, exec [, reload] ]
 
-	string saveFile = EvaluateExpressionAsString();
+	Value saveOrStart = EvaluateExpression();
 
-	if ( !AdvanceAndCheckEndOfStatement() )
+	if (saveOrStart.GetType() == Value::NumberValue)
 	{
-		// found nothing
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		start = static_cast<int>(saveOrStart.GetNumber());
+	}
+	else if (saveOrStart.GetType() == Value::StringValue)
+	{
+		saveFile = string(saveOrStart.GetString().Text(), saveOrStart.GetString().Length());
+
+		if ( m_line[ m_column ] != ',' )
+		{
+			// did not find a comma
+			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+		}
+
+		m_column++;
+
+		// Get start address
+		start = EvaluateExpressionAsInt();
+	}
+	else
+	{
+		assert(false);
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
 	}
 
-	if ( m_line[ m_column ] != ',' )
-	{
-		// did not find a comma
-		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
-	}
-
-	m_column++;
-
-	// get start address
-
-	start = EvaluateExpressionAsInt();
 	exec = start;
 	reload = start;
 

@@ -384,9 +384,9 @@ Puts a 'guard' on the specified address which will cause an error if you attempt
 Clears all guards between the `<start>` and `<end`> addresses specified.  This can also be used to reset a section of memory which has had code assembled in it previously.  BeebAsm will complain if you attempt to assemble code over previously assembled code at the same address without having `CLEAR`ed it first.
 
 
-`SAVE "filename", start, end [, exec [, reload] ]`
+`SAVE ["filename"], start, end [, exec [, reload] ]`
 
-Saves out object code to either a DFS disc image (if one has been specified), or to the current directory as a standalone file.  A source file must have at least one SAVE statement in it, otherwise nothing will be output.  BeebAsm will warn if this is the case.
+Saves out object code to either a DFS disc image (if one has been specified), or to the current directory as a standalone file.  The filename is optional only if a name is specified with `-o` on the command line.  A source file must have at least one SAVE statement in it, otherwise nothing will be output.  BeebAsm will warn if this is the case.
 
 `'exec'` can be optionally specified as the execution address of the file when saved to a disc image.
 
