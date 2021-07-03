@@ -275,7 +275,7 @@ Note that it is not possible to reassign variables once defined. However `FOR...
 
 Variables can be defined if they are not already defined using the conditional assignment syntax `=?`, e.g. `addr =? &70`. This is useful in conjunction with the `-D` command line option to provide default values for variables in the source while allowing them to be overridden on the command line. (Because variables cannot be reassigned once defined, it is not possible to define a variable with `-D` *and* with non-conditional assignment.)
 
-(Thanks to Stephen Harris <sweh@spuddy.org> and "ctr" for the `-D`/conditional assignment support.)
+(Thanks to Stephen Harris <sweh@spuddy.org> and Charles Reilly for the `-D`/conditional assignment support.)
 
 
 ## 6. ASSEMBLER DIRECTIVES
@@ -728,7 +728,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 ??/??/????  1.10  Documented "$" and "%" as literal prefixes (thanks to
                   cardboardguru76 for pointing this out).
 		  Fixed silently treating label references starting with "."
-		  as 0 (thanks to mungre for this fix).
+		  as 0 (thanks to Charles Reilly for this fix).
 		  Allowed "-h" and "-help" options to see help.
 		  Fixed tokenisation of BASIC pseudo-variables in some cases.
 		  (Thanks to Richard Russell for advice on this.)
@@ -738,6 +738,9 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
 		  Added -writes, -dd and -labels options (thanks to tricky for these)
 		  Added CMake support and man page (thanks to Dave Lambley)
+		  Added string values and VAL, EVAL, STR$, LEN, CHR$, ASC, MID$,
+		  STRING$, LOWER$, UPPER$, ASM. (Charles Reilly with thanks to
+		  Steven Flintham.)
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
