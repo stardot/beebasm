@@ -597,37 +597,15 @@ void LineParser::HandleInclude()
 		throw AsmException_SyntaxError_CantInclude( m_line, m_column );
 	}
 
-	if ( !AdvanceAndCheckEndOfStatement() )
+	string filename = EvaluateExpressionAsString();
+
+	if ( GlobalData::Instance().ShouldOutputAsm() )
 	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		cerr << "Including file " << filename << endl;
 	}
 
-	if ( m_column >= m_line.length() || m_line[ m_column ] != '\"' )
-	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
-
-	// string
-	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-	if ( endQuotePos == string::npos )
-	{
-		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-	}
-	else
-	{
-		string filename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
-
-		if ( GlobalData::Instance().ShouldOutputAsm() )
-		{
-			cerr << "Including file " << filename << endl;
-		}
-
-		SourceFile input( filename.c_str(), m_sourceCode );
-		input.Process();
-	}
-
-	m_column = endQuotePos + 1;
+	SourceFile input( filename.c_str(), m_sourceCode );
+	input.Process();
 
 	if ( AdvanceAndCheckEndOfStatement() )
 	{
@@ -644,40 +622,18 @@ void LineParser::HandleInclude()
 /*************************************************************************************************/
 void LineParser::HandleIncBin()
 {
-	if ( !AdvanceAndCheckEndOfStatement() )
+	string filename = EvaluateExpressionAsString();
+
+	try
 	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		ObjectCode::Instance().IncBin( filename.c_str() );
 	}
-
-	if ( m_column >= m_line.length() || m_line[ m_column ] != '\"' )
+	catch ( AsmException_AssembleError& e )
 	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		e.SetString( m_line );
+		e.SetColumn( m_column );
+		throw;
 	}
-
-	// string
-	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-	if ( endQuotePos == string::npos )
-	{
-		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-	}
-	else
-	{
-		string filename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
-
-		try
-		{
-			ObjectCode::Instance().IncBin( filename.c_str() );
-		}
-		catch ( AsmException_AssembleError& e )
-		{
-			e.SetString( m_line );
-			e.SetColumn( m_column );
-			throw;
-		}
-	}
-
-	m_column = endQuotePos + 1;
 
 	if ( AdvanceAndCheckEndOfStatement() )
 	{
@@ -1051,44 +1007,21 @@ void LineParser::HandleSave()
 
 	// syntax is SAVE "filename", start, end [, exec [, reload] ]
 
+	string saveFile = EvaluateExpressionAsString();
+
 	if ( !AdvanceAndCheckEndOfStatement() )
 	{
 		// found nothing
 		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 	}
 
-	string saveFile;
-
-	if ( m_line[ m_column ] == '\"' )
+	if ( m_line[ m_column ] != ',' )
 	{
-		// get filename
-
-		size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-		if ( endQuotePos == string::npos )
-		{
-			// did not find the end of the string
-			throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-		}
-
-		saveFile = m_line.substr( m_column + 1, endQuotePos - m_column - 1 );
-
-		m_column = endQuotePos + 1;
-
-		if ( !AdvanceAndCheckEndOfStatement() )
-		{
-			// found nothing
-			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-		}
-
-		if ( m_line[ m_column ] != ',' )
-		{
-			// did not find a comma
-			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
-		}
-
-		m_column++;
+		// did not find a comma
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 	}
+
+	m_column++;
 
 	// get start address
 
@@ -1438,26 +1371,6 @@ void LineParser::HandlePrint()
 		{
 			throw AsmException_SyntaxError_MissingComma( m_line, m_column );
 		}
-		else if ( m_line[ m_column ] == '\"' )
-		{
-			// string
-			size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-			if ( endQuotePos == string::npos )
-			{
-				throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-			}
-			else
-			{
-				if ( GlobalData::Instance().IsSecondPass() )
-				{
-					cout << m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) << " ";
-				}
-			}
-
-			m_column = endQuotePos + 1;
-			bDemandComma = true;
-		}
 		else if ( m_line[ m_column ] == '~' )
 		{
 			// print in hex
@@ -1595,30 +1508,10 @@ void LineParser::HandlePutFileCommon( bool bText )
 	// Syntax:
 	// PUTFILE/PUTTEXT <host filename>, [<beeb filename>,] <start addr> [,<exec addr>]
 
-	if ( !AdvanceAndCheckEndOfStatement() )
-	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
-
-	if ( m_line[ m_column ] != '\"' )
-	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
-
-	// get first filename
-	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-	if ( endQuotePos == string::npos )
-	{
-		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-	}
-
-	string hostFilename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
+	string hostFilename = EvaluateExpressionAsString();
 	string beebFilename = hostFilename;
 	int start = 0;
 	int exec = 0;
-
-	m_column = endQuotePos + 1;
 
 	if ( !AdvanceAndCheckEndOfStatement() )
 	{
@@ -1632,32 +1525,14 @@ void LineParser::HandlePutFileCommon( bool bText )
 
 	m_column++;
 
-	if ( !AdvanceAndCheckEndOfStatement() )
+	Value beebFileOrStartAddr = EvaluateExpression();
+	if (beebFileOrStartAddr.GetType() == Value::NumberValue)
 	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
+		start = static_cast<int>(beebFileOrStartAddr.GetNumber());
 	}
-
-	if ( m_line[ m_column ] == '\"' )
+	else if (beebFileOrStartAddr.GetType() == Value::StringValue)
 	{
-		// string
-		endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-		if ( endQuotePos == string::npos )
-		{
-			throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-		}
-
-		// get the second filename parameter
-
-		beebFilename = m_line.substr( m_column + 1, endQuotePos - m_column - 1 );
-
-		m_column = endQuotePos + 1;
-
-		if ( !AdvanceAndCheckEndOfStatement() )
-		{
-			// found nothing
-			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-		}
+		beebFilename = string(beebFileOrStartAddr.GetString().Text(), beebFileOrStartAddr.GetString().Length());
 
 		if ( m_line[ m_column ] != ',' )
 		{
@@ -1666,20 +1541,24 @@ void LineParser::HandlePutFileCommon( bool bText )
 		}
 
 		m_column++;
-	}
 
-	// Get start address
-
-	try
-	{
-		start = EvaluateExpressionAsInt();
-	}
-	catch ( AsmException_SyntaxError_SymbolNotDefined& )
-	{
-		if ( GlobalData::Instance().IsSecondPass() )
+		// Get start address
+		try
 		{
-			throw;
+			start = EvaluateExpressionAsInt();
 		}
+		catch ( AsmException_SyntaxError_SymbolNotDefined& )
+		{
+			if ( GlobalData::Instance().IsSecondPass() )
+			{
+				throw;
+			}
+		}
+	}
+	else
+	{
+		assert(false);
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
 	}
 
 	exec = start;
@@ -1789,28 +1668,8 @@ void LineParser::HandlePutFileCommon( bool bText )
 /*************************************************************************************************/
 void LineParser::HandlePutBasic()
 {
-	if ( !AdvanceAndCheckEndOfStatement() )
-	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
-
-	if ( m_line[ m_column ] != '\"' )
-	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
-
-	// get first filename
-	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-	if ( endQuotePos == string::npos )
-	{
-		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-	}
-
-	string hostFilename( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
+	string hostFilename = EvaluateExpressionAsString();
 	string beebFilename = hostFilename;
-
-	m_column = endQuotePos + 1;
 
 	if ( AdvanceAndCheckEndOfStatement() )
 	{
@@ -1823,29 +1682,7 @@ void LineParser::HandlePutBasic()
 
 		m_column++;
 
-		if ( !AdvanceAndCheckEndOfStatement() )
-		{
-			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-		}
-
-		if ( m_line[ m_column ] != '\"' )
-		{
-			throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-		}
-
-		// string
-		endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-		if ( endQuotePos == string::npos )
-		{
-			throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-		}
-
-		// get the second parameter
-
-		beebFilename = m_line.substr( m_column + 1, endQuotePos - m_column - 1 );
-
-		m_column = endQuotePos + 1;
+		beebFilename = EvaluateExpressionAsString();
 	}
 
 	// check this is now the end
@@ -2003,38 +1840,17 @@ void LineParser::HandleError()
 {
 	int oldColumn = m_column;
 
-	if ( !AdvanceAndCheckEndOfStatement() )
-	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
+	string errorMsg = EvaluateExpressionAsString();
 
-	if ( m_column >= m_line.length() || m_line[ m_column ] != '\"' )
-	{
-		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
-	}
-
-	// string
-	size_t endQuotePos = m_line.find_first_of( '\"', m_column + 1 );
-
-	if ( endQuotePos == string::npos )
-	{
-		throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
-	}
-	else
-	{
-		string errorMsg( m_line.substr( m_column + 1, endQuotePos - m_column - 1 ) );
-
-		// throw error
-
-		throw AsmException_UserError( m_line, oldColumn, errorMsg );
-	}
-
-	m_column = endQuotePos + 1;
-
+	// This is a slight change in behaviour.  It used to check the statement
+	// was well-formed after the error was thrown.
 	if ( AdvanceAndCheckEndOfStatement() )
 	{
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 	}
+
+	// throw error
+	throw AsmException_UserError( m_line, oldColumn, errorMsg );
 }
 
 
@@ -2136,12 +1952,7 @@ void LineParser::HandleAsm()
 {
 	// look for assembly language string
 
-	Value asmValue = EvaluateExpression();
-
-	if (asmValue.GetType() != Value::StringValue)
-	{
-		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
-	}
+	string assembly = EvaluateExpressionAsString();
 
 	// check this is now the end
 
@@ -2150,8 +1961,7 @@ void LineParser::HandleAsm()
 		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 	}
 
-	String assembly = asmValue.GetString();
-	LineParser parser(m_sourceCode, string(assembly.Text(), assembly.Length()));
+	LineParser parser(m_sourceCode, assembly);
 
 	// Parse the mnemonic, don't require a non-alpha after it.
 	int instruction = parser.GetInstructionAndAdvanceColumn(false);

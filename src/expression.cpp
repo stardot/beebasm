@@ -677,6 +677,25 @@ unsigned int LineParser::EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatch
 
 /*************************************************************************************************/
 /**
+	LineParser::EvaluateExpressionAsString()
+
+	Version of EvaluateExpression which returns its result as a String or throws a type mismatch
+*/
+/*************************************************************************************************/
+ string LineParser::EvaluateExpressionAsString( bool bAllowOneMismatchedCloseBracket )
+{
+	Value value = EvaluateExpression( bAllowOneMismatchedCloseBracket );
+	if (value.GetType() != Value::StringValue)
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	String result = value.GetString();
+	return string(result.Text(), result.Length());
+}
+
+
+/*************************************************************************************************/
+/**
 	LineParser::StackTopTwoValues()
 
 	Retrieve two values of matching type, or throw an exception

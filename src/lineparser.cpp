@@ -330,6 +330,8 @@ void LineParser::SkipStatement()
 		{
 			if ( m_column < m_line.length() && m_line[ m_column ] == '\"' && !bInSingleQuotes )
 			{
+				// This handles quoted quotes in strings (like "a""b") because it views
+				// them as two adjacent strings.
 				bInQuotes = !bInQuotes;
 			}
 			else if ( m_column < m_line.length() && m_line[ m_column ] == '\'' )

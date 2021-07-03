@@ -171,6 +171,7 @@ private:
 	double			EvaluateExpressionAsDouble( bool bAllowOneMismatchedCloseBracket = false );
 	int				EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket = false );
 	unsigned int	EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatchedCloseBracket = false );
+	std::string		EvaluateExpressionAsString( bool bAllowOneMismatchedCloseBracket = false );
 	Value			GetValue();
 
 	// convenience functions for getting operator parameters from the stack
