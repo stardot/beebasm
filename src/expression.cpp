@@ -269,9 +269,6 @@ Value LineParser::GetValue()
 		if (symbolName == "TIME$")
 		{
 			// Handle TIME$ with no parameters
-
-			m_column++;
-
 			value = FormatAssemblyTime("%a,%d %b %Y.%H:%M:%S");
 		}
 		else
