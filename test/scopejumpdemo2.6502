@@ -1,0 +1,19 @@
+ORG &2000
+
+.start
+
+	LDA #65:STA &70
+	JSR foo
+	STY &71
+	JSR bar
+	
+	\ JMP ldy_3_and_rts \ this won't assemble, even though it exists inside
+	\ scopejumpdemo2foo.6502
+	LDY #3
+	RTS
+
+INCLUDE "scopejumpdemo2.inc.6502"
+
+.end
+
+SAVE "test", start, end

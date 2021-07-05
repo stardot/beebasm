@@ -1,0 +1,9 @@
+\ beebasm -do invalidbasic1.ssd
+
+org &2000
+.start
+	rts
+.end
+
+save "test", start, end
+putbasic "invalidbasic1.bas", "ib1"

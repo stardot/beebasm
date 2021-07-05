@@ -1,0 +1,9 @@
+\ beebasm -do putbasicnonexistentdemo.ssd
+
+org &2000
+.start
+	rts
+.end
+
+save "test", start, end
+putbasic "nonexistent", "ne"
