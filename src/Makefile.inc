@@ -168,6 +168,7 @@ help:
 	$(ECHO) make all .... Build and run code
 	$(ECHO) make code ... Build code
 	$(ECHO) make run .... Run code
+	$(ECHO) make test ... Run tests
 	$(ECHO) make clean .. Clean code
 	$(ECHO) make help ... Display this message again
 	$(ECHO)
@@ -192,7 +193,11 @@ run:
 	$(VB)$(TARGET) $(PARAMS)
 
 
-all: code run
+test:
+	$(VB)$(TEST)
+
+
+all: code run test
 
 
 clean:
