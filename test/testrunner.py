@@ -84,7 +84,8 @@ def beebasm_args(beebasm, file_name, ssd_name):
 def execute_test(beebasm_arg_list):
     print(beebasm_arg_list)
     sys.stdout.flush()
-    return subprocess.Popen(beebasm_arg_list).wait() == 0
+    # Child stderr written to stdout to avoid output interleaving problems
+    return subprocess.Popen(beebasm_arg_list, stderr = sys.stdout).wait() == 0
 
 def run_test(beebasm, path, file_names, file_name):
     if file_name.endswith('.inc.6502'):
