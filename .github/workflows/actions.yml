@@ -18,6 +18,7 @@ jobs:
       - run: cmake .
       - run: make
       - run: make test
+      - run: python3 test/testrunner.py
   make:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -27,3 +28,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: make -C src all
+      - run: python3 test/testrunner.py
