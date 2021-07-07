@@ -26,4 +26,4 @@ jobs:
     name: Compile via Makefile on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - run: make -C src all
+      - run: make -C src all VERBOSE=1

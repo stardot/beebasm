@@ -3,5 +3,6 @@
 *.swp
 /beebasm
 /src/objects
+test/testlog.txt
 test/**/test
 test/**/test.ssd

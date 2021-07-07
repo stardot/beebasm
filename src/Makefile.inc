@@ -145,9 +145,11 @@ CPUS			?=		1
 ifdef VERBOSE
 VB				:=
 VB_MAKE			:=
+VB_TEST			:=	-v
 else
 VB				:=		@@
 VB_MAKE			:=		-s
+VB_TEST			:=
 endif
 
 
@@ -194,7 +196,7 @@ run:
 
 
 test:
-	$(VB)$(TEST)
+	$(VB)$(TEST) $(VB_TEST)
 
 
 all: code run test

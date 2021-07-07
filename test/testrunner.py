@@ -85,7 +85,7 @@ def execute_test(beebasm_arg_list):
     print(beebasm_arg_list)
     sys.stdout.flush()
     # Child stderr written to stdout to avoid output interleaving problems
-    return subprocess.Popen(beebasm_arg_list, stderr = sys.stdout).wait() == 0
+    return subprocess.Popen(beebasm_arg_list, stdout = sys.stdout, stderr = sys.stdout).wait() == 0
 
 def run_test(beebasm, path, file_names, file_name):
     if file_name.endswith('.inc.6502'):
@@ -123,6 +123,28 @@ def scan_directory(beebasm):
                 run_test(beebasm, path, file_names, file_name)
         os.chdir(cwd)
 
+def parse_args():
+    global verbose
+
+    if len(sys.argv) == 1:
+        return True
+
+    if len(sys.argv) > 2:
+        return False
+
+    if sys.argv[1] == '-v':
+        verbose = True
+    else:
+        return False
+
+    return True
+
+
+verbose = False
+
+if not parse_args():
+    print("testrunner.py [-v]")
+    sys.exit(2)
 
 if os.name == 'nt':
     beebasm = 'beebasm.exe'
@@ -132,12 +154,16 @@ beebasm = os.path.join(os.getcwd(), beebasm)
 
 os.chdir('test')
 
+original_stdout = sys.stdout
+if not verbose:
+    sys.stdout = open('testlog.txt', mode = 'w', encoding = sys.stdout.encoding)
+
 try:
     scan_directory(beebasm)
-    print("SUCCESS")
+    print("SUCCESS: beebasm tests succeeded", file = original_stdout)
     sys.exit(0)
 
 except TestFailure as e:
-    print("FAILURE: " + e.args[0])
+    print("FAILURE: " + e.args[0], file = original_stdout)
     sys.exit(1)
 
