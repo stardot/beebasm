@@ -100,7 +100,7 @@ def run_test(beebasm, path, file_names, file_name):
     gold_ssd = replace_extension(file_name, '.gold.ssd')
     ssd_name = None
     if gold_ssd in file_names:
-        ssd_name = replace_extension(file_name, '.ssd')
+        ssd_name = 'test.ssd'
 
     result = execute_test(beebasm_args(beebasm, file_name, ssd_name))
     if failure_test and result:
@@ -109,7 +109,7 @@ def run_test(beebasm, path, file_names, file_name):
         raise TestFailure('Success test failed: ' + full_name)
 
     if not failure_test and ssd_name != None and not compare_files(gold_ssd, ssd_name):
-        raise TestFailure('ssd does not match gold ssd :' + gold_ssd)
+        raise TestFailure('ssd does not match gold ssd: ' + gold_ssd)
 
 def scan_directory(beebasm):
     for (path, directory_names, file_names) in os.walk('.', topdown = True):

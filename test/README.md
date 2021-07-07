@@ -29,7 +29,7 @@ known-good output from running the test.  The test runner will add the
 `-do` option to the command-line.  For success tests, if will also check
 that the `.ssd` produced by the test is identical to the gold ssd.
 
-For example, if a directory contains `test.6502` and `test.gold.ssd` then
+For example, if a directory contains `sometest.6502` and `sometest.gold.ssd` then
 the test will be required to produce a `test.ssd` file that is identical
-to `test.gold.ssd`.
+to `sometest.gold.ssd`.  Note that the output file is always called `test.ssd`.
 
