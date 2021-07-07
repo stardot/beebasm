@@ -81,11 +81,19 @@ def beebasm_args(beebasm, file_name, ssd_name):
     args += ['-v', '-i', file_name]
     return args
 
-def execute_test(beebasm_arg_list):
+def execute(args, output):
+    # Child stderr written to stdout to avoid output interleaving problems
+    return subprocess.Popen(args, stdout = output, stderr = output).wait() == 0
+
+def execute_test(beebasm_arg_list, capture_name):
     print(beebasm_arg_list)
     sys.stdout.flush()
-    # Child stderr written to stdout to avoid output interleaving problems
-    return subprocess.Popen(beebasm_arg_list, stdout = sys.stdout, stderr = sys.stdout).wait() == 0
+
+    if capture_name == None:
+        return execute(beebasm_arg_list, sys.stdout)
+
+    with open(capture_name, 'w', encoding = sys.stdout.encoding) as capture:
+        return execute(beebasm_arg_list, capture)
 
 def run_test(beebasm, path, file_names, file_name):
     if file_name.endswith('.inc.6502'):
@@ -98,18 +106,43 @@ def run_test(beebasm, path, file_names, file_name):
 
     failure_test = file_name.endswith('.fail.6502')
     gold_ssd = replace_extension(file_name, '.gold.ssd')
+    gold_txt = replace_extension(file_name, '.gold.txt')
     ssd_name = None
+    gold_capture = None
     if gold_ssd in file_names:
         ssd_name = 'test.ssd'
+    if gold_txt in file_names:
+        gold_capture = 'testgold.txt'
 
-    result = execute_test(beebasm_args(beebasm, file_name, ssd_name))
+    result = execute_test(beebasm_args(beebasm, file_name, ssd_name), gold_capture)
+
+    if not gold_capture is None:
+        # This won't work well if a test produces gigabytes of output.  Don't do that!
+        with open(gold_capture, 'r') as capture_file:
+            capture = capture_file.read()
+        # Duplicate captured data on stdout
+        sys.stdout.write(capture)
+        with open(gold_txt, 'r') as gold_file:
+            gold = gold_file.read()
+        print('Comparing beebasm output to', gold_txt, end = '')
+        if capture.find(gold) != -1:
+            print(' succeeded')
+        else:
+            print(' failed')
+            raise TestFailure('Test output does not include gold text: ' + gold_txt)
+
     if failure_test and result:
         raise TestFailure('Failure test succeeded: ' + full_name)
     elif not failure_test and not result:
         raise TestFailure('Success test failed: ' + full_name)
 
-    if not failure_test and ssd_name != None and not compare_files(gold_ssd, ssd_name):
-        raise TestFailure('ssd does not match gold ssd: ' + gold_ssd)
+    if not failure_test and ssd_name != None:
+        print('Comparing output ssd to', gold_ssd, end = '')
+        if compare_files(gold_ssd, ssd_name):
+            print(' succeeded')
+        else:
+            print(' failed')
+            raise TestFailure('ssd does not match gold ssd: ' + gold_ssd)
 
 def scan_directory(beebasm):
     for (path, directory_names, file_names) in os.walk('.', topdown = True):

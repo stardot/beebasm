@@ -6,3 +6,4 @@
 test/testlog.txt
 test/**/test
 test/**/test.ssd
+test/**/testgold.txt
