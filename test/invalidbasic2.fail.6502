@@ -1,4 +1,4 @@
-\ beebasm -do invalidbasic2.ssd
+\ beebasm -do test.ssd
 
 org &2000
 .start

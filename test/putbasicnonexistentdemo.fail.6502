@@ -1,4 +1,4 @@
-\ beebasm -do putbasicnonexistentdemo.ssd
+\ beebasm -do test.ssd
 
 org &2000
 .start

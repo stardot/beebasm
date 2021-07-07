@@ -3,3 +3,5 @@
 *.swp
 /beebasm
 /src/objects
+test/**/test
+test/**/test.ssd
