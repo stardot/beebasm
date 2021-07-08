@@ -1,2 +1,2 @@
 \ This should fail
-assert(0)
+assert(1)
