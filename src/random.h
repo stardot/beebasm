@@ -28,8 +28,8 @@
 #define BEEBASM_RAND_MODULUS (2147483647UL)
 #define BEEBASM_RAND_MAX (BEEBASM_RAND_MODULUS - 2UL)
 
-void beebasm_srand(unsigned long seed);
+void beebasm_srand(unsigned int seed);
 
-unsigned long beebasm_rand();
+unsigned int beebasm_rand();
 
 #endif // RANDOM_H_

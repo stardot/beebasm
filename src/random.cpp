@@ -24,13 +24,14 @@
 */
 /*************************************************************************************************/
 
+#include <cstdio>
 #include "random.h"
 
-static unsigned long state = 19670512;
+static unsigned int state = 19670512;
 
-static unsigned long modulus = BEEBASM_RAND_MODULUS;
+static unsigned int modulus = BEEBASM_RAND_MODULUS;
 
-void beebasm_srand(unsigned long seed)
+void beebasm_srand(unsigned int seed)
 {
         state = seed % modulus;
         if ( state == 0 )
@@ -47,8 +48,9 @@ void beebasm_srand(unsigned long seed)
         }
 }
 
-unsigned long beebasm_rand()
+unsigned int beebasm_rand()
 {
+		//printf("RND %i %lu\n", ( BEEBASM_RAND_MULTIPLIER * state ) % modulus, ( BEEBASM_RAND_MULTIPLIER * (int)state ) % modulus);
         state = ( BEEBASM_RAND_MULTIPLIER * state ) % modulus;
         // It's always true that 1 <= state <= (modulus - 1), so we return state - 1 to make
         // 0 a possible value. BEEBASM_RAND_MAX is modulus - 2, so we have 0 <= return value <=
