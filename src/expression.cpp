@@ -111,6 +111,8 @@ const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	{ "CHR$(",	10,	1,	&LineParser::EvalChr },
 	{ "ASC(",	10,	1,	&LineParser::EvalAsc },
 	{ "MID$(",	10,	3,	&LineParser::EvalMid },
+	{ "LEFT$(",	10,	2,	&LineParser::EvalLeft },
+	{ "RIGHT$(",	10,	2,	&LineParser::EvalRight },
 	{ "STRING$(",	10,	2,	&LineParser::EvalString },
 	{ "UPPER$(",	10,	1,	&LineParser::EvalUpper },
 	{ "LOWER$(",	10,	1,	&LineParser::EvalLower }
@@ -1599,6 +1601,67 @@ void LineParser::EvalMid()
 	}
 
 	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(index, length);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLeft()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLeft()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::StringValue) || (value2.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 1;
+
+	String text = value1.GetString();
+	int count = static_cast<int>(value2.GetNumber());
+	if ((count < 0) || (static_cast<unsigned int>(count) > text.Length()))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(0, count);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalRight()
+*/
+/*************************************************************************************************/
+void LineParser::EvalRight()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::StringValue) || (value2.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 1;
+
+	String text = value1.GetString();
+	int count = static_cast<int>(value2.GetNumber());
+	if ((count < 0) || (static_cast<unsigned int>(count) > text.Length()))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	unsigned int ucount = static_cast<unsigned int>(count);
+	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(text.Length() - ucount, ucount);
 }
 
 

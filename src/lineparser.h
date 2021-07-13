@@ -230,6 +230,8 @@ private:
 	void			EvalChr();
 	void			EvalAsc();
 	void			EvalMid();
+	void			EvalLeft();
+	void			EvalRight();
 	void			EvalString();
 	void			EvalUpper();
 	void			EvalLower();
