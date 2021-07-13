@@ -133,23 +133,26 @@ std::string FormattedErrorLocation( const std::string& filename, int lineNumber 
 /*************************************************************************************************/
 void PrintNumber(std::ostream& dest, double value)
 {
-	double integer_part;
-	double frac = modf(value, &integer_part);
-	if ((frac == 0.0) && (-4294967296.0 < integer_part) && (integer_part < 4294967296.0))
+	if ((-4294967296.0 < value) && (value < -0.5))
 	{
-		if (integer_part < 0)
+		unsigned int abs_part = static_cast<unsigned int>(-value);
+		if (-static_cast<double>(abs_part) == value)
 		{
-			dest << '-' << static_cast<unsigned int>(-integer_part);
-		}
-		else
-		{
-			dest << static_cast<unsigned int>(integer_part);
+			dest << '-' << abs_part;
+			return;
 		}
 	}
-	else
+	else if ((0.0 <= value) && (value < 4294967296.0))
 	{
-		dest << value;
+		unsigned int abs_part = static_cast<unsigned int>(value);
+		if (static_cast<double>(abs_part) == value)
+		{
+			dest << abs_part;
+			return;
+		}
 	}
+
+	dest << value;
 }
 
 } // namespace StringUtils
