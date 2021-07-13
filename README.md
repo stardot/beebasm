@@ -246,7 +246,7 @@ CHR$(val)          Return a string with a single character with ASCII value val
 ASC(str)           Return the ASCII value of the first character of str
 MID$(str,index,length)
                    Return length characters of str starting at (one-based) index
-STRINGS$(count,str)
+STRING$(count,str)
                    Return str repeated count times
 LOWER$(str)        Return str converted to lowercase
 UPPER$(str)        Return str converted to uppercase
