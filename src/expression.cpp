@@ -927,6 +927,28 @@ void LineParser::EvalMod()
 
 /*************************************************************************************************/
 /**
+	Shifting helper functions
+*/
+/*************************************************************************************************/
+static int LogicalShiftLeft(int value, unsigned int shift)
+{
+	return static_cast<int>(static_cast<unsigned int>(value) << shift);
+}
+
+static int ArithmeticShiftRight(int value, unsigned int shift)
+{
+	unsigned int shifted = static_cast<unsigned int>(value) >> shift;
+	if (value < 0)
+	{
+		const unsigned int bitcount = 8 * sizeof(unsigned int);
+		const unsigned int ones = ~0;
+		shifted |= (ones << (bitcount - shift));
+	}
+	return static_cast<int>(shifted);
+}
+
+/*************************************************************************************************/
+/**
 	LineParser::EvalShiftLeft()
 */
 /*************************************************************************************************/
@@ -944,7 +966,7 @@ void LineParser::EvalShiftLeft()
 	}
 	else if ( shift > 0 )
 	{
-		result = val << shift;
+		result = LogicalShiftLeft(val, static_cast<unsigned int>(shift));
 	}
 	else if ( shift == 0 )
 	{
@@ -952,7 +974,7 @@ void LineParser::EvalShiftLeft()
 	}
 	else
 	{
-		result = val >> (-shift);
+		result = ArithmeticShiftRight(val, static_cast<unsigned int>(-shift));
 	}
 
 	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >( result );
@@ -980,7 +1002,7 @@ void LineParser::EvalShiftRight()
 	}
 	else if ( shift > 0 )
 	{
-		result = val >> shift;
+		result = ArithmeticShiftRight(val, static_cast<unsigned int>(shift));
 	}
 	else if ( shift == 0 )
 	{
@@ -988,7 +1010,7 @@ void LineParser::EvalShiftRight()
 	}
 	else
 	{
-		result = val << (-shift);
+		result = LogicalShiftLeft(val, static_cast<unsigned int>(-shift));
 	}
 
 	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >( result );
