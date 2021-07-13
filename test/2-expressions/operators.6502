@@ -23,7 +23,12 @@ assert(9.9 MOD 2.9=1)
 
 \ Shifts
 assert(3 << 5=96)
-assert(96 >> 5 = 3)
+assert(96 << -5=3)
+assert(96 >> 5=3)
+assert(3 >> -5=96)
+
+assert(-1>>5=-1)
+assert(&80000000>>5=-&4000000)
 
 \ Logic
 assert((14 AND 28)=12)
