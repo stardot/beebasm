@@ -9,7 +9,7 @@ assert(&7fffffff=2147483647)
 \ Unlike BBC BASIC, hex constants are always positive
 assert(&ffffffff=4294967295)
 \ But binary constants can be negative
-assert(%11111111111111111111111111111111=-1)
+assert(%000011111111111111111111111111111111=&ffffffff)
 \ Program counter
 assert(*=0)
 

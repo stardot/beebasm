@@ -178,28 +178,34 @@ Value LineParser::GetValue()
 	{
 		// get binary
 
+		// skip the number prefix
 		m_column++;
 
-		if ( m_column >= m_line.length() || ( m_line[ m_column ] != '0' && m_line[ m_column ] != '1' ) )
+		int start_column = m_column;
+		unsigned int binValue = 0;
+
+		// Skip leading zeroes
+		while ( m_column < m_line.length() && m_line[ m_column ] == '0' )
+		{
+			m_column++;
+		}
+
+		// Remember the column containing the first one (if any)
+		int first_one = m_column;
+
+		while ( m_column < m_line.length() && ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' ) )
+		{
+			binValue = ( binValue * 2 ) + ( m_line[ m_column ] - '0' );
+			m_column++;
+		}
+
+		if ( m_column == start_column || m_column - first_one > 32 )
 		{
 			// badly formed bin literal
 			throw AsmException_SyntaxError_BadBin( m_line, m_column );
 		}
-		else
-		{
-			// parse binary number
 
-			int binValue = 0;
-
-			do
-			{
-				binValue = ( binValue * 2 ) + ( m_line[ m_column ] - '0' );
-				m_column++;
-			}
-			while ( m_column < m_line.length() && ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' ) );
-
-			value = static_cast< double >( binValue );
-		}
+		value = static_cast< double >( binValue );
 	}
 	else if ( m_column < m_line.length() && m_line[ m_column ] == '*' )
 	{
