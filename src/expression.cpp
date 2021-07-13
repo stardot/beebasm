@@ -37,7 +37,7 @@
 #include "sourcefile.h"
 #include "random.h"
 #include "constants.h"
-
+#include "stringutils.h"
 
 using namespace std;
 
@@ -1469,7 +1469,7 @@ Value LineParser::FormatAssemblyTime(const char* formatString)
 void LineParser::EvalStr()
 {
 	ostringstream stream;
-	stream << StackTopNumber();
+	StringUtils::PrintNumber(stream, StackTopNumber());
 	string result = stream.str();
 
 	m_valueStack[ m_valueStackPtr - 1 ] = String(result.data(), result.length());

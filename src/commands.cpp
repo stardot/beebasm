@@ -1458,7 +1458,8 @@ void LineParser::HandlePrint()
 				{
 					if (value.GetType() == Value::NumberValue)
 					{
-						cout << value.GetNumber() << " ";
+						StringUtils::PrintNumber(cout, value.GetNumber());
+						cout << " ";
 					}
 					else if (value.GetType() == Value::StringValue)
 					{
