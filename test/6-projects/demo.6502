@@ -1,0 +1,4 @@
+\ Assemble the "sphere" demo (demo.6502) included at the top level of the
+\ repository as a test.
+
+INCLUDE "../../demo.6502"

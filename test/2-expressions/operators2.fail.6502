@@ -1,0 +1,2 @@
+\ This should fail
+assert(2<2)

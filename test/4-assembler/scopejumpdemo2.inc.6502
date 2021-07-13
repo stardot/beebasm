@@ -1,0 +1,49 @@
+\ This file is intended to be INCLUDEd by scopejumpdemo2.6502.
+\ Its entire contents are wrapped in a scope, so only labels we explicitly
+\ make global are available to the rest of the program.
+{
+
+	\ foo is a global label; this is a subroutine we are making available to
+	\ the rest of the program outside this file.
+	\
+	\ foo checks the contents of &70; if it's less than 42 we set X to 4,
+	\ otherwise we set X to 2. Either way, we set Y to 3.
+	.*foo
+	{
+		LDA &70
+		CMP #42
+		BCC lt_42
+		LDX #2
+		JMP ldy_3_and_rts
+	.lt_42
+		LDX #4
+	.^ldy_3_and_rts
+		LDY #3
+		RTS
+	}
+
+	\ bar is a global label; this is another subroutine we are making
+	\ available to the rest of the program.
+	\
+	\ bar checks the contents of &71; if it's less than 42 we set X to 9,
+	\ otherwise we set X to 7. Either way, we set Y to 3.
+	.*bar
+	{
+		\ Because we're part of the same "module", we happen to know that
+		\ the LDY #3:RTS code is available inside foo, so we can take 
+		\ advantage of that and not duplicate it here. This is an
+		\ implementation detail that might change, so we don't want that
+		\ exposing outside this file. Because we declared it ".^ldy_3_and_rts"
+		\ inside the scope enclosing foo's body, it's visible in the scope
+		\ which encloses this entire file, but not any parent scope.
+		LDA &71
+		CMP #42
+		BCC lt_42
+		LDX #7
+		JMP ldy_3_and_rts
+	.lt_42 \ local label, so doesn't clash with foo's lt_42
+		LDX #9
+		JMP ldy_3_and_rts
+	}
+
+}

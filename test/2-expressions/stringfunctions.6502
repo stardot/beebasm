@@ -1,0 +1,28 @@
+org &2000
+.start
+	rts
+.end
+
+save "test", start, end
+
+foo="Foo"
+bar="Bar"
+Foo="fooled!"
+ASSERT foo + " " + bar = "Foo Bar"
+ASSERT MID$(bar, 2, 1) = "a"
+ASSERT UPPER$(foo) = "FOO"
+ASSERT LOWER$(bar) = "bar"
+ASSERT VAL("7.2") = 7.2
+ASSERT EVAL(foo) = "fooled!"
+ASSERT STR$(7.2) = "7.2"
+ASSERT STR$~(27.3) = "1B"
+ASSERT STR$(&FFFFFFFF) = "4294967295"
+ASSERT STR$(-&FFFFFFFF) = "-4294967295"
+ASSERT LEN("") = 0
+ASSERT LEN(foo) = 3
+ASSERT LEN("a""b") = 3
+ASSERT CHR$(65) = "A"
+ASSERT ASC(foo) = 70
+ASSERT ASC(MID$("a""b", 2, 1)) = '"'
+ASSERT STRING$(3, bar) = bar + bar + bar
+ASSERT TIME$ = TIME$("%a,%d %b %Y.%H:%M:%S")

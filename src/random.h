@@ -24,12 +24,14 @@
 #ifndef RANDOM_H_
 #define RANDOM_H_
 
-#define BEEBASM_RAND_MULTIPLIER (48271UL)
-#define BEEBASM_RAND_MODULUS (2147483647UL)
-#define BEEBASM_RAND_MAX (BEEBASM_RAND_MODULUS - 2UL)
+#include <stdint.h>
 
-void beebasm_srand(unsigned long seed);
+#define BEEBASM_RAND_MULTIPLIER static_cast<uint_least32_t>(48271)
+#define BEEBASM_RAND_MODULUS static_cast<uint_least32_t>(2147483647)
+#define BEEBASM_RAND_MAX (BEEBASM_RAND_MODULUS - static_cast<uint_least32_t>(2))
 
-unsigned long beebasm_rand();
+void beebasm_srand(uint_least32_t seed);
+
+uint_least32_t beebasm_rand();
 
 #endif // RANDOM_H_

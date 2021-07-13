@@ -1,0 +1,15 @@
+assert(&10=16)
+assert($10=16)
+assert(%10000=16)
+assert('A'=&41)
+assert(&13579BDF=324508639)
+assert(&2468ACE0=610839776)
+assert(&abcdef=11259375)
+assert(&7fffffff=2147483647)
+\ Unlike BBC BASIC, hex constants are always positive
+assert(&ffffffff=4294967295)
+\ But binary constants can be negative
+assert(%11111111111111111111111111111111=-1)
+\ Program counter
+assert(*=0)
+

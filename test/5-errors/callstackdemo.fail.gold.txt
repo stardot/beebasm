@@ -1,0 +1,8 @@
+callstackdemo.fail.6502:5: error: Immediate constants cannot be greater than 255.
+
+adc #n
+     ^
+
+Call stack:
+callstackdemo.fail.6502:10
+callstackdemo.fail.6502:16

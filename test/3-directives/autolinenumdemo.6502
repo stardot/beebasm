@@ -4,4 +4,4 @@ org &2000
 .end
 
 save "test", start, end
-putbasic "invalidbasic2.bas", "ib2"
+putbasic "autolinenumdemo.bas", "alndemo"

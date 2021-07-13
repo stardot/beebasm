@@ -1,0 +1,22 @@
+org &2000
+
+macro add n
+	clc
+	adc #n
+endmacro
+
+macro add_twice n
+	add n
+	add n*2
+endmacro
+
+.start
+	lda &70
+	add_twice 4
+	add_twice 200
+	sta &70
+	rts
+
+.end
+
+save "test", start, end

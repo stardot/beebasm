@@ -1,0 +1,7 @@
+errorlinenumber1.fail.6502:10: error: Indirect mode not allowed for this instruction.
+
+ldx (&70),y
+    ^
+
+Call stack:
+errorlinenumber1.fail.6502:13

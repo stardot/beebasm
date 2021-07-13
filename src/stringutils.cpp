@@ -120,5 +120,39 @@ std::string FormattedErrorLocation( const std::string& filename, int lineNumber 
 }
 
 
+/*************************************************************************************************/
+/**
+	PrintNumber()
+
+	Print a number to a stream ensuring that 32-bit ints are not written in scientific notation
+
+	@param		dest		The stream to write to
+	@param		value		The number to write
+
+*/
+/*************************************************************************************************/
+void PrintNumber(std::ostream& dest, double value)
+{
+	if ((-4294967296.0 < value) && (value < -0.5))
+	{
+		unsigned int abs_part = static_cast<unsigned int>(-value);
+		if (-static_cast<double>(abs_part) == value)
+		{
+			dest << '-' << abs_part;
+			return;
+		}
+	}
+	else if ((0.0 <= value) && (value < 4294967296.0))
+	{
+		unsigned int abs_part = static_cast<unsigned int>(value);
+		if (static_cast<double>(abs_part) == value)
+		{
+			dest << abs_part;
+			return;
+		}
+	}
+
+	dest << value;
+}
 
 } // namespace StringUtils
