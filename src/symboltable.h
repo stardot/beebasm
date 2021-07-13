@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 
+#include "value.h"
 
 class SymbolTable
 {
@@ -38,10 +39,11 @@ public:
 	static void Destroy();
 	static inline SymbolTable& Instance() { assert( m_gInstance != NULL ); return *m_gInstance; }
 
-	void AddSymbol( const std::string& symbol, double value, bool isLabel = false );
+	void AddSymbol( const std::string& symbol, Value value, bool isLabel = false );
 	bool AddCommandLineSymbol( const std::string& expr );
+	bool AddCommandLineStringSymbol( const std::string& expr );
 	void ChangeSymbol( const std::string& symbol, double value );
-	double GetSymbol( const std::string& symbol ) const;
+	Value GetSymbol( const std::string& symbol ) const;
 	bool IsSymbolDefined( const std::string& symbol ) const;
 	void RemoveSymbol( const std::string& symbol );
 
@@ -58,15 +60,15 @@ private:
 	{
 	public:
 
-		Symbol( double value, bool isLabel ) : m_value( value ), m_isLabel( isLabel ) {}
+		Symbol( Value value, bool isLabel ) : m_value( value ), m_isLabel( isLabel ) {}
 
-		void SetValue( double d ) { m_value = d; }
-		double GetValue() const { return m_value; }
+		void SetValue( Value value ) { m_value = value; }
+		Value GetValue() const { return m_value; }
 		bool IsLabel() const { return m_isLabel; }
 
 	private:
 
-		double	m_value;
+		Value	m_value;
 		bool	m_isLabel;
 	};
 
