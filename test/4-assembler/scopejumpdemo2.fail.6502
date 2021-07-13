@@ -6,9 +6,9 @@ ORG &2000
 	JSR foo
 	STY &71
 	JSR bar
-	
-	\ JMP ldy_3_and_rts \ this won't assemble, even though it exists inside
-	                    \ scopejumpdemo2foo.6502
+
+	JMP ldy_3_and_rts \ this won't assemble, even though it exists inside
+	                  \ scopejumpdemo2foo.6502
 	LDY #3
 	RTS
 
