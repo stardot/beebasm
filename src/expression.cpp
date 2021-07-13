@@ -154,27 +154,24 @@ Value LineParser::GetValue()
 	}
 	else if ( m_column < m_line.length() && ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' ) )
 	{
-		// get a hex digit
+		// get hexadecimal
 
+		// skip the number prefix
 		m_column++;
 
-		if ( m_column >= m_line.length() || !isxdigit( m_line[ m_column ] ) )
-		{
-			// badly formed hex literal
-			throw AsmException_SyntaxError_BadHex( m_line, m_column );
-		}
-		else
-		{
-			// get a number
+		unsigned int hexValue;
 
-			unsigned int hexValue;
-
-			istringstream str( m_line );
-			str.seekg( m_column );
-			str >> hex >> hexValue;
+		istringstream str( m_line );
+		str.seekg( m_column );
+		if (str >> hex >> hexValue)
+		{
 			m_column = static_cast< size_t >( str.tellg() );
 
 			value = static_cast< double >( hexValue );
+		}
+		else
+		{
+			throw AsmException_SyntaxError_BadHex( m_line, m_column );
 		}
 	}
 	else if ( m_column < m_line.length() && m_line[ m_column ] == '%' )
