@@ -1,7 +1,7 @@
 
 \ Every valid 65C02 opcode.
 
-\ This is not thoroughly rested, but it is proof against anything changing.
+\ This is not thoroughly tested, but it is proof against anything changing.
 
 ORG &2000
 
