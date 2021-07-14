@@ -1018,7 +1018,7 @@ void LineParser::HandleSave()
 	{
 		saveFile = string(saveOrStart.GetString().Text(), saveOrStart.GetString().Length());
 
-		if ( m_line[ m_column ] != ',' )
+		if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 		{
 			// did not find a comma
 			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
