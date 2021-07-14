@@ -104,27 +104,32 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 /*************************************************************************************************/
 int LineParser::GetTokenAndAdvanceColumn()
 {
+	size_t remaining = m_line.length() - m_column;
+
 	for ( int i = 0; i < static_cast<int>( sizeof m_gaTokenTable / sizeof( Token ) ); i++ )
 	{
 		const char*	token	= m_gaTokenTable[ i ].m_pName;
 		size_t		len		= strlen( token );
 
-		// see if token matches
-
-		bool bMatch = true;
-		for ( unsigned int j = 0; j < len; j++ )
+		if (len <= remaining)
 		{
-			if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+			// see if token matches
+
+			bool bMatch = true;
+			for ( unsigned int j = 0; j < len; j++ )
 			{
-				bMatch = false;
-				break;
+				if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+				{
+					bMatch = false;
+					break;
+				}
 			}
-		}
 
-		if ( bMatch )
-		{
-			m_column += len;
-			return i;
+			if ( bMatch )
+			{
+				m_column += len;
+				return i;
+			}
 		}
 	}
 
