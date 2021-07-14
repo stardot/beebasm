@@ -1,0 +1,18 @@
+\ CLEAR - fail to clear the last byte of a range
+
+ORG &2000
+
+.start
+
+LDA #'C'
+JMP &FFEE
+
+CLEAR start, P%-1
+
+ORG &2000
+LDA #'T'
+JMP &FFEE
+
+.end
+
+SAVE "test", start, end
