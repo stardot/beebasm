@@ -207,7 +207,7 @@ DEFINE_SYNTAX_EXCEPTION( ParameterCount, "Wrong number of parameters." );
 DEFINE_SYNTAX_EXCEPTION( NoImplied, "Implied mode not allowed for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( ImmTooLarge, "Immediate constants cannot be greater than 255." );
 DEFINE_SYNTAX_EXCEPTION( ImmNegative, "Constant cannot be negative." );
-DEFINE_SYNTAX_EXCEPTION( UnexpectedComma, "Unexpected comma enountered." );
+DEFINE_SYNTAX_EXCEPTION( UnexpectedComma, "Unexpected comma encountered." );
 DEFINE_SYNTAX_EXCEPTION( NoImmediate, "Immediate mode not allowed for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( NoIndirect, "Indirect mode not allowed for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( 6502Bug, "JMP (addr) will not execute as intended due to the 6502 bug (addr = &xxFF)." );
