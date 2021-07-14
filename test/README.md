@@ -33,3 +33,7 @@ For example, if a directory contains `sometest.6502` and `sometest.gold.ssd` the
 the test will be required to produce a `test.ssd` file that is identical
 to `sometest.gold.ssd`.  Note that the output file is always called `test.ssd`.
 
+Similarly, if a test file has a corresponding `.gold.txt` file this is assumed to
+be part of the stdout/stderr output from running the test.  The test runner will
+capture the output and check it contains the text from the `.gold.txt` file.
+
