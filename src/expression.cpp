@@ -181,7 +181,7 @@ Value LineParser::GetValue()
 		// skip the number prefix
 		m_column++;
 
-		int start_column = m_column;
+		size_t start_column = m_column;
 		unsigned int binValue = 0;
 
 		// Skip leading zeroes
@@ -191,7 +191,7 @@ Value LineParser::GetValue()
 		}
 
 		// Remember the column containing the first one (if any)
-		int first_one = m_column;
+		size_t first_one = m_column;
 
 		while ( m_column < m_line.length() && ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' ) )
 		{
