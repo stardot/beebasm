@@ -1,0 +1,16 @@
+\ Various SKIPs
+
+ORG &2000
+
+.start
+
+FOR s, 0, 300, 6
+    EQUW s
+    .block
+    SKIP s
+    ASSERT(P%=block+s)
+NEXT
+
+.end
+
+SAVE "test", start, end
