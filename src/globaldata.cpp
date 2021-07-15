@@ -69,6 +69,7 @@ void GlobalData::Destroy()
 /*************************************************************************************************/
 GlobalData::GlobalData()
 	:	m_pBootFile( NULL ),
+		m_bVerboseSet( false ),
 		m_bVerbose( false ),
 		m_bUseDiscImage( false ),
 		m_pDiscImage( NULL ),

@@ -220,7 +220,7 @@ void LineParser::HandleDefineLabel()
 			SymbolTable::Instance().AddLabel(symbolName);
 		}
 
-		if ( GlobalData::Instance().ShouldOutputAsm() )
+		if ( m_sourceCode->ShouldOutputAsm() )
 		{
 			cout << "." << symbolName << endl;
 		}
@@ -517,7 +517,7 @@ void LineParser::HandleSkip()
 		throw AsmException_SyntaxError_ImmNegative( m_line, oldColumn );
 	}
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( m_sourceCode->ShouldOutputAsm() )
 	{
 		cout << uppercase << hex << setfill( '0' ) << "     ";
 		cout << setw(4) << ObjectCode::Instance().GetPC() << endl;
@@ -604,7 +604,7 @@ void LineParser::HandleInclude()
 
 	string filename = EvaluateExpressionAsString();
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( m_sourceCode->ShouldOutputAsm() )
 	{
 		cerr << "Including file " << filename << endl;
 	}
@@ -695,7 +695,7 @@ void LineParser::HandleEqub()
 				throw AsmException_SyntaxError_NumberTooBig( m_line, m_column );
 			}
 
-			if ( GlobalData::Instance().ShouldOutputAsm() )
+			if ( m_sourceCode->ShouldOutputAsm() )
 			{
 				cout << uppercase << hex << setfill( '0' ) << "     ";
 				cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
@@ -744,7 +744,7 @@ void LineParser::HandleEqub()
 /*************************************************************************************************/
 void LineParser::HandleEqus( const String& equs )
 {
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( m_sourceCode->ShouldOutputAsm() )
 	{
 		cout << uppercase << hex << setfill( '0' ) << "     ";
 		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
@@ -754,7 +754,7 @@ void LineParser::HandleEqus( const String& equs )
 	{
 		int mappedchar = ObjectCode::Instance().GetMapping( equs[ i ] );
 
-		if ( GlobalData::Instance().ShouldOutputAsm() )
+		if ( m_sourceCode->ShouldOutputAsm() )
 		{
 			if ( i < 3 )
 			{
@@ -779,7 +779,7 @@ void LineParser::HandleEqus( const String& equs )
 		}
 	}
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( m_sourceCode->ShouldOutputAsm() )
 	{
 		cout << endl << nouppercase << dec << setfill( ' ' );
 	}
@@ -819,7 +819,7 @@ void LineParser::HandleEquw()
 			throw AsmException_SyntaxError_NumberTooBig( m_line, m_column );
 		}
 
-		if ( GlobalData::Instance().ShouldOutputAsm() )
+		if ( m_sourceCode->ShouldOutputAsm() )
 		{
 			cout << uppercase << hex << setfill( '0' ) << "     ";
 			cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
@@ -889,7 +889,7 @@ void LineParser::HandleEqud()
 			}
 		}
 
-		if ( GlobalData::Instance().ShouldOutputAsm() )
+		if ( m_sourceCode->ShouldOutputAsm() )
 		{
 			cout << uppercase << hex << setfill( '0' ) << "     ";
 			cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
@@ -1136,7 +1136,7 @@ void LineParser::HandleSave()
 		}
 	}
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( m_sourceCode->ShouldOutputAsm() )
 	{
 		cout << "Saving file '" << saveFile << "'" << endl;
 	}

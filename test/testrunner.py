@@ -75,10 +75,10 @@ def read_beebasm_switches(file_name):
         return params[1:]
 
 def beebasm_args(beebasm, file_name, ssd_name):
-    args = [beebasm] + read_beebasm_switches(file_name)
+    args = [beebasm, '-v'] + read_beebasm_switches(file_name)
     if ssd_name != None:
         args += ['-do', ssd_name]
-    args += ['-v', '-i', file_name]
+    args += ['-i', file_name]
     return args
 
 def execute(args, output):

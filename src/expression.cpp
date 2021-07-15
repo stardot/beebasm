@@ -278,21 +278,7 @@ Value LineParser::GetValue()
 		{
 			// Regular symbol
 
-			bool bFoundSymbol = false;
-
-			for ( int forLevel = m_sourceCode->GetForLevel(); forLevel >= 0; forLevel-- )
-			{
-				string fullSymbolName = symbolName + m_sourceCode->GetSymbolNameSuffix( forLevel );
-
-				if ( SymbolTable::Instance().IsSymbolDefined( fullSymbolName ) )
-				{
-					value = SymbolTable::Instance().GetSymbol( fullSymbolName );
-					bFoundSymbol = true;
-					break;
-				}
-			}
-
-			if ( !bFoundSymbol )
+			if ( !m_sourceCode->GetSymbolValue(symbolName, value) )
 			{
 				// symbol not known
 				throw AsmException_SyntaxError_SymbolNotDefined( m_line, oldColumn );

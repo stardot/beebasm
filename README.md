@@ -145,7 +145,12 @@ If specified, BeebAsm will use this disc image as a template for the new disc im
 
 `-v`
 
-Verbose output.  Assembled code will be output to the screen.
+Force verbose output.  Assembled code will be output to the screen.  The VERBOSE symbol will be ignored.
+
+`-q`
+
+Force quiet (non-verbose) output.  The VERBOSE symbol will be ignored.  If neither `-v` or `-q` is used then verbose
+output can be controlled by setting `VERBOSE=0` or `VERBOSE=1`.  The value can be changed only in a new scope.
 
 `-vc`
 

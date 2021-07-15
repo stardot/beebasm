@@ -94,7 +94,7 @@ void SourceFile::Process()
 
 	// Display ok message
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( ShouldOutputAsm() )
 	{
 		cerr << "Processed file '" << m_filename << "' ok" << endl;
 	}

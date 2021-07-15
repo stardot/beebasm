@@ -143,6 +143,10 @@ int main( int argc, char* argv[] )
 				{
 					GlobalData::Instance().SetVerbose( true );
 				}
+				else if ( strcmp( argv[i], "-q" ) == 0 )
+				{
+					GlobalData::Instance().SetVerbose( false );
+				}
 				else if ( strcmp( argv[i], "-d" ) == 0 )
 				{
 					bDumpSymbols = true;
