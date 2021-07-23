@@ -1,0 +1,52 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create_release:
+    name: Create GitHub Release
+    runs-on: windows-2019
+    defaults:
+      run:
+        working-directory: .\src\VS2010
+
+    steps:
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - uses: actions/checkout@v2
+
+      - name: Build Binary
+        shell: cmd
+        run: call .\build.cmd
+
+      - name: Package Binary
+        shell: cmd
+        run: call .\package.cmd
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Automated Release by GitHub Action CI
+          draft: false
+          prerelease: true
+
+      - name: Upload Release Asset (Windows x86)
+        id: upload-release-asset-x86
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./src/VS2010/beebasm-win32.zip
+          asset_name: beebasm-win32.zip
+          asset_content_type: application/zip
