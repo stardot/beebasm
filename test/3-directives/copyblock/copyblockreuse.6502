@@ -1,0 +1,29 @@
+\ COPYBLOCK - reuse memory from source of copy
+
+ORG &2000
+
+.start
+
+\ This CLEAR is required otherwise the second pass grumbles here
+\ about the LDX #&00 later in the first pass.  This is rather
+\ unintuitive.
+CLEAR start, start+2
+
+LDY #&00
+.loop
+LDA (&70),Y
+STA (&72),Y
+DEY
+BNE loop
+.loopend
+
+SKIP loopend-start
+COPYBLOCK start,loopend,loopend
+
+.end
+
+ORG start
+\ This would fail if the block hadn't been copied
+LDX #&00
+
+SAVE "test", start, end

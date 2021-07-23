@@ -1,0 +1,20 @@
+\ COPYBLOCK - simple copy
+
+ORG &2000
+
+.start
+
+LDY #&00
+.loop
+LDA (&70),Y
+STA (&72),Y
+DEY
+BNE loop
+.loopend
+
+SKIP loopend-start
+COPYBLOCK start,loopend,loopend
+
+.end
+
+SAVE "test", start, end
