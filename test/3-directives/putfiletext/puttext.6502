@@ -7,4 +7,4 @@ ORG &2000
 
 SAVE "test", start, end
 
-PUTTEXT "PUT.TXT", &FEED
+PUTTEXT "put.txt", &FEED
