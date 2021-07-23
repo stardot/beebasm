@@ -1533,7 +1533,7 @@ void LineParser::HandlePutFileCommon( bool bText )
 		throw AsmException_SyntaxError_EmptyExpression( m_line, m_column );
 	}
 
-	if ( m_line[ m_column ] != ',' )
+	if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 	{
 		throw AsmException_SyntaxError_MissingComma( m_line, m_column );
 	}
@@ -1549,7 +1549,7 @@ void LineParser::HandlePutFileCommon( bool bText )
 	{
 		beebFilename = string(beebFileOrStartAddr.GetString().Text(), beebFileOrStartAddr.GetString().Length());
 
-		if ( m_line[ m_column ] != ',' )
+		if ( m_column >= m_line.length() || m_line[ m_column ] != ',' )
 		{
 			// did not find a comma
 			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
