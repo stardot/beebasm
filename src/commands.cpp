@@ -1910,18 +1910,15 @@ void LineParser::HandleCopyBlock()
 		throw AsmException_SyntaxError_OutOfRange( m_line, m_column );
 	}
 
-	if ( GlobalData::Instance().IsSecondPass() )
+	try
 	{
-		try
-		{
-			ObjectCode::Instance().CopyBlock( start, end, dest );
-		}
-		catch ( AsmException_AssembleError& e )
-		{
-			e.SetString( m_line );
-			e.SetColumn( m_column );
-			throw;
-		}
+		ObjectCode::Instance().CopyBlock( start, end, dest );
+	}
+	catch ( AsmException_AssembleError& e )
+	{
+		e.SetString( m_line );
+		e.SetColumn( m_column );
+		throw;
 	}
 
 	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
