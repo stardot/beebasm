@@ -1912,7 +1912,16 @@ void LineParser::HandleCopyBlock()
 
 	if ( GlobalData::Instance().IsSecondPass() )
 	{
-		ObjectCode::Instance().CopyBlock( start, end, dest );
+		try
+		{
+			ObjectCode::Instance().CopyBlock( start, end, dest );
+		}
+		catch ( AsmException_AssembleError& e )
+		{
+			e.SetString( m_line );
+			e.SetColumn( m_column );
+			throw;
+		}
 	}
 
 	if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
