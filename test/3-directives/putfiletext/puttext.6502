@@ -1,0 +1,10 @@
+\ PUTTEXT - simple test
+
+ORG &2000
+
+.start
+.end
+
+SAVE "test", start, end
+
+PUTTEXT "PUT.TXT", &FEED
