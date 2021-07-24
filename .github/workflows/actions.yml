@@ -40,4 +40,4 @@ jobs:
         shell: cmd
         working-directory: .\src\VS2010
         run: call .\build.cmd
-      - run: python test\testrunner.py
+      - run: python test\testrunner.py -v
