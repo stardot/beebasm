@@ -252,6 +252,8 @@ private:
 	Operator				m_operatorStack[ MAX_OPERATORS ];
 	int						m_valueStackPtr;
 	int						m_operatorStackPtr;
+
+	friend class ArgListParser;
 };
 
 
