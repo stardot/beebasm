@@ -167,6 +167,14 @@ public:
 		m_line(line), m_column(column), m_state(StateFound), m_value(value)
 	{
 	}
+	Argument(const Argument<T>& that) :
+		m_line(that.m_line), m_column(that.m_column), m_state(that.m_state), m_value(that.m_value)
+	{
+		m_line = that.m_line;
+		m_column = that.m_column;
+		m_state = that.m_state;
+		m_value = that.m_value;
+	}
 	// Is a value available?
 	bool Found() const
 	{
@@ -194,7 +202,7 @@ public:
 		}
 	}
 	// Check the parameter lies within a range.
-	Argument& Range(T mn, T mx)
+	Argument<T>& Range(T mn, T mx)
 	{
 		if ( Found() && ( mn > m_value || m_value > mx ) )
 		{
@@ -203,7 +211,7 @@ public:
 		return *this;
 	}
 	// Check the parameter does not exceed a maximum.
-	Argument& Maximum(T mx)
+	Argument<T>& Maximum(T mx)
 	{
 		if ( Found() && m_value > mx )
 		{
@@ -213,7 +221,7 @@ public:
 	}
 	// Set a default value for optional parameters.
 	// This is overloaded for strings below.
-	Argument& Default(T value)
+	Argument<T>& Default(T value)
 	{
 		if ( !Found() )
 		{
@@ -228,7 +236,7 @@ public:
 	}
 	// Permit this parameter to be an undefined symbol.
 	// This is overloaded for strings below.
-	Argument& AcceptUndef()
+	Argument<T>& AcceptUndef()
 	{
 		if (m_state == StateUndefined)
 		{
@@ -238,12 +246,12 @@ public:
 		return *this;
 	}
 private:
-	// Prevent copies
-	Argument operator=(const Argument& that);
+	// Prevent assignment
+	Argument<T> operator=(const Argument<T>& that);
 
-	State m_state;
 	string m_line;
 	int m_column;
+	State m_state;
 	T m_value;
 };
 
@@ -252,7 +260,7 @@ typedef Argument<double> DoubleArg;
 typedef Argument<string> StringArg;
 typedef Argument<Value> ValueArg;
 
-StringArg& StringArg::Default(string value)
+template<> StringArg& StringArg::Default(string value)
 {
 	if ( !Found() )
 	{
@@ -263,7 +271,7 @@ StringArg& StringArg::Default(string value)
 }
 
 // AcceptUndef should not be called for string types.
-StringArg& StringArg::AcceptUndef()
+template<> StringArg& StringArg::AcceptUndef()
 {
 	assert(false);
 	if (m_state == StateUndefined)
@@ -360,7 +368,7 @@ private:
 			return T(m_lineParser.m_line, m_paramColumn, T::StateTypeMismatch);
 		}
 		m_pending = false;
-		return T(m_lineParser.m_line, m_paramColumn, static_cast<T::ContainedType>(m_pendingValue.GetNumber()));
+		return T(m_lineParser.m_line, m_paramColumn, static_cast<typename T::ContainedType>(m_pendingValue.GetNumber()));
 	}
 
 	// Return true if an argument is available
