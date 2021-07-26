@@ -1,0 +1,17 @@
+\ PUTTEXT - undefined addresses
+
+\ no host filename and undefined start address
+PUTTEXT "put.txt", start
+
+\ undefined exec address
+PUTTEXT "put.txt", "put2", &2000, exec
+
+ORG &2000
+
+.start
+.end
+NOP
+.exec
+
+SAVE "test", start, end
+
