@@ -1,0 +1,114 @@
+\\  EXAMPLE CODE SHOWING HOW TO ALIGN A BLOCK OF CODE TO *FINISH* ON
+\\  A PAGE BOUNDARY.
+\\
+\\  DEDICATED TO THE PUBLIC DOMAIN BY JULIE KIRSTY LOUISE MONTOYA, 2021
+\\
+\\  THIS CREATES A JUMP TABLE WITH THREE FIXED ENTRY POINTS:
+\\
+\\      wibble  = &xxF7
+\\      blah    = &xxFA
+\\      sayXY   = &xxFD
+\\
+\\  YOU COULD ALSO USE THIS TO ALLOCATE A BLOCK OF MEMORY FOR PASSING
+\\  PARAMETERS BETWEEN BASIC AND ASSEMBLER.
+
+
+\\  MOS ENTRY POINTS
+
+osasci = &FFE3
+
+
+\\  WE WANT OUR CODE TO BEGIN JUST BELOW THE START OF SCREEN MEMORY
+\\
+\\  MODE 0, 1, 2 ; ORG &2F00
+\\  MODE 3       ; ORG &3F00
+\\  MODE 4, 5    ; ORG &5700
+\\  MODE 6       ; ORG &5F00
+\\  MODE 7       ; ORG &7B00
+
+ORG &7B00
+
+._begin
+
+\\  THE ACTUAL CODE
+
+\\  PRINT THE WORD "WIBBLE" AND START A NEW LINE
+
+.real_wibble
+    LDX #wibble_msg MOD 256
+    LDY #wibble_msg DIV 256
+    JMP real_sayXY
+
+\\  PRINT THE WORD "BLAH" AND START A NEW LINE
+
+.real_blah
+    LDX #blah_msg MOD 256
+    LDY #blah_msg DIV 256
+
+\\  PRINT A STRING OF UP TO 255 CHARACTERS OF TEXT FROM ANYWHERE IN MEMORY
+\\      X => UNITS BYTE OF STARTING ADDRESS
+\\      Y => 256ES BYTE OF STARTING ADDRESS
+\\  RETURNS AFTER PRINTING ANY CONTROL CHARACTER, INCLUDING CR, BRK
+
+.real_sayXY
+    STX &70             \  Store address of text in zero page,
+    STY &71             \   low byte before high byte
+._sayXY0
+    LDY #0              \  Initialise Y index register
+._sayXY1
+    LDA (&70),Y         \  Read a character of text from memory
+    INY                 \  Move on to next character
+    JSR osasci          \  Print the character
+    CMP #32             \  See if ASCII code was less than 32 (space)
+    BCS _sayXY1         \  Go round again if greater than or equal to 32
+._rts
+    RTS
+
+.wibble_msg
+    EQUS "WIBBLE": EQUB 13
+.blah_msg
+    EQUS "BLAH": EQUB 13
+
+
+\\  THAT'S ALL THIS LITTLE DEMO DOES.
+\\  THE JUMP TABLE WILL ALWAYS BE IN A FIXED LOCATION AT THE END.  YOUR
+\\  CODE HAS ALL THE SPACE IN BETWEEN TO GROW INTO.
+
+\\  THE END OF THE CODE PROPER, AND THE BEGINNING OF THE MAGIC
+
+._real_end              \  This is the first location after end of code
+
+ALIGN &100              \  Now P% is on a page boundary
+
+GUARD P%                \  Prevent assembling any more code after here
+
+CLEAR _real_end, P%     \  Mark the area from the real end of code as far
+                        \   as the new origin, as available for use again
+
+ORG P% - 9              \  Wind the origin back 3 bytes for each entry in
+                        \   the jump table, to &xxF7
+                        \  (YOU WILL NEED TO EDIT THIS TO SUIT YOUR CODE!)
+
+\\  THE END OF THE MAGIC, AND THE BEGINNING OF THE JUMP TABLE
+\\
+\\  THIS IS SIMPLY A SERIES OF JMP INSTRUCTIONS INTO THE MAIN CODE
+\\  EACH ONE IS EXACTLY 3 BYTES LONG, HENCE THE 9 ABOVE
+
+.wibble
+    JMP real_wibble
+.blah
+    JMP real_blah
+.sayXY
+    JMP real_sayXY
+
+\\  THE END OF THE JUMP TABLE
+\\
+\\  AS LONG AS WE SUBTRACTED THE RIGHT NUMBER OF BYTES FROM P% UP ABOVE
+\\  THEN THIS WILL FINISH EXACTLY ON A PAGE BOUNDARY
+
+._end
+
+\\  SAVE THE CODE.  USING THE ADDRESS OF AN RTS INSTRUCTION FOR THE
+\\  EXECUTION ADDRESS MEANS IT CAN SAFELY BE *RUN.
+
+SAVE "M.JT1", _begin, _end, _rts
