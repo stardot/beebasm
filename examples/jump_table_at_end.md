@@ -20,11 +20,11 @@ them; and to alter `HIMEM` as your machine code grows  (otherwise, the
 BASIC `PROC` stack will stomp on your code).
 
 The trick is this:  We create a label pointing to the first free location
-after the code that has been assembled so far.  Then we ALIGN &100 to
-advance the origin to the next page boundary.  We use CLEAR to tell BeebAsm
-that the area from where the aforementioned label points to the current
-origin is safe to use; and lastly, we adjust the origin backwards by the
-exact size of the code or data we are going to insert.
+after the code that has been assembled so far.  Then we `ALIGN &100` to
+advance the origin to the next page boundary.  We use `CLEAR` to tell
+BeebAsm that the area from where the aforementioned label points to the
+current origin is safe to use; and lastly, we adjust the origin backwards
+by the exact size of the code or data we are going to insert.
 
 This is the actual code from the example, with its nine-byte jump table:
 ```
@@ -43,4 +43,13 @@ ORG P% - 9              \  Wind the origin back 3 bytes for each entry in
 ```
 The value 9 will need to be edited to match the size of the fixed part of
 the code in your own use case.  You can just decrease the origin, if the
-code grows too big.  
+code grows too big.
+
+You can optionally add the following after your jump table:
+```
+ASSERT ((P% MOD 256) = 0)
+```
+This will cause BeebAsm to stop with an error if the jump table has fallen
+short of the page boundary.  (It will of course already have stopped with an
+error if the jump table has exceeded the page boundary, thanks to the
+earlier `GUARD` directive.)
