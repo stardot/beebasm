@@ -1,3 +1,5 @@
+name: Build and run tests
+
 on: [push, pull_request]
 
 jobs:
@@ -27,3 +29,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: make -C src all VERBOSE=1
+  msbuild:
+    runs-on: windows-2019
+    name: Compile via msbuild on Windows
+    steps:
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+      - uses: actions/checkout@v2
+      - name: Build Binary
+        shell: cmd
+        working-directory: .\src\VS2010
+        run: call .\build.cmd
+      - run: python test\testrunner.py -v

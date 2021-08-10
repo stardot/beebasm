@@ -1,0 +1,14 @@
+\ INCBIN - one byte too long for remaining memory
+
+ORG &EE32
+
+.start
+
+EQUS "XX"
+INCBIN "incbin.bin"
+
+.end
+
+ASSERT(P%=&10001)
+
+SAVE "test", start, end

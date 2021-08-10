@@ -1,0 +1,18 @@
+\ SAVE - undefined symbol for execution address
+
+ORG &2000
+
+.start
+
+NOP
+LDA #'C'
+JMP &FFEE
+
+.end
+
+SAVE "test", start, end, exec
+
+ORG &2001
+
+.exec
+

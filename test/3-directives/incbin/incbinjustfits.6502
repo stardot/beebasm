@@ -1,0 +1,14 @@
+\ INCBIN - fit exactly in remaining memory
+
+ORG &EE31
+
+.start
+
+EQUS "XX"
+INCBIN "incbin.bin"
+
+.end
+
+ASSERT(P%=&10000)
+
+SAVE "test", start, end

@@ -230,6 +230,8 @@ private:
 	void			EvalChr();
 	void			EvalAsc();
 	void			EvalMid();
+	void			EvalLeft();
+	void			EvalRight();
 	void			EvalString();
 	void			EvalUpper();
 	void			EvalLower();
@@ -252,6 +254,8 @@ private:
 	Operator				m_operatorStack[ MAX_OPERATORS ];
 	int						m_valueStackPtr;
 	int						m_operatorStackPtr;
+
+	friend class ArgListParser;
 };
 
 

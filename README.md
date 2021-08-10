@@ -251,7 +251,9 @@ CHR$(val)          Return a string with a single character with ASCII value val
 ASC(str)           Return the ASCII value of the first character of str
 MID$(str,index,length)
                    Return length characters of str starting at (one-based) index
-STRINGS$(count,str)
+LEFT$(str,length)  Return the first length characters of str
+RIGHT$(str,length) Return the last length characters of str
+STRING$(count,str)
                    Return str repeated count times
 LOWER$(str)        Return str converted to lowercase
 UPPER$(str)        Return str converted to uppercase
@@ -744,8 +746,8 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Added -writes, -dd and -labels options (thanks to tricky for these)
 		  Added CMake support and man page (thanks to Dave Lambley)
 		  Added string values and VAL, EVAL, STR$, LEN, CHR$, ASC, MID$,
-		  STRING$, LOWER$, UPPER$, ASM. (Charles Reilly with thanks to
-		  Steven Flintham.)
+		  LEFT$, RIGHT$, STRING$, LOWER$, UPPER$, ASM. (Charles Reilly with
+		  thanks to Steven Flintham.)
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT

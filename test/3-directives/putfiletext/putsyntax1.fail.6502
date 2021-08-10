@@ -1,0 +1,5 @@
+\ PUTFILE - no params
+
+\ PUTTEXT uses the same parser, so this test is not repeated.
+
+PUTFILE
