@@ -111,6 +111,8 @@ const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	{ "CHR$(",	10,	1,	&LineParser::EvalChr },
 	{ "ASC(",	10,	1,	&LineParser::EvalAsc },
 	{ "MID$(",	10,	3,	&LineParser::EvalMid },
+	{ "LEFT$(",	10,	2,	&LineParser::EvalLeft },
+	{ "RIGHT$(",	10,	2,	&LineParser::EvalRight },
 	{ "STRING$(",	10,	2,	&LineParser::EvalString },
 	{ "UPPER$(",	10,	1,	&LineParser::EvalUpper },
 	{ "LOWER$(",	10,	1,	&LineParser::EvalLower }
@@ -928,6 +930,28 @@ void LineParser::EvalMod()
 
 /*************************************************************************************************/
 /**
+	Shifting helper functions
+*/
+/*************************************************************************************************/
+static int LogicalShiftLeft(int value, unsigned int shift)
+{
+	return static_cast<int>(static_cast<unsigned int>(value) << shift);
+}
+
+static int ArithmeticShiftRight(int value, unsigned int shift)
+{
+	unsigned int shifted = static_cast<unsigned int>(value) >> shift;
+	if (value < 0)
+	{
+		const unsigned int bitcount = 8 * sizeof(unsigned int);
+		const unsigned int ones = ~0;
+		shifted |= (ones << (bitcount - shift));
+	}
+	return static_cast<int>(shifted);
+}
+
+/*************************************************************************************************/
+/**
 	LineParser::EvalShiftLeft()
 */
 /*************************************************************************************************/
@@ -945,7 +969,7 @@ void LineParser::EvalShiftLeft()
 	}
 	else if ( shift > 0 )
 	{
-		result = val << shift;
+		result = LogicalShiftLeft(val, static_cast<unsigned int>(shift));
 	}
 	else if ( shift == 0 )
 	{
@@ -953,7 +977,7 @@ void LineParser::EvalShiftLeft()
 	}
 	else
 	{
-		result = val >> (-shift);
+		result = ArithmeticShiftRight(val, static_cast<unsigned int>(-shift));
 	}
 
 	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >( result );
@@ -981,7 +1005,7 @@ void LineParser::EvalShiftRight()
 	}
 	else if ( shift > 0 )
 	{
-		result = val >> shift;
+		result = ArithmeticShiftRight(val, static_cast<unsigned int>(shift));
 	}
 	else if ( shift == 0 )
 	{
@@ -989,7 +1013,7 @@ void LineParser::EvalShiftRight()
 	}
 	else
 	{
-		result = val << (-shift);
+		result = LogicalShiftLeft(val, static_cast<unsigned int>(-shift));
 	}
 
 	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >( result );
@@ -1602,6 +1626,67 @@ void LineParser::EvalMid()
 	}
 
 	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(index, length);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLeft()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLeft()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::StringValue) || (value2.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 1;
+
+	String text = value1.GetString();
+	int count = static_cast<int>(value2.GetNumber());
+	if ((count < 0) || (static_cast<unsigned int>(count) > text.Length()))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(0, count);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalRight()
+*/
+/*************************************************************************************************/
+void LineParser::EvalRight()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::StringValue) || (value2.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 1;
+
+	String text = value1.GetString();
+	int count = static_cast<int>(value2.GetNumber());
+	if ((count < 0) || (static_cast<unsigned int>(count) > text.Length()))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	unsigned int ucount = static_cast<unsigned int>(count);
+	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(text.Length() - ucount, ucount);
 }
 
 
