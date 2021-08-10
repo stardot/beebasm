@@ -1,0 +1,9 @@
+\ ASSERT - don't complain about undefined symbols on first pass
+
+ASSERT(ABS(start))
+
+ORG &2000
+
+.start
+SAVE "test", start, start
+

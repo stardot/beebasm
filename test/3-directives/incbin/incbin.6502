@@ -1,0 +1,15 @@
+\ INCBIN - simple inclusion
+
+ORG &2000
+
+.start
+
+EQUS "XX"
+INCBIN "incbin.bin"
+EQUS "XX"
+
+.end
+
+ASSERT(end-start=4561)
+
+SAVE "test", start, end

@@ -1,0 +1,4 @@
+errorlinenumber2.fail.6502:9: error: Indirect mode not allowed for this instruction.
+
+ldx (&70),y
+    ^

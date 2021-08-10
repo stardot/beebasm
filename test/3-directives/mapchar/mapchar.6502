@@ -1,0 +1,19 @@
+\ MAPCHAR - some mapping
+
+ORG &2000
+
+MAPCHAR 'A','Y','B'
+MAPCHAR 'Z','A'
+MAPCHAR 'a','y','b'
+MAPCHAR 'z','a'
+MAPCHAR '>',' '
+MAPCHAR '<',','
+
+.start
+
+EQUS "ROGHMW>NE>AKZBJ>PTZQSY<>ITCFD>LX>UNV", 10
+EQUS "sgd>pthbj>aqnvm>enw>itlor>nudq>sgd>kzyx>cnf", 10
+
+.end
+
+SAVE "test", start, end

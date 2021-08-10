@@ -1,0 +1,6 @@
+\ MAPCHAR - two many parameters
+
+ORG &2000
+
+MAPCHAR 'A','B','C','D'
+

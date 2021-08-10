@@ -1,0 +1,18 @@
+\ CLEAR - assemble over same memory twice
+
+ORG &2000
+
+.start
+
+LDA #'C'
+JMP &FFEE
+
+CLEAR start, P%
+
+ORG &2000
+LDA #'T'
+JMP &FFEE
+
+.end
+
+SAVE "test", start, end
