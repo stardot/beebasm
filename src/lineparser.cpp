@@ -98,8 +98,10 @@ void LineParser::Process()
 					  ( isalpha( m_line[ m_column ] ) ||
 						isdigit( m_line[ m_column ] ) ||
 						m_line[ m_column ] == '_' ||
-						m_line[ m_column ] == '%' ) &&
-						m_line[ m_column - 1 ] != '%' );
+						m_line[ m_column ] == '%' ||
+						m_line[ m_column ] == '$' ) &&
+						m_line[ m_column - 1 ] != '%' &&
+						m_line[ m_column - 1 ] != '$' );
 
 			if ( AdvanceAndCheckEndOfStatement() )
 			{
@@ -176,7 +178,7 @@ void LineParser::Process()
 				m_column++;
 			}
 
-			double value = EvaluateExpression();
+			Value value = EvaluateExpression();
 
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
@@ -227,7 +229,7 @@ void LineParser::Process()
 					{
 						if ( !SymbolTable::Instance().IsSymbolDefined( paramName ) )
 						{
-							double value = EvaluateExpression();
+							Value value = EvaluateExpression();
 							SymbolTable::Instance().AddSymbol( paramName, value );
 						}
 						else if ( GlobalData::Instance().IsSecondPass() )
@@ -238,7 +240,7 @@ void LineParser::Process()
 							// macro parameter rather than the new value of the outer macro
 							// parameter. See local-forward-branch-5.6502 for an example.
 							SymbolTable::Instance().RemoveSymbol( paramName );
-							double value = EvaluateExpression();
+							Value value = EvaluateExpression();
 							SymbolTable::Instance().AddSymbol( paramName, value );
 						}
 					}
@@ -328,6 +330,8 @@ void LineParser::SkipStatement()
 		{
 			if ( m_column < m_line.length() && m_line[ m_column ] == '\"' && !bInSingleQuotes )
 			{
+				// This handles quoted quotes in strings (like "a""b") because it views
+				// them as two adjacent strings.
 				bInQuotes = !bInQuotes;
 			}
 			else if ( m_column < m_line.length() && m_line[ m_column ] == '\'' )
@@ -371,22 +375,19 @@ void LineParser::SkipStatement()
 /*************************************************************************************************/
 void LineParser::SkipExpression( int bracketCount, bool bAllowOneMismatchedCloseBracket )
 {
-	while ( AdvanceAndCheckEndOfSubStatement() )
+	while ( AdvanceAndCheckEndOfSubStatement(bracketCount == 0) )
 	{
-		if ( bAllowOneMismatchedCloseBracket )
+		if ( m_line[ m_column ] == '(' )
 		{
-			if ( m_line[ m_column ] == '(' )
-			{
-				bracketCount++;
-			}
-			else if ( m_line[ m_column ] == ')' )
-			{
-				bracketCount--;
+			bracketCount++;
+		}
+		else if ( m_line[ m_column ] == ')' )
+		{
+			bracketCount--;
 
-				if ( bracketCount < 0 )
-				{
-					break;
-				}
+			if (bAllowOneMismatchedCloseBracket && ( bracketCount < 0 ) )
+			{
+				break;
 			}
 		}
 
@@ -514,9 +515,16 @@ bool LineParser::AdvanceAndCheckEndOfStatement()
 	@return		bool		true if we are not yet at the end of the substatement
 */
 /*************************************************************************************************/
-bool LineParser::AdvanceAndCheckEndOfSubStatement()
+bool LineParser::AdvanceAndCheckEndOfSubStatement(bool includeComma)
 {
-	return MoveToNextAtom( ";:\\,{}" );
+	if (includeComma)
+	{
+		return MoveToNextAtom( ";:\\,{}" );
+	}
+	else
+	{
+		return MoveToNextAtom( ";:\\{}" );
+	}
 }
 
 
@@ -543,8 +551,10 @@ string LineParser::GetSymbolName()
 			  ( isalpha( m_line[ m_column ] ) ||
 				isdigit( m_line[ m_column ] ) ||
 				m_line[ m_column ] == '_' ||
-				m_line[ m_column ] == '%' ) &&
-				m_line[ m_column - 1 ] != '%' );
+				m_line[ m_column ] == '%' ||
+				m_line[ m_column ] == '$' ) &&
+				m_line[ m_column - 1 ] != '%' &&
+				m_line[ m_column - 1 ] != '$' );
 
 	return symbolName;
 }

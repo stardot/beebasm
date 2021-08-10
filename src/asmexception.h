@@ -201,6 +201,7 @@ DEFINE_SYNTAX_EXCEPTION( MissingQuote, "Unterminated string." );
 DEFINE_SYNTAX_EXCEPTION( MissingComma, "Missing comma." );
 DEFINE_SYNTAX_EXCEPTION( IllegalOperation, "Operation attempted with invalid or out of range values." );
 DEFINE_SYNTAX_EXCEPTION( TimeResultTooBig, "TIME$() result too big." );
+DEFINE_SYNTAX_EXCEPTION( ParameterCount, "Wrong number of parameters." );
 
 // assembler parsing exceptions
 DEFINE_SYNTAX_EXCEPTION( NoImplied, "Implied mode not allowed for this instruction." );
@@ -219,6 +220,7 @@ DEFINE_SYNTAX_EXCEPTION( BadAddress, "Out of range address." );
 DEFINE_SYNTAX_EXCEPTION( BadIndexed, "Syntax error in indexed instruction." );
 DEFINE_SYNTAX_EXCEPTION( NoIndexedX, "X indexed mode does not exist for this instruction." );
 DEFINE_SYNTAX_EXCEPTION( NoIndexedY, "Y indexed mode does not exist for this instruction." );
+DEFINE_SYNTAX_EXCEPTION( MissingAssemblyInstruction, "Expected an assembly language instruction." );
 DEFINE_SYNTAX_EXCEPTION( LabelAlreadyDefined, "Symbol already defined." );
 DEFINE_SYNTAX_EXCEPTION( InvalidSymbolName, "Invalid symbol name; must start with a letter and contain only letters, numbers and underscore." );
 DEFINE_SYNTAX_EXCEPTION( SymbolScopeOutsideMacro, "Symbol scope cannot promote outside current macro." );
@@ -248,6 +250,7 @@ DEFINE_SYNTAX_EXCEPTION( OutOfRange, "Out of range." );
 DEFINE_SYNTAX_EXCEPTION( BackwardsSkip, "Attempted to skip backwards to an address." );
 DEFINE_SYNTAX_EXCEPTION( NoAnonSave, "Cannot specify SAVE without a filename if no default output filename has been specified." );
 DEFINE_SYNTAX_EXCEPTION( OnlyOneAnonSave, "Can only use SAVE without a filename once per project." );
+DEFINE_SYNTAX_EXCEPTION( TypeMismatch, "Type mismatch." );
 
 
 

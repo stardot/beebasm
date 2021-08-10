@@ -179,10 +179,12 @@ Things like `STA&4000` are permitted with or without `-w`.
 
 `-D <symbol>=<value>`
 
-Define `<symbol>` before starting to assemble. If `<value>` is not given, `-1` (`TRUE`)
-will be used by default. Note that there must be a space between `-D` and the symbol. `<value>` may be in decimal, hexadecimal (prefixed with $, & or 0x) or binary (prefixed with %).
+`-S <symbol>=<string>`
 
-`-D` can be used in conjunction with conditional assignment to provide default values within the source which can be overridden from the command line.
+Define `<symbol>` before starting to assemble. If `<value>` is not given, `-1` (`TRUE`)
+will be used by default. Note that there must be a space between `-D` or `-S` and the symbol. `<value>` may be in decimal, hexadecimal (prefixed with $, & or 0x) or binary (prefixed with %).  `<string>` may be quoted.
+
+`-D` and `-S` can be used in conjunction with conditional assignment to provide default values within the source which can be overridden from the command line.
 
 ## 5. SOURCE FILE SYNTAX
 
@@ -235,7 +237,28 @@ NOT(val)           Return the bitwise 1's complement of val
 LOG(val)           Return the base 10 log of val
 LN(val)            Return the natural log of val
 EXP(val)           Return e raised to the power of val
+VAL(str)           Return the value of a decimal number in a string
+EVAL(str)          Return the value of an expression in a string
+STR$(val)          Return the number val converted to a string
+STR$~(val)         Return the number val converted to a string in hexadecimal
+LEN(str)           Return the length of str
+CHR$(val)          Return a string with a single character with ASCII value val
+ASC(str)           Return the ASCII value of the first character of str
+MID$(str,index,length)
+                   Return length characters of str starting at (one-based) index
+LEFT$(str,length)  Return the first length characters of str
+RIGHT$(str,length) Return the last length characters of str
+STRING$(count,str)
+                   Return str repeated count times
+LOWER$(str)        Return str converted to lowercase
+UPPER$(str)        Return str converted to uppercase
+TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
+TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
+                   is the same format used by the C library strftime()
 ```
+
+The assembly date/time is constant throughout the assembly; every use of `TIME$`
+will return the same date/time.
 
 Also, some constants are defined:
 
@@ -248,25 +271,13 @@ TRUE               Returns -1
 CPU                The value set by the CPU assembler directive (see below)
 ```
 
-Within `EQUB/EQUS` only you can also use the expressions:
-
-```
-TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
-
-TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
-                   is the same format used by the C library strftime().
-```
-
-The assembly date/time is constant throughout the assembly; every use of `TIME$`
-will return the same date/time.
-
-Variables can be defined at any point using the BASIC syntax, i.e. `addr = &70`.
+Variables can be defined at any point using the BASIC syntax, i.e. `addr = &70` or `name = "Bob"`.  Quotes in strings are quoted by doubling, e.g. `"a""b"` for the string `a"b`.
 
 Note that it is not possible to reassign variables once defined. However `FOR...NEXT` blocks have their own scope (more on this later).
 
 Variables can be defined if they are not already defined using the conditional assignment syntax `=?`, e.g. `addr =? &70`. This is useful in conjunction with the `-D` command line option to provide default values for variables in the source while allowing them to be overridden on the command line. (Because variables cannot be reassigned once defined, it is not possible to define a variable with `-D` *and* with non-conditional assignment.)
 
-(Thanks to Stephen Harris <sweh@spuddy.org> and "ctr" for the `-D`/conditional assignment support.)
+(Thanks to Stephen Harris <sweh@spuddy.org> and Charles Reilly for the `-D`/conditional assignment support.)
 
 
 ## 6. ASSEMBLER DIRECTIVES
@@ -375,9 +386,9 @@ Puts a 'guard' on the specified address which will cause an error if you attempt
 Clears all guards between the `<start>` and `<end`> addresses specified.  This can also be used to reset a section of memory which has had code assembled in it previously.  BeebAsm will complain if you attempt to assemble code over previously assembled code at the same address without having `CLEAR`ed it first.
 
 
-`SAVE "filename", start, end [, exec [, reload] ]`
+`SAVE ["filename"], start, end [, exec [, reload] ]`
 
-Saves out object code to either a DFS disc image (if one has been specified), or to the current directory as a standalone file.  A source file must have at least one SAVE statement in it, otherwise nothing will be output.  BeebAsm will warn if this is the case.
+Saves out object code to either a DFS disc image (if one has been specified), or to the current directory as a standalone file.  The filename is optional only if a name is specified with `-o` on the command line.  A source file must have at least one SAVE statement in it, otherwise nothing will be output.  BeebAsm will warn if this is the case.
 
 `'exec'` can be optionally specified as the execution address of the file when saved to a disc image.
 
@@ -627,6 +638,10 @@ Abort assembly if any of the expressions is false.
 
 Seed the random number generator used by the RND() function.  If this is not used, the random number generator is seeded based on the current time and so each build of a program using `RND()` will be different.
 
+`ASM <str>`
+
+Assemble the supplied assembly language string.  For example `ASM "LDA #&41"`.
+
 ## 7. TIPS AND TRICKS
 
 BeebAsm's approach of treating memory as a canvas which can be written to, saved, and rewritten if desired makes it very easy to create certain types of applications.
@@ -715,7 +730,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 ??/??/????  1.10  Documented "$" and "%" as literal prefixes (thanks to
                   cardboardguru76 for pointing this out).
 		  Fixed silently treating label references starting with "."
-		  as 0 (thanks to mungre for this fix).
+		  as 0 (thanks to Charles Reilly for this fix).
 		  Allowed "-h" and "-help" options to see help.
 		  Fixed tokenisation of BASIC pseudo-variables in some cases.
 		  (Thanks to Richard Russell for advice on this.)
@@ -725,6 +740,9 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
 		  Added -writes, -dd and -labels options (thanks to tricky for these)
 		  Added CMake support and man page (thanks to Dave Lambley)
+		  Added string values and VAL, EVAL, STR$, LEN, CHR$, ASC, MID$,
+		  LEFT$, RIGHT$, STRING$, LOWER$, UPPER$, ASM. (Charles Reilly with
+		  thanks to Steven Flintham.)
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT

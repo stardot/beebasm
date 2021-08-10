@@ -117,6 +117,21 @@ const LineParser::OpcodeData	LineParser::m_gaOpcodeTable[] =
 
 #undef X
 
+/*************************************************************************************************/
+/**
+	LineParser::GetInstructionAndAdvanceColumn()
+
+	Searches for an instruction match in the current line, starting at the current column,
+	and moves the column pointer past the token
+
+	@return		The token number, or -1 for "not found"
+				column is modified to index the character after the token
+*/
+/*************************************************************************************************/
+int LineParser::GetInstructionAndAdvanceColumn()
+{
+	return GetInstructionAndAdvanceColumn(GlobalData::Instance().RequireDistinctOpcodes());
+}
 
 /*************************************************************************************************/
 /**
@@ -125,14 +140,13 @@ const LineParser::OpcodeData	LineParser::m_gaOpcodeTable[] =
 	Searches for an instruction match in the current line, starting at the current column,
 	and moves the column pointer past the token
 
-	@param		line			The string to parse
-	@param		column			The column to start from
+	@param		requireDistinctOpcodes	If true, check the opcode is a complete token
 
 	@return		The token number, or -1 for "not found"
 				column is modified to index the character after the token
 */
 /*************************************************************************************************/
-int LineParser::GetInstructionAndAdvanceColumn()
+int LineParser::GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes)
 {
 	for ( int i = 0; i < static_cast<int>( sizeof m_gaOpcodeTable / sizeof( OpcodeData ) ); i++ )
 	{
@@ -159,7 +173,7 @@ int LineParser::GetInstructionAndAdvanceColumn()
 		// The token matches so far, but (optionally) check there's nothing after it; this prevents 
 		// false matches where a macro name begins with an opcode, at the cost of disallowing 
 		// things like "foo=&70:stafoo".
-		if ( GlobalData::Instance().RequireDistinctOpcodes() && bMatch )
+		if ( requireDistinctOpcodes && bMatch )
 		{
 			std::string::size_type k = m_column + len;
 			if ( k < m_line.length() )
@@ -180,7 +194,6 @@ int LineParser::GetInstructionAndAdvanceColumn()
 
 	return -1;
 }
-
 
 
 /*************************************************************************************************/

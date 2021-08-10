@@ -128,10 +128,10 @@ bool SymbolTable::IsSymbolDefined( const std::string& symbol ) const
 	Adds a symbol to the symbol table with the supplied value
 
 	@param		symbol			The symbol to add
-	@param		int				Its value
+	@param		value			Its value
 */
 /*************************************************************************************************/
-void SymbolTable::AddSymbol( const std::string& symbol, double value, bool isLabel )
+void SymbolTable::AddSymbol( const std::string& symbol, Value value, bool isLabel )
 {
 	assert( !IsSymbolDefined( symbol ) );
 	m_map.insert( make_pair( symbol, Symbol( value, isLabel ) ) );
@@ -265,6 +265,42 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 
 /*************************************************************************************************/
 /**
+	SymbolTable::AddCommandLineStringSymbol()
+
+	Adds a string symbol to the symbol table using a command line 'FOO=BAR' expression
+
+	@param		expr			Symbol name and value
+	@returns	bool
+*/
+/*************************************************************************************************/
+bool SymbolTable::AddCommandLineStringSymbol( const std::string& expr )
+{
+	std::string::size_type equalsIndex = expr.find( '=' );
+	std::string symbol;
+	std::string valueString;
+	if ( equalsIndex == std::string::npos )
+	{
+		return false;
+	}
+
+	symbol = expr.substr( 0, equalsIndex );
+	valueString = expr.substr( equalsIndex + 1 );
+
+	if ( symbol.empty() )
+	{
+		return false;
+	}
+
+	String value = String(valueString.data(), valueString.length());
+
+	m_map.insert( make_pair( symbol, Symbol( value, false ) ) );
+
+	return true;
+}
+
+
+/*************************************************************************************************/
+/**
 	SymbolTable::GetSymbol()
 
 	Gets the value of a symbol which already exists in the symbol table
@@ -272,7 +308,7 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 	@param		symbol			The name of the symbol to look for
 */
 /*************************************************************************************************/
-double SymbolTable::GetSymbol( const std::string& symbol ) const
+Value SymbolTable::GetSymbol( const std::string& symbol ) const
 {
 	assert( IsSymbolDefined( symbol ) );
 	return m_map.find( symbol )->second.GetValue();
@@ -341,14 +377,19 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 			if ( symbol.IsLabel() &&
 				 symbolName.find_first_of( '@' ) == string::npos )
 			{
-				if ( !bFirst )
+				// This doesn't output string valued symbols
+				Value value = symbol.GetValue();
+				if (value.GetType() == Value::NumberValue)
 				{
-					our_cout << ",";
+					if ( !bFirst )
+					{
+						our_cout << ",";
+					}
+
+					our_cout << "'" << symbolName << "':" << value.GetNumber() << "L";
+
+					bFirst = false;
 				}
-
-				our_cout << "'" << symbolName << "':" << symbol.GetValue() << "L";
-
-				bFirst = false;
 			}
 		}
 	}
