@@ -1,0 +1,27 @@
+ORG &2000
+
+.start
+
+	{
+		LDX #255
+		.loop
+			DEX
+			BNE loop
+	}
+
+	{
+		\ .loop128 is a global label and is visible outside of this scope
+		.*loop128
+		LDX #128
+		\ This .loop label here is independent of the previous one
+		.loop
+			DEX
+			BNE loop
+	}
+
+	\ JMP loop - this is an error, there is no .loop label visible
+	JMP loop128 \ this is fine
+
+.end
+
+SAVE "test", start, end

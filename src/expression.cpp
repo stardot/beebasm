@@ -37,7 +37,7 @@
 #include "sourcefile.h"
 #include "random.h"
 #include "constants.h"
-
+#include "stringutils.h"
 
 using namespace std;
 
@@ -156,55 +156,58 @@ Value LineParser::GetValue()
 	}
 	else if ( m_column < m_line.length() && ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' ) )
 	{
-		// get a hex digit
+		// get hexadecimal
 
+		// skip the number prefix
 		m_column++;
 
-		if ( m_column >= m_line.length() || !isxdigit( m_line[ m_column ] ) )
-		{
-			// badly formed hex literal
-			throw AsmException_SyntaxError_BadHex( m_line, m_column );
-		}
-		else
-		{
-			// get a number
+		unsigned int hexValue;
 
-			unsigned int hexValue;
-
-			istringstream str( m_line );
-			str.seekg( m_column );
-			str >> hex >> hexValue;
+		istringstream str( m_line );
+		str.seekg( m_column );
+		if (str >> hex >> hexValue)
+		{
 			m_column = static_cast< size_t >( str.tellg() );
 
 			value = static_cast< double >( hexValue );
+		}
+		else
+		{
+			throw AsmException_SyntaxError_BadHex( m_line, m_column );
 		}
 	}
 	else if ( m_column < m_line.length() && m_line[ m_column ] == '%' )
 	{
 		// get binary
 
+		// skip the number prefix
 		m_column++;
 
-		if ( m_column >= m_line.length() || ( m_line[ m_column ] != '0' && m_line[ m_column ] != '1' ) )
+		size_t start_column = m_column;
+		unsigned int binValue = 0;
+
+		// Skip leading zeroes
+		while ( m_column < m_line.length() && m_line[ m_column ] == '0' )
+		{
+			m_column++;
+		}
+
+		// Remember the column containing the first one (if any)
+		size_t first_one = m_column;
+
+		while ( m_column < m_line.length() && ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' ) )
+		{
+			binValue = ( binValue * 2 ) + ( m_line[ m_column ] - '0' );
+			m_column++;
+		}
+
+		if ( m_column == start_column || m_column - first_one > 32 )
 		{
 			// badly formed bin literal
 			throw AsmException_SyntaxError_BadBin( m_line, m_column );
 		}
-		else
-		{
-			// parse binary number
 
-			int binValue = 0;
-
-			do
-			{
-				binValue = ( binValue * 2 ) + ( m_line[ m_column ] - '0' );
-				m_column++;
-			}
-			while ( m_column < m_line.length() && ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' ) );
-
-			value = static_cast< double >( binValue );
-		}
+		value = static_cast< double >( binValue );
 	}
 	else if ( m_column < m_line.length() && m_line[ m_column ] == '*' )
 	{
@@ -1496,7 +1499,7 @@ Value LineParser::FormatAssemblyTime(const char* formatString)
 void LineParser::EvalStr()
 {
 	ostringstream stream;
-	stream << StackTopNumber();
+	StringUtils::PrintNumber(stream, StackTopNumber());
 	string result = stream.str();
 
 	m_valueStack[ m_valueStackPtr - 1 ] = String(result.data(), result.length());

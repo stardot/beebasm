@@ -1,0 +1,27 @@
+org &2000
+
+macro foo n
+	bar n-1
+endmacro
+
+macro bar n
+	lda #n
+	print "Current call stack:", CALLSTACK$, " (end)"
+endmacro
+
+.start
+	ldy #42
+	print "Current location:", FILELINE$
+	ldx #0
+.loop
+	foo 25
+	sta &3000,x
+	iny
+	inx
+	cpx #4
+	bne loop
+	rts
+
+.end
+
+save "test", start, end

@@ -1,0 +1,15 @@
+\ INCBIN - missing file name
+
+ORG &2000
+
+.start
+
+EQUS "XX"
+INCBIN
+EQUS "XX"
+
+.end
+
+ASSERT(end-start=4561)
+
+SAVE "test", start, end

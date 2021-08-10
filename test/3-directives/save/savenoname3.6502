@@ -1,0 +1,16 @@
+\ beebasm -o test
+
+ORG &2000
+
+.start
+
+LDA #'C'
+JMP &FFEE
+
+RTS
+.end
+
+base=&3000
+
+SAVE start, end, base + end - start - 1, base
+

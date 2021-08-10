@@ -1,0 +1,22 @@
+\ COPYBLOCK - try to reuse copy destination
+
+ORG &2000
+
+.start
+
+LDY #&00
+.loop
+LDA (&70),Y
+STA (&72),Y
+DEY
+BNE loop
+.loopend
+
+COPYBLOCK start,loopend,loopend
+
+\ This should fail because it overlaps the copy
+LDA #&00
+
+.end
+
+SAVE "test", start, end
