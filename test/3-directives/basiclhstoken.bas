@@ -1,0 +1,15 @@
+REM this comment is scratch space
+
+FOR I%=0 TO 252 STEP 4:I%!&900=0:NEXT
+TIME=25
+?((TIME AND &FF)+&900)=42
+PRINT TIME
+FOR I%=0 TO 255
+IF I%?&900<>0 THEN PRINT I%
+NEXT
+
+?(PAGE+7)=ASC("T")
+!(PAGE+8)=&30313233
+PRINT ~?PAGE
+PRINT ~?(PAGE+7)
+PRINT ~!(PAGE+8)

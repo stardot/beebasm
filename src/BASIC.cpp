@@ -593,6 +593,8 @@ bool EncodeLine()
 						StartOfStatement = true;
 					else if(Token == '=') // an equals sign always switches the tokeniser back to "middle of statement" mode
 						StartOfStatement = false;
+					else if(Token == '?' || Token == '!')
+						StartOfStatement = false;
 
 					// grab entire variables rather than allowing bits to be tokenised
 					if
