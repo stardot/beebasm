@@ -1,11 +1,16 @@
 REM this comment is scratch space
 
+DIM X(255)
 FOR I%=0 TO 252 STEP 4:I%!&900=0:NEXT
-TIME=25
+TIME=100
 ?((TIME AND &FF)+&900)=42
+X(TIME)=42
+X(TIME+1)=TIME
+X(PAGE DIV 256)=PAGE
 PRINT TIME
 FOR I%=0 TO 255
-IF I%?&900<>0 THEN PRINT I%
+IF I%?&900<>0 THEN PRINT "M ";I%;" ";I%?&900
+IF X(I%)<>0 THEN PRINT "X ";I%;" ";X(I%)
 NEXT
 
 ?(PAGE+7)=ASC("T")
