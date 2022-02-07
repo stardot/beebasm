@@ -1081,18 +1081,18 @@ void LineParser::HandleAssert()
 {
 	do
 	{
-		unsigned int value;
+		int value;
 
 		try
 		{
 			// Take a copy of the column before evaluating the expression so
 			// we can point correctly at the failed expression when throwing.
 			size_t column = m_column;
-			value = EvaluateExpressionAsUnsignedInt();
+			value = EvaluateExpressionAsInt();
 			// We never throw for value being false on the first pass, simply
 			// to ensure that if two assertions both fail, the one which 
 			// appears earliest in the source will be reported.
-			if ( !GlobalData::Instance().IsFirstPass() && !value )
+			if ( !GlobalData::Instance().IsFirstPass() && (value != -1) )
 			{
 				while ( ( column < m_line.length() ) && isspace( static_cast< unsigned char >( m_line[ column ] ) ) )
 				{

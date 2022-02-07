@@ -1,13 +1,15 @@
 org &2000
 
 .start
-	assert (addr_offset + 3) <= 255
+	assert TRUE
+	assert 65==65
 
 	\ You can assert multiple things if you wish: 
-	assert 65==65, loop == start + 4
-	assert 1+2==3, 2+2 == 5
-
-	assert start == &2000
+	assert start == &2000, loop == start + 4
+	assert 1+2==3, 2+2 == 5 \ The second expression is clearly false and
+	                        \ compilation will fail with an error message
+                            \ showing the line and identifying the second
+                            \ expression as failing.
 
 	ldy #addr_offset
 	ldx #0
