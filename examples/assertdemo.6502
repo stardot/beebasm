@@ -1,15 +1,18 @@
 org &2000
 
 .start
+	assert 1
 	assert TRUE
+	assert -1 \ BBC Basic defines TRUE to be -1
 	assert 65==65
 
 	\ You can assert multiple things if you wish: 
 	assert start == &2000, loop == start + 4
-	assert 1+2==3, 2+2 == 5 \ The second expression is clearly false and
-	                        \ compilation will fail with an error message
-                            \ showing the line and identifying the second
-                            \ expression as failing.
+
+	\ The second expression below is clearly false and compilation will fail
+	\ with an error message showing the line and identifying the second
+	\ expression as failing.
+	assert 1+2==3, 2+2 == 5
 
 	ldy #addr_offset
 	ldx #0

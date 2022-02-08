@@ -1092,7 +1092,7 @@ void LineParser::HandleAssert()
 			// We never throw for value being false on the first pass, simply
 			// to ensure that if two assertions both fail, the one which 
 			// appears earliest in the source will be reported.
-			if ( !GlobalData::Instance().IsFirstPass() && (value != -1) )
+			if ( !GlobalData::Instance().IsFirstPass() && !value )
 			{
 				while ( ( column < m_line.length() ) && isspace( static_cast< unsigned char >( m_line[ column ] ) ) )
 				{
