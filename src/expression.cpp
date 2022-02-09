@@ -29,6 +29,22 @@
 #include <sstream>
 #include <iomanip>
 
+#if defined(__arm__) || defined(__arm64)
+	#include <arm_acle.h>
+
+	// If the ARM target does not support the JCVT intrinsic then emit a warning
+	// explaining that we will use the default floating-to-int conversion
+	// behavior which is fine in every day development but broken in extreme
+	// cases, like those found in the test suite.
+	#ifndef __ARM_FEATURE_JCVT
+		#ifdef __GNUC__
+			#warning ARM target lacks JCVT intrinsic, falling back to mostly compatible behavior
+		#elif _MSC_VER
+			#pragma message ( "ARM target lacks JCVT intrinsic, falling back to mostly compatible behavior" )
+		#endif
+	#endif
+#endif
+
 #include "lineparser.h"
 #include "asmexception.h"
 #include "symboltable.h"
@@ -796,7 +812,7 @@ std::pair<double, double> LineParser::StackTopTwoNumbers()
 std::pair<int, int> LineParser::StackTopTwoInts()
 {
 	std::pair<double, double> pair = StackTopTwoNumbers();
-	return std::pair<int, int>(static_cast<int>(pair.first), static_cast<int>(pair.second));
+	return std::pair<int, int>(CastDblToInt(pair.first), CastDblToInt(pair.second));
 }
 
 
@@ -1739,4 +1755,24 @@ void LineParser::EvalUpper()
 void LineParser::EvalLower()
 {
 	m_valueStack[ m_valueStackPtr - 1 ] = StackTopString().Lower();
+}
+
+/*************************************************************************************************/
+/**
+	LineParser::CastDblToInt()
+*/
+/*************************************************************************************************/
+int LineParser::CastDblToInt(double d) {
+	// A word on why this function exists: converting a floating point number
+	// to an int has to handle the situation where the floating point number is
+	// larger than can be represented with an int. x86 and ARM CPU architectures
+	// handle this differently: ARM saturates and x86 performs a modulo. beebasm
+	// is expecting the latter behavior so when targeting ARM CPUs we use a
+	// special float-to-int instruction that has the same behavior as x86. This
+	// instruction is accessed via the __jcvt intrinsic.
+#ifdef __ARM_FEATURE_JCVT
+	return __jcvt(d);
+#else
+	return static_cast< int >(d);
+#endif
 }

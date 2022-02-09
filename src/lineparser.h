@@ -238,6 +238,8 @@ private:
 
 	Value			FormatAssemblyTime(const char* formatString);
 
+	int				CastDblToInt(double d);
+	
 	SourceCode*				m_sourceCode;
 	std::string				m_line;
 	size_t					m_column;
