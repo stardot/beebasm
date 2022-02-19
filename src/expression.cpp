@@ -28,6 +28,7 @@
 #include <cerrno>
 #include <sstream>
 #include <iomanip>
+#include <climits>
 
 #include "lineparser.h"
 #include "asmexception.h"
