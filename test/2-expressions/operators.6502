@@ -54,6 +54,12 @@ assert(sgn(0)=0)
 assert(sgn(-56)=-1)
 assert(sgn(56)=1)
 
+\ Integer conversions
+assert(int(&FFFFFFFF)=-1)
+assert(int(4294967295)=-1)
+assert(int(&80000000)=-2147483648)
+assert(int(-2147483648)=-2147483648)
+
 e=0.000000000001
 assert(sin(0)=0)
 assert(sin(PI/2)=1)
