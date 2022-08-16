@@ -294,12 +294,12 @@ public:
 
 	IntArg ParseInt()
 	{
-		return ParseNumber<IntArg>();
+		return ParseNumber<IntArg>(&ArgListParser::ConvertDoubleToInt);
 	}
 
 	DoubleArg ParseDouble()
 	{
-		return ParseNumber<DoubleArg>();
+		return ParseNumber<DoubleArg>(&ArgListParser::ConvertDoubleToDouble);
 	}
 
 	StringArg ParseString()
@@ -352,7 +352,17 @@ private:
 	ArgListParser(const ArgListParser& that);
 	ArgListParser operator=(const ArgListParser& that);
 
-	template <class T> T ParseNumber()
+	int ConvertDoubleToInt(double value)
+	{
+		return m_lineParser.ConvertDoubleToInt(value);
+	}
+
+	double ConvertDoubleToDouble(double value)
+	{
+		return value;
+	}
+
+	template <class T> T ParseNumber(typename T::ContainedType (ArgListParser::*convertDoubleTo)(double))
 	{
 		if ( !ReadPending() )
 		{
@@ -368,7 +378,7 @@ private:
 			return T(m_lineParser.m_line, m_paramColumn, T::StateTypeMismatch);
 		}
 		m_pending = false;
-		return T(m_lineParser.m_line, m_paramColumn, static_cast<typename T::ContainedType>(m_pendingValue.GetNumber()));
+		return T(m_lineParser.m_line, m_paramColumn, (this->*convertDoubleTo)(m_pendingValue.GetNumber()));
 	}
 
 	// Return true if an argument is available

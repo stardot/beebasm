@@ -28,6 +28,7 @@
 #include <cerrno>
 #include <sstream>
 #include <iomanip>
+#include <climits>
 
 #include "lineparser.h"
 #include "asmexception.h"
@@ -660,7 +661,7 @@ double LineParser::EvaluateExpressionAsDouble( bool bAllowOneMismatchedCloseBrac
 /*************************************************************************************************/
 int LineParser::EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket )
 {
-	return static_cast< int >( EvaluateExpressionAsDouble( bAllowOneMismatchedCloseBracket ) );
+	return ConvertDoubleToInt( EvaluateExpressionAsDouble( bAllowOneMismatchedCloseBracket ) );
 }
 
 
@@ -673,7 +674,7 @@ int LineParser::EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket )
 /*************************************************************************************************/
 unsigned int LineParser::EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatchedCloseBracket )
 {
-	return static_cast< unsigned int >( EvaluateExpressionAsDouble( bAllowOneMismatchedCloseBracket ) );
+	return static_cast< unsigned int >( ConvertDoubleToInt( EvaluateExpressionAsDouble( bAllowOneMismatchedCloseBracket ) ) );
 }
 
 
@@ -765,6 +766,19 @@ double LineParser::StackTopNumber()
 
 /*************************************************************************************************/
 /**
+	LineParser::StackTopInt()
+
+	Retrieve a number from the top of the stack and convert to an int, or throw an exception
+*/
+/*************************************************************************************************/
+int LineParser::StackTopInt()
+{
+	return ConvertDoubleToInt( StackTopNumber() );
+}
+
+
+/*************************************************************************************************/
+/**
 	LineParser::StackTopTwoNumbers()
 
 	Retrieve two values of numeric type, or throw an exception
@@ -796,9 +810,34 @@ std::pair<double, double> LineParser::StackTopTwoNumbers()
 std::pair<int, int> LineParser::StackTopTwoInts()
 {
 	std::pair<double, double> pair = StackTopTwoNumbers();
-	return std::pair<int, int>(static_cast<int>(pair.first), static_cast<int>(pair.second));
+	return std::pair<int, int>(ConvertDoubleToInt(pair.first), ConvertDoubleToInt(pair.second));
 }
 
+/*************************************************************************************************/
+/**
+	LineParser::ConvertDoubleToInt()
+
+	Convert a double to an int throwing an exception if it is out of range
+
+	Handle values between -2147483648 and 4294967295.
+*/
+/*************************************************************************************************/
+int LineParser::ConvertDoubleToInt(double value)
+{
+	if ((value < INT_MIN) || (value > UINT_MAX))
+	{
+		throw AsmException_SyntaxError_OutOfIntegerRange( m_line, m_column );
+	}
+
+	if (value <= INT_MAX)
+	{
+		return static_cast<int>( value );
+	}
+	else
+	{
+		return static_cast<unsigned int>( value );
+	}
+}
 
 /*************************************************************************************************/
 /**
@@ -1167,7 +1206,7 @@ void LineParser::EvalNegate()
 /*************************************************************************************************/
 void LineParser::EvalNot()
 {
-	int value = ~static_cast<int>(StackTopNumber());
+	int value = ~StackTopInt();
 	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(value);
 }
 
@@ -1196,7 +1235,7 @@ void LineParser::EvalPosate()
 /*************************************************************************************************/
 void LineParser::EvalLo()
 {
-	int value = static_cast<int>(StackTopNumber()) & 0xFF;
+	int value = StackTopInt() & 0xFF;
 	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(value);
 }
 
@@ -1209,7 +1248,7 @@ void LineParser::EvalLo()
 /*************************************************************************************************/
 void LineParser::EvalHi()
 {
-	int value = (static_cast<int>(StackTopNumber()) & 0xffff) >> 8;
+	int value = (StackTopInt() & 0xffff) >> 8;
 	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(value);
 }
 
@@ -1401,8 +1440,7 @@ void LineParser::EvalRadToDeg()
 /*************************************************************************************************/
 void LineParser::EvalInt()
 {
-	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(
-		static_cast< int >( StackTopNumber() ) );
+	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >( StackTopInt() );
 }
 
 
@@ -1452,7 +1490,7 @@ void LineParser::EvalRnd()
 	}
 	else
 	{
-		result = static_cast< double >( static_cast< int >( beebasm_rand() / ( static_cast< double >( BEEBASM_RAND_MAX ) + 1.0 ) * val ) );
+		result = static_cast< double >( ConvertDoubleToInt( beebasm_rand() / ( static_cast< double >( BEEBASM_RAND_MAX ) + 1.0 ) * val ) );
 	}
 
 	m_valueStack[ m_valueStackPtr - 1 ] = result;
@@ -1514,7 +1552,7 @@ void LineParser::EvalStr()
 void LineParser::EvalStrHex()
 {
 	ostringstream stream;
-	stream << std::hex << std::uppercase << static_cast<int>(StackTopNumber());
+	stream << std::hex << std::uppercase << StackTopInt();
 	string result = stream.str();
 
 	m_valueStack[ m_valueStackPtr - 1 ] = String(result.data(), result.length());
@@ -1569,8 +1607,7 @@ void LineParser::EvalLen()
 /*************************************************************************************************/
 void LineParser::EvalChr()
 {
-	double value = StackTopNumber();
-	int ascii = static_cast<int>(value);
+	int ascii = StackTopInt();
 	if ((ascii < 0) || (ascii > 255))
 	{
 		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
@@ -1618,8 +1655,8 @@ void LineParser::EvalMid()
 	m_valueStackPtr -= 2;
 
 	String text = value1.GetString();
-	int index = static_cast<int>(value2.GetNumber()) - 1;
-	int length = static_cast<int>(value3.GetNumber());
+	int index = ConvertDoubleToInt(value2.GetNumber()) - 1;
+	int length = ConvertDoubleToInt(value3.GetNumber());
 	if ((index < 0) || (static_cast<unsigned int>(index) > text.Length()) || (length < 0))
 	{
 		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
@@ -1649,7 +1686,7 @@ void LineParser::EvalLeft()
 	m_valueStackPtr -= 1;
 
 	String text = value1.GetString();
-	int count = static_cast<int>(value2.GetNumber());
+	int count = ConvertDoubleToInt(value2.GetNumber());
 	if ((count < 0) || (static_cast<unsigned int>(count) > text.Length()))
 	{
 		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
@@ -1679,7 +1716,7 @@ void LineParser::EvalRight()
 	m_valueStackPtr -= 1;
 
 	String text = value1.GetString();
-	int count = static_cast<int>(value2.GetNumber());
+	int count = ConvertDoubleToInt(value2.GetNumber());
 	if ((count < 0) || (static_cast<unsigned int>(count) > text.Length()))
 	{
 		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
@@ -1709,7 +1746,7 @@ void LineParser::EvalString()
 	}
 	m_valueStackPtr -= 1;
 
-	int count = static_cast<int>(value1.GetNumber());
+	int count = ConvertDoubleToInt(value1.GetNumber());
 	String text = value2.GetString();
 	if ((count < 0) || (count >= 0x10000) || (text.Length() >= 0x10000) || (static_cast<unsigned int>(count) * text.Length() >= 0x10000))
 	{

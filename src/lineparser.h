@@ -178,8 +178,10 @@ private:
 	std::pair<Value, Value> StackTopTwoValues();
 	String StackTopString();
 	double StackTopNumber();
+	int StackTopInt();
 	std::pair<double, double> StackTopTwoNumbers();
 	std::pair<int, int> StackTopTwoInts();
+	int ConvertDoubleToInt(double value);
 
 	void			EvalAdd();
 	void			EvalSubtract();
