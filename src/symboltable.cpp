@@ -30,6 +30,8 @@
 #include "objectcode.h"
 #include "symboltable.h"
 #include "constants.h"
+#include "asmexception.h"
+#include "literals.h"
 
 
 using namespace std;
@@ -182,76 +184,25 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 		return false;
 	}
 
-	bool readHex = false;
-	bool readBinary = false;
-
-	if ( !valueString.compare( 0, 1, "&" ) || !valueString.compare( 0, 1, "$" ) )
+	// Convert C-style hex prefix to beeb-style
+	if ( !valueString.compare( 0, 2, "0x" ) || !valueString.compare( 0, 2, "0X" ) )
 	{
-		readHex = true;
 		valueString = valueString.substr( 1 );
-	}
-	else if ( !valueString.compare( 0, 2, "0x" ) || !valueString.compare( 0, 2, "0X" ) )
-	{
-		readHex = true;
-		valueString = valueString.substr( 2 );
-	}
-	else if ( !valueString.compare( 0, 1, "%" ) )
-	{
-		readBinary = true;
-		valueString = valueString.substr( 1 );
+		valueString[0] = '&';
 	}
 
-	std::istringstream valueStream( valueString );
+	size_t index = 0;
 	double value;
-	char c;
-
-	valueStream >> noskipws;
-
-	if ( readHex )
+	try
 	{
-		int intValue;
-
-		if ( ! ( valueStream  >> hex >> intValue ) )
-		{
-			return false;
-		}
-
-		value = intValue;
+		Literals::ParseNumeric(valueString, index, value);
 	}
-	else if ( readBinary )
-	{
-		unsigned int intValue = 0;
-
-		int charOrEof = valueStream.get();
-
-		if ( charOrEof == EOF )
-		{
-			return false;
-		}
-
-		while ( ( charOrEof == '0' ) || ( charOrEof == '1' ) )
-		{
-			if ( intValue & 0x80000000 )
-			{
-				return false;
-			}
-			intValue = 2 * intValue + (charOrEof - '0');
-			charOrEof = valueStream.get();
-		}
-
-		if ( charOrEof != EOF )
-		{
-			return false;
-		}
-
-		value = static_cast<double>(intValue);
-	}
-	else if ( ! ( valueStream >> value ) )
+	catch (AsmException_SyntaxError const&)
 	{
 		return false;
 	}
 
-	if ( valueStream.get( c ) )
+	if (index != valueString.length())
 	{
 		return false;
 	}

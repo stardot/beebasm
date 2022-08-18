@@ -86,6 +86,7 @@
     <ClCompile Include="..\expression.cpp" />
     <ClCompile Include="..\globaldata.cpp" />
     <ClCompile Include="..\lineparser.cpp" />
+    <ClCompile Include="..\literals.cpp" />
     <ClCompile Include="..\macro.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\objectcode.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="..\discimage.h" />
     <ClInclude Include="..\globaldata.h" />
     <ClInclude Include="..\lineparser.h" />
+    <ClInclude Include="..\literals.h" />
     <ClInclude Include="..\macro.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\objectcode.h" />
