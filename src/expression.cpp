@@ -39,6 +39,7 @@
 #include "random.h"
 #include "constants.h"
 #include "stringutils.h"
+#include "literals.h"
 
 using namespace std;
 
@@ -139,76 +140,10 @@ Value LineParser::GetValue()
 {
 	Value value;
 
-	if ( m_column < m_line.length() && ( isdigit( m_line[ m_column ] ) || m_line[ m_column ] == '.' ) )
+	double double_value;
+	if ( Literals::ParseNumeric(m_line, m_column, double_value) )
 	{
-		// get a number
-
-		istringstream str( m_line );
-		str.seekg( m_column );
-		double number;
-		str >> number;
-		if (str.fail())
-		{
-			// A decimal point with no number will cause this
-			throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
-		}
-		value = number;
-		m_column = static_cast< size_t >( str.tellg() );
-	}
-	else if ( m_column < m_line.length() && ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' ) )
-	{
-		// get hexadecimal
-
-		// skip the number prefix
-		m_column++;
-
-		unsigned int hexValue;
-
-		istringstream str( m_line );
-		str.seekg( m_column );
-		if (str >> hex >> hexValue)
-		{
-			m_column = static_cast< size_t >( str.tellg() );
-
-			value = static_cast< double >( hexValue );
-		}
-		else
-		{
-			throw AsmException_SyntaxError_BadHex( m_line, m_column );
-		}
-	}
-	else if ( m_column < m_line.length() && m_line[ m_column ] == '%' )
-	{
-		// get binary
-
-		// skip the number prefix
-		m_column++;
-
-		size_t start_column = m_column;
-		unsigned int binValue = 0;
-
-		// Skip leading zeroes
-		while ( m_column < m_line.length() && m_line[ m_column ] == '0' )
-		{
-			m_column++;
-		}
-
-		// Remember the column containing the first one (if any)
-		size_t first_one = m_column;
-
-		while ( m_column < m_line.length() && ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' ) )
-		{
-			binValue = ( binValue * 2 ) + ( m_line[ m_column ] - '0' );
-			m_column++;
-		}
-
-		if ( m_column == start_column || m_column - first_one > 32 )
-		{
-			// badly formed bin literal
-			throw AsmException_SyntaxError_BadBin( m_line, m_column );
-		}
-
-		value = static_cast< double >( binValue );
+		value = double_value;
 	}
 	else if ( m_column < m_line.length() && m_line[ m_column ] == '*' )
 	{

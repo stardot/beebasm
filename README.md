@@ -196,7 +196,7 @@ Instructions can be written one-per-line, or many on one line, separated by colo
 
 Comments are introduced by a semicolon or backslash.  Unlike the BBC Micro assembler, these continue to the end of the line, and are not terminated by a colon (because this BBC Micro feature is horrible!).
 
-Numeric literals are in decimal by default, and can be integers or reals. Hex literals are prefixed with `"&"` or `"$"`, binary literals are prefixed with `"%"`. A character in single quotes (e.g. `'A'`) returns its ASCII code.
+Numeric literals are in decimal by default, and can be integers or reals. Scientific notation can be used, e.g. `1.2E10` or `1e-7`.  Hex literals are prefixed with `"&"` or `"$"`, binary literals are prefixed with `"%"`. Digits can be separated with an underscore to improve readability, e.g. `1_000_000` or `$1_0000`. A character in single quotes (e.g. `'A'`) returns its ASCII code.
 
 BeebAsm can accept complex expressions, using a wide variety of operators and functions.  Here's a summary:
 
@@ -743,6 +743,9 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Added string values and VAL, EVAL, STR$, LEN, CHR$, ASC, MID$,
 		  LEFT$, RIGHT$, STRING$, LOWER$, UPPER$, ASM. (Charles Reilly with
 		  thanks to Steven Flintham.)
+		  Support underscore separators in numeric literals. C++'s built-in
+		  parsing was used previously so beebasm's numeric syntax varied
+		  between compilers and platforms; this is fixed.
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT

@@ -1,0 +1,2 @@
+\ beebasm -D V=1_2.3_
+\ Check parsing of values defined on the command-line with -D
