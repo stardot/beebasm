@@ -571,3 +571,57 @@ bool SourceCode::IsRealForLevel( int level ) const
         assert( level <= m_forStackPtr );
         return m_forStack[ level - 1 ].m_step != 0.0;
 }
+
+
+
+/*************************************************************************************************/
+/**
+	SourceCode::GetSymbolValue()
+
+	Search up the stack for a value for a symbol.  N.B. This is dynamic scoping.
+*/
+/*************************************************************************************************/
+bool SourceCode::GetSymbolValue(std::string name, Value& value)
+{
+	for ( int forLevel = GetForLevel(); forLevel >= 0; forLevel-- )
+	{
+		string fullSymbolName = name + GetSymbolNameSuffix( forLevel );
+
+		if ( SymbolTable::Instance().IsSymbolDefined( fullSymbolName ) )
+		{
+			value = SymbolTable::Instance().GetSymbol( fullSymbolName );
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SourceCode::ShouldOutputAsm()
+
+	Return true if verbose output is required.
+*/
+/*************************************************************************************************/
+bool SourceCode::ShouldOutputAsm()
+{
+	if (!GlobalData::Instance().IsSecondPass())
+		return false;
+
+	if (GlobalData::Instance().IsVerboseSet())
+	{
+		return GlobalData::Instance().IsVerbose();
+	}
+
+	Value value;
+	if ( GetSymbolValue("VERBOSE", value) )
+	{
+		if (value.GetType() != Value::NumberValue)
+			return false;
+		return value.GetNumber() != 0;
+	}
+
+	return false;
+}

@@ -1,22 +1,4 @@
-.start
-     2000   A0 2A      LDY #&2A
-Current location:filelinecallstackdemo.6502:14
-     2002   A2 00      LDX #&00
-.loop
-Macro foo:
-Macro bar:
-     2004   A9 18      LDA #&18
-Current call stack:filelinecallstackdemo.6502:9
-filelinecallstackdemo.6502:4
-filelinecallstackdemo.6502:17 (end)
-End macro bar
-End macro foo
-     2006   9D 00 30   STA &3000,X
-     2009   C8         INY
-     200A   E8         INX
-     200B   E0 04      CPX #&04
-     200D   D0 F5      BNE &2004
-     200F   60         RTS
-.end
-Saving file 'test'
-Processed file 'filelinecallstackdemo.6502' ok
+Current location:filelinecallstackdemo.6502:16
+Current call stack:filelinecallstackdemo.6502:11
+filelinecallstackdemo.6502:6
+filelinecallstackdemo.6502:19 (end)

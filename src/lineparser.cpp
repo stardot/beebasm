@@ -214,7 +214,7 @@ void LineParser::Process()
 			const Macro* macro = MacroTable::Instance().Get( macroName );
 			if ( macro != NULL )
 			{
-				if ( GlobalData::Instance().ShouldOutputAsm() )
+				if ( m_sourceCode->ShouldOutputAsm() )
 				{
 					cout << "Macro " << macroName << ":" << endl;
 				}
@@ -273,7 +273,7 @@ void LineParser::Process()
 
 				HandleCloseBrace();
 
-				if ( GlobalData::Instance().ShouldOutputAsm() )
+				if ( m_sourceCode->ShouldOutputAsm() )
 				{
 					cout << "End macro " << macroName << endl;
 				}

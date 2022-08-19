@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+#include "value.h"
+
 class Macro;
 
 class SourceCode
@@ -120,7 +122,9 @@ public:
 	inline int 				GetInitialForStackPtr() const { return m_initialForStackPtr; }
 	inline Macro*			GetCurrentMacro() { return m_currentMacro; }
 
+	bool					GetSymbolValue(std::string name, Value& value);
 	std::string				GetSymbolNameSuffix( int level = -1 ) const;
+	bool					ShouldOutputAsm();
 
 	bool					IsIfConditionTrue() const;
 	void					AddIfLevel( const std::string& line, int column );

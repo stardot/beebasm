@@ -1,3 +1,5 @@
+\ beebasm -q
+
 org &2000
 
 macro foo n
