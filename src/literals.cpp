@@ -188,12 +188,14 @@ bool Literals::ParseNumeric(const std::string& line, size_t& index, double& resu
 			throw AsmException_SyntaxError_InvalidCharacter( line, index );
 		}
 
-		// Copy exponent
-		if ( index < line.length() && ( line[index] == 'e' || line[index] == 'E' ) )
+		// Copy exponent if it's followed by a sign or digit
+		if ( index + 1 < line.length() &&
+			( line[index] == 'e' || line[index] == 'E' ) &&
+			( line[index + 1] == '+' || line[index + 1] == '-' || is_decimal_digit(line[index + 1]) ) )
 		{
-			buffer.push_back(line[index]);
+			buffer.push_back('e');
 			index++;
-			if ( index < line.length() && ( line[index] == '+' || line[index] == '-' ) )
+			if ( line[index] == '+' || line[index] == '-' )
 			{
 				buffer.push_back(line[index]);
 				index++;
