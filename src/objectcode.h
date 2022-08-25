@@ -57,15 +57,20 @@ public:
 	void SetMapping( int ascii, int mapped );
 	int GetMapping( int ascii ) const;
 
-	void CopyBlock( int start, int end, int dest );
+	void CopyBlock( int start, int end, int dest, bool firstPass );
 
 private:
 
+	// Each byte in the memory map has a set of flags
 	enum FLAGS
 	{
+		// This memory location has been used so don't assemble over it
 		USED  = (1 << 0),
+		// This memory location has been guarded so don't assemble over it
 		GUARD = (1 << 1),
+		// On the second pass, check that opcodes match what was written on the first pass
 		CHECK = (1 << 2),
+		// Suppress the opcode check (set by CLEAR)
 		DONT_CHECK = (1 << 3)
 	};
 

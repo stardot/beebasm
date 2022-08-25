@@ -1801,7 +1801,7 @@ void LineParser::HandleCopyBlock()
 
 	try
 	{
-		ObjectCode::Instance().CopyBlock( start, end, dest );
+		ObjectCode::Instance().CopyBlock( start, end, dest, GlobalData::Instance().IsFirstPass() );
 	}
 	catch ( AsmException_AssembleError& e )
 	{

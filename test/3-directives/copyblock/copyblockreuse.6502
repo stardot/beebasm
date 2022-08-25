@@ -1,13 +1,8 @@
-\ COPYBLOCK - reuse memory from source of copy
+\ COPYBLOCK - reuse memory from source of copy using CLEAR
 
 ORG &2000
 
 .start
-
-\ This CLEAR is required otherwise the second pass grumbles here
-\ about the LDX #&00 later in the first pass.  This is rather
-\ unintuitive.
-CLEAR start, start+2
 
 LDY #&00
 .loop
@@ -19,6 +14,7 @@ BNE loop
 
 SKIP loopend-start
 COPYBLOCK start,loopend,loopend
+CLEAR start, start+2
 
 .end
 

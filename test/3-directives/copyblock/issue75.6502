@@ -1,0 +1,10 @@
+\ Don't copy memory on first pass of COPYBLOCK.
+\ Commit 54bbcd232bb82b77a6758ecf3b02b4338a7f5c2c broke this in v1.10rc1.
+
+ORG &1200
+LDA #0
+
+ORG &7900
+NOP
+
+COPYBLOCK &7900, &7902, &1200
