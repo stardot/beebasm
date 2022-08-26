@@ -74,7 +74,7 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_BOOT_FILENAME,
 		WAITING_FOR_DISC_OPTION,
 		WAITING_FOR_DISC_TITLE,
-		WAITING_FOR_DISC_WRITES,
+		WAITING_FOR_DISC_CYCLE,
 		WAITING_FOR_SYMBOL,
 		WAITING_FOR_STRING_SYMBOL,
 		WAITING_FOR_LABELS_FILE
@@ -127,9 +127,9 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_DISC_TITLE;
 				}
-				else if ( strcmp( argv[i], "-writes" ) == 0 )
+				else if ( strcmp( argv[i], "-cycle" ) == 0 )
 				{
-					state = WAITING_FOR_DISC_WRITES;
+					state = WAITING_FOR_DISC_CYCLE;
 				}
 				else if ( strcmp( argv[i], "-w" ) == 0 )
 				{
@@ -177,7 +177,7 @@ int main( int argc, char* argv[] )
 					cout << " -labels <file> Specify a filename to export any labels dumped with -d or -dd to" << endl;
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
 					cout << " -title <title> Specify the title for the generated disc image" << endl;
-					cout << " -writes <n>    Specify the number of writes for the generated disc image" << endl;
+					cout << " -cycle <n>     Specify the cycle for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
 					cout << " -dd            Dump all global and local symbols after assembly" << endl;
@@ -250,9 +250,9 @@ int main( int argc, char* argv[] )
 				state = READY;
                                 break;
 
-			case WAITING_FOR_DISC_WRITES:
+			case WAITING_FOR_DISC_CYCLE:
 
-				GlobalData::Instance().SetDiscWrites( std::strtol( argv[i], NULL, 10 ) );
+				GlobalData::Instance().SetDiscCycle( std::strtol( argv[i], NULL, 10 ) );
 				state = READY;
 				break;
 
