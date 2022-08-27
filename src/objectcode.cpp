@@ -501,7 +501,7 @@ void ObjectCode::CopyBlock( int start, int end, int dest, bool firstPass )
 /*************************************************************************************************/
 bool ObjectCode::AnyUsed() const
 {
-	for (int i = 0; i < ARRAY_LENGTH(m_aFlags); ++i)
+	for (unsigned int i = 0; i < ARRAY_LENGTH(m_aFlags); ++i)
 	{
 		if ( m_aFlags[i] & USED )
 		{
