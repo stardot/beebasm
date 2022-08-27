@@ -135,9 +135,9 @@ If specified, this sets the disc option of the generated disc image (i.e. the `*
 
 If specified, this sets the disc title of the generated disc image (i.e. the string set by `*TITLE`) to the value specified.
 
-`-writes <n>`
+`-cycle <n>`
 
-If specified, this sets the number of writes for the generated disc image (i.e. the number shown next to the title in the disc catalogue) to the value specified.
+If specified, this sets the cycle for the generated disc image (i.e. the number shown next to the title in the disc catalogue) to the value specified.
 
 `-di <filename>`
 
@@ -743,7 +743,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  blank lines inside them.
 		  Fixed incorrect line numbers from PUTBASIC in some cases.
 		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
-		  Added -writes, -dd and -labels options (thanks to tricky for these)
+		  Added -cycle, -dd and -labels options (thanks to tricky for these)
 		  Added CMake support and man page (thanks to Dave Lambley)
 		  Added string values and VAL, EVAL, STR$, LEN, CHR$, ASC, MID$,
 		  LEFT$, RIGHT$, STRING$, LOWER$, UPPER$, ASM. (Charles Reilly with
