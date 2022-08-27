@@ -491,3 +491,23 @@ void ObjectCode::CopyBlock( int start, int end, int dest, bool firstPass )
 		}
 	}
 }
+
+#define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a[0]))
+
+/*************************************************************************************************/
+/**
+	ObjectCode::AnyUsed() - is any memory USED?
+*/
+/*************************************************************************************************/
+bool ObjectCode::AnyUsed() const
+{
+	for (int i = 0; i < ARRAY_LENGTH(m_aFlags); ++i)
+	{
+		if ( m_aFlags[i] & USED )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
