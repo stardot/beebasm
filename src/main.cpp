@@ -42,7 +42,7 @@
 using namespace std;
 
 
-#define VERSION "1.10-pre"
+#define VERSION "1.10rc2"
 
 
 /*************************************************************************************************/
@@ -350,7 +350,7 @@ int main( int argc, char* argv[] )
 		SymbolTable::Instance().Dump(bDumpSymbols, bDumpAllSymbols, pLabelsOutputFile);
 	}
 
-	if ( !GlobalData::Instance().IsSaved() && exitCode == EXIT_SUCCESS )
+	if ( !GlobalData::Instance().IsSaved() && ObjectCode::Instance().AnyUsed() && exitCode == EXIT_SUCCESS )
 	{
 		cerr << "warning: no SAVE command in source file." << endl;
 	}

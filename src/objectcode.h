@@ -59,6 +59,8 @@ public:
 
 	void CopyBlock( int start, int end, int dest, bool firstPass );
 
+	bool AnyUsed() const;
+
 private:
 
 	// Each byte in the memory map has a set of flags
