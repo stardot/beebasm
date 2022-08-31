@@ -179,7 +179,7 @@ int LineParser::GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes)
 			std::string::size_type k = m_column + len;
 			if ( k < m_line.length() )
 			{
-				if ( isalpha( m_line[ k ] ) || m_line[ k ] == '_' )
+				if ( ! isspace( m_line[ k ] ) )
 				{
 					bMatch = false;
 				}
