@@ -40,7 +40,6 @@ public:
 		StringHeader* header = Allocate(length);
 		char* buffer = StringBuffer(header);
 		memcpy(buffer, text, length);
-		buffer[length] = 0;
 		return header;
 	}
 
@@ -87,7 +86,6 @@ public:
 			char* buffer = StringBuffer(header);
 			memcpy(buffer, StringData(header1), header1->m_length);
 			memcpy(buffer + header1->m_length, StringData(header2), header2->m_length);
-			buffer[length] = 0;
 		}
 		return header;
 	}
@@ -121,7 +119,6 @@ public:
 				memcpy(buffer, sourceData, sourceLength);
 				buffer += sourceLength;
 			}
-			*buffer = 0;
 		}
 		return header;
 	}
@@ -167,9 +164,12 @@ private:
 	static StringHeader* Allocate(unsigned int length)
 	{
 		int fullLength = sizeof(StringHeader) + length + 1;
-		StringHeader* header = static_cast<StringHeader*>(malloc(fullLength));
-		if (!header)
+		char* data = static_cast<char*>(malloc(fullLength));
+		if (!data)
 			return 0;
+		// Null-terminate the buffer
+		data[fullLength - 1] = 0;
+		StringHeader* header = reinterpret_cast<StringHeader*>(data);
 		header->m_refCount = 0;
 		header->m_length = length;
 		return header;
