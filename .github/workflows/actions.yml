@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'macos-12', 'ubuntu-20.04']
+        os: ['ubuntu-latest', 'macos-latest', 'ubuntu-18.04']
         cc: [ 'gcc', 'clang' ]
     name: Compile via CMakeLists.txt on ${{ matrix.os }} using ${{ matrix.cc }}
     env:
@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'macos-12', 'ubuntu-20.04']
+        os: ['ubuntu-latest', 'macos-latest', 'ubuntu-18.04']
     name: Compile via Makefile on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
