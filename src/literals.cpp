@@ -164,10 +164,16 @@ bool Literals::ParseNumeric(const std::string& line, size_t& index, double& resu
 		return false;
 	}
 
-	if ( is_decimal_digit(line[index]) || line[index] == '.' )
+	if ( is_decimal_digit(line[index]) || line[index] == '.' || line[index] == '-' )
 	{
 		// Copy the number without underscores to this buffer
 		std::string buffer;
+
+		if ( line[index] == '-' )
+		{
+			buffer.push_back('-');
+			index++;
+		}
 
 		// Copy digits preceding decimal point
 		bool have_digits = CopyDigitsSkippingUnderscores(line, index, buffer);
