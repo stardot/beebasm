@@ -195,7 +195,10 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 	double value;
 	try
 	{
-		Literals::ParseNumeric(valueString, index, value);
+		if ( !Literals::ParseNumeric(valueString, index, value) )
+		{
+			return false;
+		}
 	}
 	catch (AsmException_SyntaxError const&)
 	{
