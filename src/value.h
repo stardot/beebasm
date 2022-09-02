@@ -37,7 +37,7 @@ private:
 public:
 	static StringHeader* Allocate(const char* text, unsigned int length)
 	{
-		StringHeader* header = Allocate(length);
+		StringHeader* header = Allocate(length + 1);
 		char* buffer = StringBuffer(header);
 		memcpy(buffer, text, length);
 		buffer[length] = 0;
@@ -81,7 +81,7 @@ public:
 	static StringHeader* Concat(StringHeader* header1, StringHeader* header2)
 	{
 		int length = header1->m_length + header2->m_length;
-		StringHeader* header = Allocate(length);
+		StringHeader* header = Allocate(length + 1);
 		if (header)
 		{
 			char* buffer = StringBuffer(header);
@@ -112,7 +112,7 @@ public:
 		unsigned int length = sourceLength * count;
 		assert(length < 0x10000);
 
-		StringHeader* header = Allocate(length);
+		StringHeader* header = Allocate(length + 1);
 		if (header)
 		{
 			char* buffer = StringBuffer(header);
@@ -166,12 +166,14 @@ private:
 
 	static StringHeader* Allocate(unsigned int length)
 	{
-		int fullLength = sizeof(StringHeader) + length + 1;
+		// Length includes space for the terminating null
+		int fullLength = sizeof(StringHeader) + length;
 		StringHeader* header = static_cast<StringHeader*>(malloc(fullLength));
 		if (!header)
 			return 0;
 		header->m_refCount = 0;
-		header->m_length = length;
+		// String length does not include the terminating null
+		header->m_length = length - 1;
 		return header;
 	}
 
