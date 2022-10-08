@@ -21,6 +21,8 @@
 /*************************************************************************************************/
 
 #include <iostream>
+#include <sstream>
+#include "globaldata.h"
 #include "stringutils.h"
 
 using namespace std;
@@ -90,5 +92,67 @@ bool EatWhitespace( const string& line, size_t& column )
 }
 
 
+
+/*************************************************************************************************/
+/**
+	FormattedErrorLocation()
+
+	Return an error location formatted according to the command line options.
+
+	@param		filename		Filename
+	@param		lineNumber		Line number
+
+	@return		string			Error location string
+*/
+/*************************************************************************************************/
+std::string FormattedErrorLocation( const std::string& filename, int lineNumber )
+{
+	std::stringstream s;
+	if ( GlobalData::Instance().UseVisualCppErrorFormat() )
+	{
+		s << filename << "(" << lineNumber << ")";
+	}
+	else
+	{
+		s << filename << ":" << lineNumber;
+	}
+	return s.str();
+}
+
+
+/*************************************************************************************************/
+/**
+	PrintNumber()
+
+	Print a number to a stream ensuring that 32-bit ints are not written in scientific notation
+
+	@param		dest		The stream to write to
+	@param		value		The number to write
+
+*/
+/*************************************************************************************************/
+void PrintNumber(std::ostream& dest, double value)
+{
+	if ((-4294967296.0 < value) && (value < -0.5))
+	{
+		unsigned int abs_part = static_cast<unsigned int>(-value);
+		if (-static_cast<double>(abs_part) == value)
+		{
+			dest << '-' << abs_part;
+			return;
+		}
+	}
+	else if ((0.0 <= value) && (value < 4294967296.0))
+	{
+		unsigned int abs_part = static_cast<unsigned int>(value);
+		if (static_cast<double>(abs_part) == value)
+		{
+			dest << abs_part;
+			return;
+		}
+	}
+
+	dest << value;
+}
 
 } // namespace StringUtils

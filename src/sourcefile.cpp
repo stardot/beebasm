@@ -44,13 +44,14 @@ using namespace std;
 
 	Constructor for SourceFile
 
-	@param		pFilename		Filename of source file to open
+	@param		filename		Filename of source file to open
+	@param		parent			Parent SourceCode object
 
 	The supplied file will be opened.  If there is a problem, an AsmException will be thrown.
 */
 /*************************************************************************************************/
-SourceFile::SourceFile( const string& filename )
-	:	SourceCode( filename, 1 )
+SourceFile::SourceFile( const string& filename, const SourceCode* parent )
+	:	SourceCode( filename, 1, parent )
 {
 	// we have to open in binary, due to a bug in MinGW which means that calling
 	// tellg() on a text-mode file ruins the file pointer!
@@ -93,7 +94,7 @@ void SourceFile::Process()
 
 	// Display ok message
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( ShouldOutputAsm() )
 	{
 		cerr << "Processed file '" << m_filename << "' ok" << endl;
 	}

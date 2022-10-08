@@ -41,7 +41,7 @@ public:
 
 	inline void SetPass( int i )				{ m_pass = i; }
 	inline void SetBootFile( const char* p )	{ m_pBootFile = p; }
-	inline void SetVerbose( bool b )			{ m_bVerbose = b; }
+	inline void SetVerbose( bool b )			{ m_bVerboseSet = true; m_bVerbose = b; }
 	inline void SetUseDiscImage( bool b )		{ m_bUseDiscImage = b; }
 	inline void SetDiscImage( DiscImage* d )	{ m_pDiscImage = d; }
 	inline void ResetForId()					{ m_forId = 0; }
@@ -49,6 +49,7 @@ public:
 	inline void SetOutputFile( const char* p )	{ m_pOutputFile = p; }
 	inline void IncNumAnonSaves()				{ m_numAnonSaves++; }
 	inline void SetDiscOption( int opt )		{ m_discOption = opt; }
+	inline void SetDiscCycle( int num )		    { m_discCycle = num; }
 	inline void SetDiscTitle( const std::string& t )  
 												{ m_discTitle = t; }
 	inline void SetRequireDistinctOpcodes ( bool b )
@@ -59,7 +60,8 @@ public:
 	inline int GetPass() const					{ return m_pass; }
 	inline bool IsFirstPass() const				{ return ( m_pass == 0 ); }
 	inline bool IsSecondPass() const			{ return ( m_pass == 1 ); }
-	inline bool ShouldOutputAsm() const			{ return ( m_pass == 1 && m_bVerbose ); }
+	inline bool IsVerboseSet() const			{ return m_bVerboseSet; }
+	inline bool IsVerbose() const				{ return m_bVerbose; }
 	inline const char* GetBootFile() const		{ return m_pBootFile; }
 	inline bool UsesDiscImage() const			{ return m_bUseDiscImage; }
 	inline DiscImage* GetDiscImage() const		{ return m_pDiscImage; }
@@ -68,6 +70,7 @@ public:
 	inline const char* GetOutputFile() const	{ return m_pOutputFile; }
 	inline int GetNumAnonSaves() const			{ return m_numAnonSaves; }
 	inline int GetDiscOption() const			{ return m_discOption; }
+	inline int GetDiscCycle() const			    { return m_discCycle; }
 	inline const std::string& GetDiscTitle() const
 												{ return m_discTitle; }
 	inline time_t GetAssemblyTime() const		{ return m_assemblyTime; }
@@ -83,6 +86,7 @@ private:
 
 	int							m_pass;
 	const char*					m_pBootFile;
+	bool						m_bVerboseSet;
 	bool						m_bVerbose;
 	bool						m_bUseDiscImage;
 	DiscImage*					m_pDiscImage;
@@ -91,6 +95,7 @@ private:
 	const char*					m_pOutputFile;
 	int							m_numAnonSaves;
 	int							m_discOption;
+	int							m_discCycle;
 	std::string					m_discTitle;
 	time_t						m_assemblyTime;
 	bool						m_bRequireDistinctOpcodes;

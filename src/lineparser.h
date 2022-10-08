@@ -24,6 +24,7 @@
 #define LINEPARSER_H_
 
 #include <string>
+#include "value.h"
 
 class SourceCode;
 
@@ -90,6 +91,7 @@ private:
 	{
 		const char*			token;
 		int					precedence;
+		int					parameterCount;
 		OperatorHandler		handler;
 	};
 
@@ -105,11 +107,12 @@ private:
 	int				GetTokenAndAdvanceColumn();
 	void			HandleToken( int i, int oldColumn );
 	int				GetInstructionAndAdvanceColumn();
+	int				GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes);
 	int				CheckMacroMatches();
 	bool			MoveToNextAtom( const char* pTerminators = NULL );
 	bool			AdvanceAndCheckEndOfLine();
 	bool			AdvanceAndCheckEndOfStatement();
-	bool			AdvanceAndCheckEndOfSubStatement();
+	bool			AdvanceAndCheckEndOfSubStatement(bool includeComma);
 	void			SkipStatement();
 	void			SkipExpression( int bracketCount, bool bAllowOneMismatchedCloseBracket );
 	std::string		GetSymbolName();
@@ -135,7 +138,7 @@ private:
 	void			HandleInclude();
 	void			HandleIncBin();
 	void			HandleEqub();
-	void			HandleEqus(const std::string& equs);
+	void			HandleEqus(const String& equs);
 	void			HandleEquw();
 	void			HandleEqud();
 	void			HandleAssert();
@@ -160,13 +163,25 @@ private:
 	void			HandleError();
 	void			HandleCopyBlock();
 	void			HandleRandomize();
+	void			HandleAsm();
 
 	// expression evaluating methods
 
-	double			EvaluateExpression( bool bAllowOneMismatchedCloseBracket = false );
+	Value			EvaluateExpression( bool bAllowOneMismatchedCloseBracket = false );
+	double			EvaluateExpressionAsDouble( bool bAllowOneMismatchedCloseBracket = false );
 	int				EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket = false );
 	unsigned int	EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatchedCloseBracket = false );
-	double			GetValue();
+	std::string		EvaluateExpressionAsString( bool bAllowOneMismatchedCloseBracket = false );
+	Value			GetValue();
+
+	// convenience functions for getting operator parameters from the stack
+	std::pair<Value, Value> StackTopTwoValues();
+	String StackTopString();
+	double StackTopNumber();
+	int StackTopInt();
+	std::pair<double, double> StackTopTwoNumbers();
+	std::pair<int, int> StackTopTwoInts();
+	int ConvertDoubleToInt(double value);
 
 	void			EvalAdd();
 	void			EvalSubtract();
@@ -208,7 +223,22 @@ private:
 	void			EvalLog();
 	void			EvalLn();
 	void			EvalExp();
+	void			EvalTime();
+	void			EvalStr();
+	void			EvalStrHex();
+	void			EvalVal();
+	void			EvalEval();
+	void			EvalLen();
+	void			EvalChr();
+	void			EvalAsc();
+	void			EvalMid();
+	void			EvalLeft();
+	void			EvalRight();
+	void			EvalString();
+	void			EvalUpper();
+	void			EvalLower();
 
+	Value			FormatAssemblyTime(const char* formatString);
 
 	SourceCode*				m_sourceCode;
 	std::string				m_line;
@@ -222,10 +252,12 @@ private:
 	#define MAX_VALUES		128
 	#define MAX_OPERATORS	32
 
-	double					m_valueStack[ MAX_VALUES ];
+	Value					m_valueStack[ MAX_VALUES ];
 	Operator				m_operatorStack[ MAX_OPERATORS ];
 	int						m_valueStackPtr;
 	int						m_operatorStackPtr;
+
+	friend class ArgListParser;
 };
 
 

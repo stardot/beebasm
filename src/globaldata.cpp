@@ -69,6 +69,7 @@ void GlobalData::Destroy()
 /*************************************************************************************************/
 GlobalData::GlobalData()
 	:	m_pBootFile( NULL ),
+		m_bVerboseSet( false ),
 		m_bVerbose( false ),
 		m_bUseDiscImage( false ),
 		m_pDiscImage( NULL ),
@@ -76,6 +77,7 @@ GlobalData::GlobalData()
 		m_pOutputFile( NULL ),
 		m_numAnonSaves( 0 ),
 		m_discOption( 0 ),
+		m_discCycle( 0 ),
 		m_assemblyTime( time( NULL ) ),
 		m_bRequireDistinctOpcodes( false ),
 		m_bUseVisualCppErrorFormat( false )

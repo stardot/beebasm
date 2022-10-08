@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+#include "value.h"
+
 class Macro;
 
 class SourceCode
@@ -35,7 +37,7 @@ public:
 
 	// Constructor/destructor
 
-	SourceCode( const std::string& filename, int lineNumber );
+	SourceCode( const std::string& filename, int lineNumber, const SourceCode* parent );
 	~SourceCode();
 
 	// Process the file
@@ -46,6 +48,7 @@ public:
 
 	inline const std::string&	GetFilename() const				{ return m_filename; }
 	inline int				GetLineNumber() const			{ return m_lineNumber; }
+	inline const SourceCode*GetParent() const				{ return m_parent; }
 	inline int				GetLineStartPointer() const		{ return m_lineStartPointer; }
 
 	virtual std::istream&	GetLine( std::string& lineFromFile ) = 0;
@@ -119,7 +122,9 @@ public:
 	inline int 				GetInitialForStackPtr() const { return m_initialForStackPtr; }
 	inline Macro*			GetCurrentMacro() { return m_currentMacro; }
 
+	bool					GetSymbolValue(std::string name, Value& value);
 	std::string				GetSymbolNameSuffix( int level = -1 ) const;
+	bool					ShouldOutputAsm();
 
 	bool					IsIfConditionTrue() const;
 	void					AddIfLevel( const std::string& line, int column );
@@ -138,6 +143,7 @@ protected:
 
 	std::string				m_filename;
 	int						m_lineNumber;
+	const SourceCode*		m_parent;
 	int						m_lineStartPointer;
 };
 

@@ -112,6 +112,7 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 		// generate a blank catalog
 
 		memset( m_aCatalog, 0, 0x200 );
+		m_aCatalog[ 0x104 ] = GlobalData::Instance().GetDiscCycle();
 		m_aCatalog[ 0x106 ] = 0x03 | ( ( GlobalData::Instance().GetDiscOption() & 3 ) << 4);
 		m_aCatalog[ 0x107 ] = 0x20;
 

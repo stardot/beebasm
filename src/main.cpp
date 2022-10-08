@@ -42,7 +42,7 @@
 using namespace std;
 
 
-#define VERSION "1.09"
+#define VERSION "1.10"
 
 
 /*************************************************************************************************/
@@ -62,6 +62,7 @@ int main( int argc, char* argv[] )
 	const char* pOutputFile = NULL;
 	const char* pDiscInputFile = NULL;
 	const char* pDiscOutputFile = NULL;
+	const char* pLabelsOutputFile = NULL;
 
 	enum STATES
 	{
@@ -73,11 +74,15 @@ int main( int argc, char* argv[] )
 		WAITING_FOR_BOOT_FILENAME,
 		WAITING_FOR_DISC_OPTION,
 		WAITING_FOR_DISC_TITLE,
-		WAITING_FOR_SYMBOL
+		WAITING_FOR_DISC_CYCLE,
+		WAITING_FOR_SYMBOL,
+		WAITING_FOR_STRING_SYMBOL,
+		WAITING_FOR_LABELS_FILE
 
 	} state = READY;
 
 	bool bDumpSymbols = false;
+	bool bDumpAllSymbols = false;
 
 	GlobalData::Create();
 	SymbolTable::Create();
@@ -110,6 +115,10 @@ int main( int argc, char* argv[] )
 				{
 					state = WAITING_FOR_BOOT_FILENAME;
 				}
+				else if ( strcmp( argv[i], "-labels" ) == 0 )
+				{
+					state = WAITING_FOR_LABELS_FILE;
+				}
 				else if ( strcmp( argv[i], "-opt" ) == 0 )
 				{
 					state = WAITING_FOR_DISC_OPTION;
@@ -117,6 +126,10 @@ int main( int argc, char* argv[] )
 				else if ( strcmp( argv[i], "-title" ) == 0 )
 				{
 					state = WAITING_FOR_DISC_TITLE;
+				}
+				else if ( strcmp( argv[i], "-cycle" ) == 0 )
+				{
+					state = WAITING_FOR_DISC_CYCLE;
 				}
 				else if ( strcmp( argv[i], "-w" ) == 0 )
 				{
@@ -130,15 +143,29 @@ int main( int argc, char* argv[] )
 				{
 					GlobalData::Instance().SetVerbose( true );
 				}
+				else if ( strcmp( argv[i], "-q" ) == 0 )
+				{
+					GlobalData::Instance().SetVerbose( false );
+				}
 				else if ( strcmp( argv[i], "-d" ) == 0 )
 				{
 					bDumpSymbols = true;
+				}
+				else if ( strcmp( argv[i], "-dd" ) == 0 )
+				{
+					bDumpAllSymbols = true;
 				}
 				else if ( strcmp( argv[i], "-D" ) == 0 )
 				{
 					state = WAITING_FOR_SYMBOL;
 				}
-				else if ( strcmp( argv[i], "--help" ) == 0 )
+				else if ( strcmp( argv[i], "-S" ) == 0 )
+				{
+					state = WAITING_FOR_STRING_SYMBOL;
+				}
+				else if ( ( strcmp( argv[i], "--help" ) == 0 ) ||
+					  ( strcmp( argv[i], "-help" ) == 0 ) ||
+					  ( strcmp( argv[i], "-h" ) == 0 ) )
 				{
 					cout << "beebasm " VERSION << endl << endl;
 					cout << "Possible options:" << endl;
@@ -147,13 +174,17 @@ int main( int argc, char* argv[] )
 					cout << " -di <file>     Specify a disc image file to be added to" << endl;
 					cout << " -do <file>     Specify a disc image file to output" << endl;
 					cout << " -boot <file>   Specify a filename to be run by !BOOT on a new disc image" << endl;
+					cout << " -labels <file> Specify a filename to export any labels dumped with -d or -dd to" << endl;
 					cout << " -opt <opt>     Specify the *OPT 4,n for the generated disc image" << endl;
 					cout << " -title <title> Specify the title for the generated disc image" << endl;
+					cout << " -cycle <n>     Specify the cycle for the generated disc image" << endl;
 					cout << " -v             Verbose output" << endl;
 					cout << " -d             Dump all global symbols after assembly" << endl;
+					cout << " -dd            Dump all global and local symbols after assembly" << endl;
 					cout << " -w             Require whitespace between opcodes and labels" << endl;
 					cout << " -vc            Use Visual C++-style error messages" << endl;
-					cout << " -D <sym>=<val> Define symbol prior to assembly" << endl;
+					cout << " -D <sym>=<val> Define numeric symbol prior to assembly" << endl;
+					cout << " -S <sym>=<str> Define string symbol prior to assembly" << endl;
 					cout << " --help         See this help again" << endl;
 					return EXIT_SUCCESS;
 				}
@@ -219,6 +250,12 @@ int main( int argc, char* argv[] )
 				state = READY;
                                 break;
 
+			case WAITING_FOR_DISC_CYCLE:
+
+				GlobalData::Instance().SetDiscCycle( std::strtol( argv[i], NULL, 10 ) );
+				state = READY;
+				break;
+
 			case WAITING_FOR_SYMBOL:
 
 				if ( ! SymbolTable::Instance().AddCommandLineSymbol( argv[i] ) )
@@ -226,6 +263,22 @@ int main( int argc, char* argv[] )
 					cerr << "Invalid -D expression: " << argv[i] << endl;
 					return EXIT_FAILURE;
 				}
+				state = READY;
+				break;
+
+			case WAITING_FOR_STRING_SYMBOL:
+
+				if ( ! SymbolTable::Instance().AddCommandLineStringSymbol( argv[i] ) )
+				{
+					cerr << "Invalid -S expression: " << argv[i] << endl;
+					return EXIT_FAILURE;
+				}
+				state = READY;
+				break;
+
+			case WAITING_FOR_LABELS_FILE:
+
+				pLabelsOutputFile = argv[i];
 				state = READY;
 				break;
 		}
@@ -280,7 +333,7 @@ int main( int argc, char* argv[] )
 			ObjectCode::Instance().InitialisePass();
 			GlobalData::Instance().ResetForId();
 			beebasm_srand( static_cast< unsigned long >( randomSeed ) );
-			SourceFile input( pInputFile );
+			SourceFile input( pInputFile, 0 );
 			input.Process();
 		}
 	}
@@ -292,12 +345,12 @@ int main( int argc, char* argv[] )
 
 	delete pDiscIm;
 
-	if ( bDumpSymbols && exitCode == EXIT_SUCCESS )
+	if ( (bDumpSymbols || bDumpAllSymbols) && exitCode == EXIT_SUCCESS )
 	{
-		SymbolTable::Instance().Dump();
+		SymbolTable::Instance().Dump(bDumpSymbols, bDumpAllSymbols, pLabelsOutputFile);
 	}
 
-	if ( !GlobalData::Instance().IsSaved() && exitCode == EXIT_SUCCESS )
+	if ( !GlobalData::Instance().IsSaved() && ObjectCode::Instance().AnyUsed() && exitCode == EXIT_SUCCESS )
 	{
 		cerr << "warning: no SAVE command in source file." << endl;
 	}

@@ -1,0 +1,5 @@
+\ This could fail with libc++ because operator>> consumes 128A
+\ rather than just 128.  Fixed by parsing numbers ourselves.
+\ https://github.com/stardot/beebasm/issues/36
+org 0:Q%=255:equb (128ANDQ%)
+ASSERT((252AND63)=60)

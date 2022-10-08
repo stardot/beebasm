@@ -440,7 +440,7 @@ int ObjectCode::GetMapping( int ascii ) const
 	ObjectCode::CopyBlock()
 */
 /*************************************************************************************************/
-void ObjectCode::CopyBlock( int start, int end, int dest )
+void ObjectCode::CopyBlock( int start, int end, int dest, bool firstPass )
 {
 	int length = end - start;
 
@@ -450,7 +450,19 @@ void ObjectCode::CopyBlock( int start, int end, int dest )
 		throw AsmException_AssembleError_OutOfMemory();
 	}
 
-	if ( start < dest )
+	if (firstPass)
+	{
+		for ( int i = 0; i < length; i++ )
+		{
+			if ( m_aFlags[ dest + i ] & GUARD )
+			{
+				throw AsmException_AssembleError_GuardHit();
+			}
+
+			m_aFlags[ dest + i ] |= (m_aFlags[ start + i ] & USED);
+		}
+	}
+	else if ( start < dest )
 	{
 		for ( int i = length - 1; i >= 0; i-- )
 		{
@@ -478,4 +490,24 @@ void ObjectCode::CopyBlock( int start, int end, int dest )
 			m_aFlags[ start + i ] &= ( CHECK | DONT_CHECK );
 		}
 	}
+}
+
+#define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a[0]))
+
+/*************************************************************************************************/
+/**
+	ObjectCode::AnyUsed() - is any memory USED?
+*/
+/*************************************************************************************************/
+bool ObjectCode::AnyUsed() const
+{
+	for (unsigned int i = 0; i < ARRAY_LENGTH(m_aFlags); ++i)
+	{
+		if ( m_aFlags[i] & USED )
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

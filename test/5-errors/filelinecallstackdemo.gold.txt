@@ -1,0 +1,4 @@
+Current location:filelinecallstackdemo.6502:16
+Current call stack:filelinecallstackdemo.6502:11
+filelinecallstackdemo.6502:6
+filelinecallstackdemo.6502:19 (end)

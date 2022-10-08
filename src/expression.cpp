@@ -28,6 +28,7 @@
 #include <cerrno>
 #include <sstream>
 #include <iomanip>
+#include <climits>
 
 #include "lineparser.h"
 #include "asmexception.h"
@@ -37,7 +38,8 @@
 #include "sourcefile.h"
 #include "random.h"
 #include "constants.h"
-
+#include "stringutils.h"
+#include "literals.h"
 
 using namespace std;
 
@@ -45,62 +47,77 @@ using namespace std;
 
 const LineParser::Operator	LineParser::m_gaBinaryOperatorTable[] =
 {
-	{ ")",		-1,	NULL },		// special case
-	{ "]",		-1,	NULL },		// special case
+	{ ")",		-1,	0,	NULL },		// special case
+	{ "]",		-1,	0,	NULL },		// special case
+	{ ",",		-1,	0,	NULL },		// special case
 
-	{ "^",		7,	&LineParser::EvalPower },
-	{ "*",		6,	&LineParser::EvalMultiply },
-	{ "/",		6,	&LineParser::EvalDivide },
-	{ "%",		6,	&LineParser::EvalMod },
-	{ "DIV",	6,	&LineParser::EvalDiv },
-	{ "MOD",	6,	&LineParser::EvalMod },
-	{ "<<",		6,	&LineParser::EvalShiftLeft },
-	{ ">>",		6,	&LineParser::EvalShiftRight },
-	{ "+",		5,	&LineParser::EvalAdd },
-	{ "-",		5,	&LineParser::EvalSubtract },
-	{ "==",		4,	&LineParser::EvalEqual },
-	{ "=",		4,	&LineParser::EvalEqual },
-	{ "<>",		4,	&LineParser::EvalNotEqual },
-	{ "!=",		4,	&LineParser::EvalNotEqual },
-	{ "<=",		4,	&LineParser::EvalLessThanOrEqual },
-	{ ">=",		4,	&LineParser::EvalMoreThanOrEqual },
-	{ "<",		4,	&LineParser::EvalLessThan },
-	{ ">",		4,	&LineParser::EvalMoreThan },
-	{ "AND",	3,	&LineParser::EvalAnd },
-	{ "OR",		2,	&LineParser::EvalOr },
-	{ "EOR",	2,	&LineParser::EvalEor }
+	{ "^",		7,	0,	&LineParser::EvalPower },
+	{ "*",		6,	0,	&LineParser::EvalMultiply },
+	{ "/",		6,	0,	&LineParser::EvalDivide },
+	{ "%",		6,	0,	&LineParser::EvalMod },
+	{ "DIV",	6,	0,	&LineParser::EvalDiv },
+	{ "MOD",	6,	0,	&LineParser::EvalMod },
+	{ "<<",		6,	0,	&LineParser::EvalShiftLeft },
+	{ ">>",		6,	0,	&LineParser::EvalShiftRight },
+	{ "+",		5,	0,	&LineParser::EvalAdd },
+	{ "-",		5,	0,	&LineParser::EvalSubtract },
+	{ "==",		4,	0,	&LineParser::EvalEqual },
+	{ "=",		4,	0,	&LineParser::EvalEqual },
+	{ "<>",		4,	0,	&LineParser::EvalNotEqual },
+	{ "!=",		4,	0,	&LineParser::EvalNotEqual },
+	{ "<=",		4,	0,	&LineParser::EvalLessThanOrEqual },
+	{ ">=",		4,	0,	&LineParser::EvalMoreThanOrEqual },
+	{ "<",		4,	0,	&LineParser::EvalLessThan },
+	{ ">",		4,	0,	&LineParser::EvalMoreThan },
+	{ "AND",	3,	0,	&LineParser::EvalAnd },
+	{ "OR",		2,	0,	&LineParser::EvalOr },
+	{ "EOR",	2,	0,	&LineParser::EvalEor }
 };
 
 
 
 const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 {
-	{ "(",		-1,	NULL },		// special case
-	{ "[",		-1,	NULL },		// special case
+	{ "(",		-1,	0, NULL },		// special case
+	{ "[",		-1,	0, NULL },		// special case
 
-	{ "-",		8,	&LineParser::EvalNegate },
-	{ "+",		8,	&LineParser::EvalPosate },
-	{ "HI(",	10,	&LineParser::EvalHi },
-	{ "LO(",	10,	&LineParser::EvalLo },
-	{ ">",		10,	&LineParser::EvalHi },
-	{ "<",		10,	&LineParser::EvalLo },
-	{ "SIN(",	10, &LineParser::EvalSin },
-	{ "COS(",	10, &LineParser::EvalCos },
-	{ "TAN(",	10, &LineParser::EvalTan },
-	{ "ASN(",	10, &LineParser::EvalArcSin },
-	{ "ACS(",	10, &LineParser::EvalArcCos },
-	{ "ATN(",	10, &LineParser::EvalArcTan },
-	{ "SQR(",	10, &LineParser::EvalSqrt },
-	{ "RAD(",	10, &LineParser::EvalDegToRad },
-	{ "DEG(",	10, &LineParser::EvalRadToDeg },
-	{ "INT(",	10,	&LineParser::EvalInt },
-	{ "ABS(",	10, &LineParser::EvalAbs },
-	{ "SGN(",	10, &LineParser::EvalSgn },
-	{ "RND(",	10,	&LineParser::EvalRnd },
-	{ "NOT(",	10, &LineParser::EvalNot },
-	{ "LOG(",	10, &LineParser::EvalLog },
-	{ "LN(",	10,	&LineParser::EvalLn },
-	{ "EXP(",	10,	&LineParser::EvalExp }
+	{ "-",		8,	0,	&LineParser::EvalNegate },
+	{ "+",		8,	0,	&LineParser::EvalPosate },
+	{ "HI(",	10,	1,	&LineParser::EvalHi },
+	{ "LO(",	10,	1,	&LineParser::EvalLo },
+	{ ">",		10,	0,	&LineParser::EvalHi },
+	{ "<",		10,	0,	&LineParser::EvalLo },
+	{ "SIN(",	10, 1,	&LineParser::EvalSin },
+	{ "COS(",	10, 1,	&LineParser::EvalCos },
+	{ "TAN(",	10, 1,	&LineParser::EvalTan },
+	{ "ASN(",	10, 1,	&LineParser::EvalArcSin },
+	{ "ACS(",	10, 1,	&LineParser::EvalArcCos },
+	{ "ATN(",	10, 1,	&LineParser::EvalArcTan },
+	{ "SQR(",	10, 1,	&LineParser::EvalSqrt },
+	{ "RAD(",	10, 1,	&LineParser::EvalDegToRad },
+	{ "DEG(",	10, 1,	&LineParser::EvalRadToDeg },
+	{ "INT(",	10,	1,	&LineParser::EvalInt },
+	{ "ABS(",	10, 1,	&LineParser::EvalAbs },
+	{ "SGN(",	10, 1,	&LineParser::EvalSgn },
+	{ "RND(",	10,	1,	&LineParser::EvalRnd },
+	{ "NOT(",	10, 1,	&LineParser::EvalNot },
+	{ "LOG(",	10, 1,	&LineParser::EvalLog },
+	{ "LN(",	10,	1,	&LineParser::EvalLn },
+	{ "EXP(",	10,	1,	&LineParser::EvalExp },
+	{ "TIME$(",	10,	1,	&LineParser::EvalTime },
+	{ "STR$(",	10,	1,	&LineParser::EvalStr },
+	{ "STR$~(",	10,	1,	&LineParser::EvalStrHex },
+	{ "VAL(",	10,	1,	&LineParser::EvalVal },
+	{ "EVAL(",	10,	1,	&LineParser::EvalEval },
+	{ "LEN(",	10,	1,	&LineParser::EvalLen },
+	{ "CHR$(",	10,	1,	&LineParser::EvalChr },
+	{ "ASC(",	10,	1,	&LineParser::EvalAsc },
+	{ "MID$(",	10,	3,	&LineParser::EvalMid },
+	{ "LEFT$(",	10,	2,	&LineParser::EvalLeft },
+	{ "RIGHT$(",	10,	2,	&LineParser::EvalRight },
+	{ "STRING$(",	10,	2,	&LineParser::EvalString },
+	{ "UPPER$(",	10,	1,	&LineParser::EvalUpper },
+	{ "LOWER$(",	10,	1,	&LineParser::EvalLower }
 };
 
 
@@ -112,76 +129,21 @@ const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 	Parses a simple value.  This may be
 	- a decimal literal
 	- a hex literal (prefixed by &)
+	- a string
 	- a symbol (label)
 	- a special value such as * (PC)
 
 	@return		double
 */
 /*************************************************************************************************/
-double LineParser::GetValue()
+Value LineParser::GetValue()
 {
-	double value = 0;
+	Value value;
 
-	if ( m_column < m_line.length() && ( isdigit( m_line[ m_column ] ) || m_line[ m_column ] == '.' ) )
+	double double_value;
+	if ( Literals::ParseNumeric(m_line, m_column, double_value) )
 	{
-		// get a number
-
-		istringstream str( m_line );
-		str.seekg( m_column );
-		str >> value;
-		m_column = static_cast< size_t >( str.tellg() );
-	}
-	else if ( m_column < m_line.length() && ( m_line[ m_column ] == '&' || m_line[ m_column ] == '$' ) )
-	{
-		// get a hex digit
-
-		m_column++;
-
-		if ( m_column >= m_line.length() || !isxdigit( m_line[ m_column ] ) )
-		{
-			// badly formed hex literal
-			throw AsmException_SyntaxError_BadHex( m_line, m_column );
-		}
-		else
-		{
-			// get a number
-
-			unsigned int hexValue;
-
-			istringstream str( m_line );
-			str.seekg( m_column );
-			str >> hex >> hexValue;
-			m_column = static_cast< size_t >( str.tellg() );
-
-			value = static_cast< double >( hexValue );
-		}
-	}
-	else if ( m_column < m_line.length() && m_line[ m_column ] == '%' )
-	{
-		// get binary
-
-		m_column++;
-
-		if ( m_column >= m_line.length() || ( m_line[ m_column ] != '0' && m_line[ m_column ] != '1' ) )
-		{
-			// badly formed bin literal
-			throw AsmException_SyntaxError_BadBin( m_line, m_column );
-		}
-		else
-		{
-			// parse binary number
-
-			int binValue = 0;
-
-			do
-			{
-				binValue = ( binValue * 2 ) + ( m_line[ m_column ] - '0' );
-				m_column++;
-			}
-			while ( m_column < m_line.length() && ( m_line[ m_column ] == '0' || m_line[ m_column ] == '1' ) );
-
-			value = static_cast< double >( binValue );
-		}
+		value = double_value;
 	}
 	else if ( m_column < m_line.length() && m_line[ m_column ] == '*' )
 	{
@@ -203,30 +165,62 @@ double LineParser::GetValue()
 		value = static_cast< double >( m_line[ m_column + 1 ] );
 		m_column += 3;
 	}
+	else if ( m_column < m_line.length() && m_line[ m_column ] == '\"' )
+	{
+		// get string literal
+
+		std::vector<char> text;
+		m_column++;
+		bool done = false;
+		while (!done && (m_column < m_line.length()))
+		{
+			char c = m_line[ m_column ];
+			m_column++;
+			if (c == '\"')
+			{
+				if ((m_column < m_line.length()) && (m_line[m_column] == '\"'))
+				{
+					// Quote quoted by doubling
+					text.push_back(c);
+					m_column++;
+				}
+				else
+				{
+					done = true;
+				}
+			}
+			else
+			{
+				text.push_back(c);
+			}
+		}
+		if (!done)
+		{
+			throw AsmException_SyntaxError_MissingQuote( m_line, m_line.length() );
+		}
+		value = String(text.data(), text.size());
+	}
 	else if ( m_column < m_line.length() && ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
 	{
 		// get a symbol
 
 		int oldColumn = m_column;
 		string symbolName = GetSymbolName();
-		bool bFoundSymbol = false;
 
-		for ( int forLevel = m_sourceCode->GetForLevel(); forLevel >= 0; forLevel-- )
+		if (symbolName == "TIME$")
 		{
-			string fullSymbolName = symbolName + m_sourceCode->GetSymbolNameSuffix( forLevel );
-
-			if ( SymbolTable::Instance().IsSymbolDefined( fullSymbolName ) )
-			{
-				value = SymbolTable::Instance().GetSymbol( fullSymbolName );
-				bFoundSymbol = true;
-				break;
-			}
+			// Handle TIME$ with no parameters
+			value = FormatAssemblyTime("%a,%d %b %Y.%H:%M:%S");
 		}
-
-		if ( !bFoundSymbol )
+		else
 		{
-			// symbol not known
-			throw AsmException_SyntaxError_SymbolNotDefined( m_line, oldColumn );
+			// Regular symbol
+
+			if ( !m_sourceCode->GetSymbolValue(symbolName, value) )
+			{
+				// symbol not known
+				throw AsmException_SyntaxError_SymbolNotDefined( m_line, oldColumn );
+			}
 		}
 	}
 	else
@@ -247,7 +241,7 @@ double LineParser::GetValue()
 	Evaluates an expression, and returns its value, also advancing the string pointer
 */
 /*************************************************************************************************/
-double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
+Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 {
 	// Reset stacks
 
@@ -258,11 +252,15 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 
 	int bracketCount = 0;
 
+	// When we know a '(' is coming (because it was the end of a token) this is the number of commas to expect
+	// in the parameter list, i.e. one less than the number of parameters.
+	int pendingCommaCount = 0;
+
 	TYPE expected = VALUE_OR_UNARY;
 
 	// Iterate through the expression
 
-	while ( AdvanceAndCheckEndOfSubStatement() )
+	while ( AdvanceAndCheckEndOfSubStatement(bracketCount == 0) )
 	{
 		if ( expected == VALUE_OR_UNARY )
 		{
@@ -300,6 +298,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 
 					if ( len > 1 && token[ len - 1 ] == '(' )
 					{
+						pendingCommaCount = m_gaUnaryOperatorTable[ matchedToken ].parameterCount - 1;
 						m_column--;
 						assert( m_line[ m_column ] == '(' );
 					}
@@ -317,7 +316,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 					throw AsmException_SyntaxError_ExpressionTooComplex( m_line, m_column );
 				}
 
-				double value;
+				Value value;
 
 				try
 				{
@@ -346,7 +345,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 			{
 				// If unary operator *was* found...
 
-				const Operator& thisOp = m_gaUnaryOperatorTable[ matchedToken ];
+				Operator thisOp = m_gaUnaryOperatorTable[ matchedToken ];
 
 				if ( thisOp.handler != NULL )
 				{
@@ -365,6 +364,9 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 				}
 				else
 				{
+					// The open bracket's parameterCount counts down the number of commas expected.
+					thisOp.parameterCount = pendingCommaCount;
+					pendingCommaCount = 0;
 					bracketCount++;
 				}
 
@@ -444,9 +446,14 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 			}
 			else
 			{
-				// is a close bracket
+				// is a close bracket or parameter separator
 
-				bracketCount--;
+				bool separator = strcmp(thisOp.token, ",") == 0;
+
+				if (!separator)
+				{
+					bracketCount--;
+				}
 
 				bool bFoundMatchingBracket = false;
 
@@ -466,8 +473,39 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 					}
 				}
 
-				if ( !bFoundMatchingBracket )
+				if ( bFoundMatchingBracket )
 				{
+					if (separator)
+					{
+						// parameter separator
+
+						// check we are expecting multiple parameters
+						if (m_operatorStack[ m_operatorStackPtr ].parameterCount == 0)
+						{
+							throw AsmException_SyntaxError_ParameterCount( m_line, m_column - 1 );
+						}
+						m_operatorStack[ m_operatorStackPtr ].parameterCount--;
+
+						// put the open bracket back on the stack
+						m_operatorStackPtr++;
+
+						// expect the next parameter
+						expected = VALUE_OR_UNARY;
+					}
+					else
+					{
+						// close par
+
+						// check all parameters have been supplied
+						if (m_operatorStack[ m_operatorStackPtr ].parameterCount != 0)
+						{
+							throw AsmException_SyntaxError_ParameterCount( m_line, m_column - 1 );
+						}
+					}
+				}
+				else
+				{
+					// did not find matching bracket
 					if ( bAllowOneMismatchedCloseBracket )
 					{
 						// this is a hack which allows an extra close bracket to terminate an expression,
@@ -517,6 +555,22 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 	return m_valueStack[ 0 ];
 }
 
+/*************************************************************************************************/
+/**
+	LineParser::EvaluateExpressionAsDouble()
+
+	Version of EvaluateExpression which returns its result as a double or throws a type mismatch
+*/
+/*************************************************************************************************/
+double LineParser::EvaluateExpressionAsDouble( bool bAllowOneMismatchedCloseBracket )
+{
+	Value value = EvaluateExpression( bAllowOneMismatchedCloseBracket );
+	if (value.GetType() != Value::NumberValue)
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	return value.GetNumber();
+}
 
 
 /*************************************************************************************************/
@@ -528,7 +582,7 @@ double LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 /*************************************************************************************************/
 int LineParser::EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket )
 {
-	return static_cast< int >( EvaluateExpression( bAllowOneMismatchedCloseBracket ) );
+	return ConvertDoubleToInt( EvaluateExpressionAsDouble( bAllowOneMismatchedCloseBracket ) );
 }
 
 
@@ -541,10 +595,170 @@ int LineParser::EvaluateExpressionAsInt( bool bAllowOneMismatchedCloseBracket )
 /*************************************************************************************************/
 unsigned int LineParser::EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatchedCloseBracket )
 {
-	return static_cast< unsigned int >( EvaluateExpression( bAllowOneMismatchedCloseBracket ) );
+	return static_cast< unsigned int >( ConvertDoubleToInt( EvaluateExpressionAsDouble( bAllowOneMismatchedCloseBracket ) ) );
 }
 
 
+/*************************************************************************************************/
+/**
+	LineParser::EvaluateExpressionAsString()
+
+	Version of EvaluateExpression which returns its result as a String or throws a type mismatch
+*/
+/*************************************************************************************************/
+ string LineParser::EvaluateExpressionAsString( bool bAllowOneMismatchedCloseBracket )
+{
+	Value value = EvaluateExpression( bAllowOneMismatchedCloseBracket );
+	if (value.GetType() != Value::StringValue)
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	String result = value.GetString();
+	return string(result.Text(), result.Length());
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::StackTopTwoValues()
+
+	Retrieve two values of matching type, or throw an exception
+*/
+/*************************************************************************************************/
+std::pair<Value, Value> LineParser::StackTopTwoValues()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if (value1.GetType() != value2.GetType())
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	return std::pair<Value, Value>(value1, value2);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::StackTopString()
+
+	Retrieve a string from the top of the stack, or throw an exception
+*/
+/*************************************************************************************************/
+String LineParser::StackTopString()
+{
+	if ( m_valueStackPtr < 1 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value = m_valueStack[ m_valueStackPtr - 1 ];
+	if (value.GetType() != Value::StringValue)
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	return value.GetString();
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::StackTopNumber()
+
+	Retrieve a number from the top of the stack, or throw an exception
+*/
+/*************************************************************************************************/
+double LineParser::StackTopNumber()
+{
+	if ( m_valueStackPtr < 1 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value = m_valueStack[ m_valueStackPtr - 1 ];
+	if (value.GetType() != Value::NumberValue)
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	return value.GetNumber();
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::StackTopInt()
+
+	Retrieve a number from the top of the stack and convert to an int, or throw an exception
+*/
+/*************************************************************************************************/
+int LineParser::StackTopInt()
+{
+	return ConvertDoubleToInt( StackTopNumber() );
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::StackTopTwoNumbers()
+
+	Retrieve two values of numeric type, or throw an exception
+*/
+/*************************************************************************************************/
+std::pair<double, double> LineParser::StackTopTwoNumbers()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::NumberValue) || (value2.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	return std::pair<double, double>(value1.GetNumber(), value2.GetNumber());
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::StackTopTwoInts()
+
+	Retrieve two values of numeric type and convert to ints, or throw an exception
+*/
+/*************************************************************************************************/
+std::pair<int, int> LineParser::StackTopTwoInts()
+{
+	std::pair<double, double> pair = StackTopTwoNumbers();
+	return std::pair<int, int>(ConvertDoubleToInt(pair.first), ConvertDoubleToInt(pair.second));
+}
+
+/*************************************************************************************************/
+/**
+	LineParser::ConvertDoubleToInt()
+
+	Convert a double to an int throwing an exception if it is out of range
+
+	Handle values between -2147483648 and 4294967295.
+*/
+/*************************************************************************************************/
+int LineParser::ConvertDoubleToInt(double value)
+{
+	if ((value < INT_MIN) || (value > UINT_MAX))
+	{
+		throw AsmException_SyntaxError_OutOfIntegerRange( m_line, m_column );
+	}
+
+	if (value <= INT_MAX)
+	{
+		return static_cast<int>( value );
+	}
+	else
+	{
+		return static_cast<unsigned int>( value );
+	}
+}
 
 /*************************************************************************************************/
 /**
@@ -553,15 +767,18 @@ unsigned int LineParser::EvaluateExpressionAsUnsignedInt( bool bAllowOneMismatch
 /*************************************************************************************************/
 void LineParser::EvalAdd()
 {
-	if ( m_valueStackPtr < 2 )
+	std::pair<Value, Value> values = StackTopTwoValues();
+
+	if (values.first.GetType() == Value::NumberValue)
 	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+		m_valueStack[ m_valueStackPtr - 2 ] = Value(values.first.GetNumber() + values.second.GetNumber());
 	}
-	m_valueStack[ m_valueStackPtr - 2 ] = m_valueStack[ m_valueStackPtr - 2 ] + m_valueStack[ m_valueStackPtr - 1 ];
+	else if (values.first.GetType() == Value::StringValue)
+	{
+		m_valueStack[ m_valueStackPtr - 2 ] = Value(values.first.GetString() + values.second.GetString());
+	}
 	m_valueStackPtr--;
 }
-
-
 
 /*************************************************************************************************/
 /**
@@ -570,11 +787,8 @@ void LineParser::EvalAdd()
 /*************************************************************************************************/
 void LineParser::EvalSubtract()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = m_valueStack[ m_valueStackPtr - 2 ] - m_valueStack[ m_valueStackPtr - 1 ];
+	std::pair<double, double> values = StackTopTwoNumbers();
+	m_valueStack[ m_valueStackPtr - 2 ] = values.first - values.second;
 	m_valueStackPtr--;
 }
 
@@ -587,11 +801,8 @@ void LineParser::EvalSubtract()
 /*************************************************************************************************/
 void LineParser::EvalMultiply()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = m_valueStack[ m_valueStackPtr - 2 ] * m_valueStack[ m_valueStackPtr - 1 ];
+	std::pair<double, double> values = StackTopTwoNumbers();
+	m_valueStack[ m_valueStackPtr - 2 ] = values.first * values.second;
 	m_valueStackPtr--;
 }
 
@@ -604,15 +815,12 @@ void LineParser::EvalMultiply()
 /*************************************************************************************************/
 void LineParser::EvalDivide()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	if ( m_valueStack[ m_valueStackPtr - 1 ] == 0.0 )
+	std::pair<double, double> values = StackTopTwoNumbers();
+	if ( values.second == 0.0 )
 	{
 		throw AsmException_SyntaxError_DivisionByZero( m_line, m_column - 1 );
 	}
-	m_valueStack[ m_valueStackPtr - 2 ] = m_valueStack[ m_valueStackPtr - 2 ] / m_valueStack[ m_valueStackPtr - 1 ];
+	m_valueStack[ m_valueStackPtr - 2 ] = values.first / values.second;
 	m_valueStackPtr--;
 }
 
@@ -625,11 +833,8 @@ void LineParser::EvalDivide()
 /*************************************************************************************************/
 void LineParser::EvalPower()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = pow( m_valueStack[ m_valueStackPtr - 2 ], m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<double, double> values = StackTopTwoNumbers();
+	m_valueStack[ m_valueStackPtr - 2 ] = pow( values.first, values.second );
 	m_valueStackPtr--;
 
 	if ( errno == ERANGE )
@@ -652,17 +857,13 @@ void LineParser::EvalPower()
 /*************************************************************************************************/
 void LineParser::EvalDiv()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	if ( m_valueStack[ m_valueStackPtr - 1 ] == 0.0 )
+	std::pair<int, int> values = StackTopTwoInts();
+
+	if ( values.second == 0 )
 	{
 		throw AsmException_SyntaxError_DivisionByZero( m_line, m_column - 1 );
 	}
-	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 2 ] ) /
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) );
+	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(values.first / values.second);
 	m_valueStackPtr--;
 }
 
@@ -675,21 +876,39 @@ void LineParser::EvalDiv()
 /*************************************************************************************************/
 void LineParser::EvalMod()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	if ( m_valueStack[ m_valueStackPtr - 1 ] == 0.0 )
+	std::pair<int, int> values = StackTopTwoInts();
+
+	if ( values.second == 0 )
 	{
 		throw AsmException_SyntaxError_DivisionByZero( m_line, m_column - 1 );
 	}
-	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 2 ] ) %
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) );
+	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(values.first % values.second);
 	m_valueStackPtr--;
 }
 
 
+
+/*************************************************************************************************/
+/**
+	Shifting helper functions
+*/
+/*************************************************************************************************/
+static int LogicalShiftLeft(int value, unsigned int shift)
+{
+	return static_cast<int>(static_cast<unsigned int>(value) << shift);
+}
+
+static int ArithmeticShiftRight(int value, unsigned int shift)
+{
+	unsigned int shifted = static_cast<unsigned int>(value) >> shift;
+	if (value < 0)
+	{
+		const unsigned int bitcount = 8 * sizeof(unsigned int);
+		const unsigned int ones = ~0;
+		shifted |= (ones << (bitcount - shift));
+	}
+	return static_cast<int>(shifted);
+}
 
 /*************************************************************************************************/
 /**
@@ -698,12 +917,10 @@ void LineParser::EvalMod()
 /*************************************************************************************************/
 void LineParser::EvalShiftLeft()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	int val = static_cast< int >( m_valueStack[ m_valueStackPtr - 2 ] );
-	int shift = static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<int, int> values = StackTopTwoInts();
+
+	int val = values.first;
+	int shift = values.second;
 	int result;
 
 	if ( shift > 31 || shift < -31 )
@@ -712,7 +929,7 @@ void LineParser::EvalShiftLeft()
 	}
 	else if ( shift > 0 )
 	{
-		result = val << shift;
+		result = LogicalShiftLeft(val, static_cast<unsigned int>(shift));
 	}
 	else if ( shift == 0 )
 	{
@@ -720,7 +937,7 @@ void LineParser::EvalShiftLeft()
 	}
 	else
 	{
-		result = val >> (-shift);
+		result = ArithmeticShiftRight(val, static_cast<unsigned int>(-shift));
 	}
 
 	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >( result );
@@ -736,12 +953,10 @@ void LineParser::EvalShiftLeft()
 /*************************************************************************************************/
 void LineParser::EvalShiftRight()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	int val = static_cast< int >( m_valueStack[ m_valueStackPtr - 2 ] );
-	int shift = static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<int, int> values = StackTopTwoInts();
+
+	int val = values.first;
+	int shift = values.second;
 	int result;
 
 	if ( shift > 31 || shift < -31 )
@@ -750,7 +965,7 @@ void LineParser::EvalShiftRight()
 	}
 	else if ( shift > 0 )
 	{
-		result = val >> shift;
+		result = ArithmeticShiftRight(val, static_cast<unsigned int>(shift));
 	}
 	else if ( shift == 0 )
 	{
@@ -758,7 +973,7 @@ void LineParser::EvalShiftRight()
 	}
 	else
 	{
-		result = val << (-shift);
+		result = LogicalShiftLeft(val, static_cast<unsigned int>(-shift));
 	}
 
 	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >( result );
@@ -774,13 +989,8 @@ void LineParser::EvalShiftRight()
 /*************************************************************************************************/
 void LineParser::EvalAnd()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 2 ] ) &
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) );
+	std::pair<int, int> values = StackTopTwoInts();
+	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(values.first & values.second);
 	m_valueStackPtr--;
 }
 
@@ -793,13 +1003,8 @@ void LineParser::EvalAnd()
 /*************************************************************************************************/
 void LineParser::EvalOr()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 2 ] ) |
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) );
+	std::pair<int, int> values = StackTopTwoInts();
+	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(values.first | values.second);
 	m_valueStackPtr--;
 }
 
@@ -812,13 +1017,8 @@ void LineParser::EvalOr()
 /*************************************************************************************************/
 void LineParser::EvalEor()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 2 ] ) ^
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) );
+	std::pair<int, int> values = StackTopTwoInts();
+	m_valueStack[ m_valueStackPtr - 2 ] = static_cast< double >(values.first ^ values.second);
 	m_valueStackPtr--;
 }
 
@@ -831,11 +1031,8 @@ void LineParser::EvalEor()
 /*************************************************************************************************/
 void LineParser::EvalEqual()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = -( m_valueStack[ m_valueStackPtr - 2 ] == m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<Value, Value> values = StackTopTwoValues();
+	m_valueStack[ m_valueStackPtr - 2 ] = (Value::Compare(values.first, values.second) == 0) ? -1 : 0;
 	m_valueStackPtr--;
 }
 
@@ -848,11 +1045,8 @@ void LineParser::EvalEqual()
 /*************************************************************************************************/
 void LineParser::EvalNotEqual()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = -( m_valueStack[ m_valueStackPtr - 2 ] != m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<Value, Value> values = StackTopTwoValues();
+	m_valueStack[ m_valueStackPtr - 2 ] = (Value::Compare(values.first, values.second) != 0) ? -1 : 0;
 	m_valueStackPtr--;
 }
 
@@ -865,11 +1059,8 @@ void LineParser::EvalNotEqual()
 /*************************************************************************************************/
 void LineParser::EvalLessThanOrEqual()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = -( m_valueStack[ m_valueStackPtr - 2 ] <= m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<Value, Value> values = StackTopTwoValues();
+	m_valueStack[ m_valueStackPtr - 2 ] = (Value::Compare(values.first, values.second) <= 0) ? -1 : 0;
 	m_valueStackPtr--;
 }
 
@@ -882,11 +1073,8 @@ void LineParser::EvalLessThanOrEqual()
 /*************************************************************************************************/
 void LineParser::EvalMoreThanOrEqual()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = -( m_valueStack[ m_valueStackPtr - 2 ] >= m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<Value, Value> values = StackTopTwoValues();
+	m_valueStack[ m_valueStackPtr - 2 ] = (Value::Compare(values.first, values.second) >= 0) ? -1 : 0;
 	m_valueStackPtr--;
 }
 
@@ -899,11 +1087,8 @@ void LineParser::EvalMoreThanOrEqual()
 /*************************************************************************************************/
 void LineParser::EvalLessThan()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = -( m_valueStack[ m_valueStackPtr - 2 ] < m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<Value, Value> values = StackTopTwoValues();
+	m_valueStack[ m_valueStackPtr - 2 ] = (Value::Compare(values.first, values.second) < 0) ? -1 : 0;
 	m_valueStackPtr--;
 }
 
@@ -916,11 +1101,8 @@ void LineParser::EvalLessThan()
 /*************************************************************************************************/
 void LineParser::EvalMoreThan()
 {
-	if ( m_valueStackPtr < 2 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 2 ] = -( m_valueStack[ m_valueStackPtr - 2 ] > m_valueStack[ m_valueStackPtr - 1 ] );
+	std::pair<Value, Value> values = StackTopTwoValues();
+	m_valueStack[ m_valueStackPtr - 2 ] = (Value::Compare(values.first, values.second) > 0) ? -1 : 0;
 	m_valueStackPtr--;
 }
 
@@ -933,11 +1115,7 @@ void LineParser::EvalMoreThan()
 /*************************************************************************************************/
 void LineParser::EvalNegate()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = -m_valueStack[ m_valueStackPtr - 1 ];
+	m_valueStack[ m_valueStackPtr - 1 ] = -StackTopNumber();
 }
 
 
@@ -949,12 +1127,8 @@ void LineParser::EvalNegate()
 /*************************************************************************************************/
 void LineParser::EvalNot()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(
-		~static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) );
+	int value = ~StackTopInt();
+	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(value);
 }
 
 
@@ -982,12 +1156,8 @@ void LineParser::EvalPosate()
 /*************************************************************************************************/
 void LineParser::EvalLo()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) & 0xFF );
+	int value = StackTopInt() & 0xFF;
+	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(value);
 }
 
 
@@ -999,12 +1169,8 @@ void LineParser::EvalLo()
 /*************************************************************************************************/
 void LineParser::EvalHi()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(
-		( static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) & 0xffff ) >> 8 );
+	int value = (StackTopInt() & 0xffff) >> 8;
+	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(value);
 }
 
 
@@ -1016,11 +1182,7 @@ void LineParser::EvalHi()
 /*************************************************************************************************/
 void LineParser::EvalSin()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = sin( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = sin( StackTopNumber() );
 }
 
 
@@ -1032,11 +1194,7 @@ void LineParser::EvalSin()
 /*************************************************************************************************/
 void LineParser::EvalCos()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = cos( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = cos( StackTopNumber() );
 }
 
 
@@ -1048,11 +1206,7 @@ void LineParser::EvalCos()
 /*************************************************************************************************/
 void LineParser::EvalTan()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = tan( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = tan( StackTopNumber() );
 }
 
 
@@ -1064,11 +1218,7 @@ void LineParser::EvalTan()
 /*************************************************************************************************/
 void LineParser::EvalArcSin()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = asin( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = asin( StackTopNumber() );
 
 	if ( errno == EDOM )
 	{
@@ -1085,11 +1235,7 @@ void LineParser::EvalArcSin()
 /*************************************************************************************************/
 void LineParser::EvalArcCos()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = acos( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = acos( StackTopNumber() );
 
 	if ( errno == EDOM )
 	{
@@ -1106,11 +1252,7 @@ void LineParser::EvalArcCos()
 /*************************************************************************************************/
 void LineParser::EvalArcTan()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = atan( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = atan( StackTopNumber() );
 
 	if ( errno == EDOM )
 	{
@@ -1127,11 +1269,7 @@ void LineParser::EvalArcTan()
 /*************************************************************************************************/
 void LineParser::EvalLog()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = log10( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = log10( StackTopNumber() );
 
 	if ( errno == EDOM || errno == ERANGE )
 	{
@@ -1148,11 +1286,7 @@ void LineParser::EvalLog()
 /*************************************************************************************************/
 void LineParser::EvalLn()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = log( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = log( StackTopNumber() );
 
 	if ( errno == EDOM || errno == ERANGE )
 	{
@@ -1169,11 +1303,7 @@ void LineParser::EvalLn()
 /*************************************************************************************************/
 void LineParser::EvalExp()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = exp( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = exp( StackTopNumber() );
 
 	if ( errno == ERANGE )
 	{
@@ -1190,11 +1320,7 @@ void LineParser::EvalExp()
 /*************************************************************************************************/
 void LineParser::EvalSqrt()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = sqrt( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = sqrt( StackTopNumber() );
 
 	if ( errno == EDOM )
 	{
@@ -1211,11 +1337,7 @@ void LineParser::EvalSqrt()
 /*************************************************************************************************/
 void LineParser::EvalDegToRad()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = m_valueStack[ m_valueStackPtr - 1 ] * const_pi / 180.0;
+	m_valueStack[ m_valueStackPtr - 1 ] = StackTopNumber() * const_pi / 180.0;
 }
 
 
@@ -1227,11 +1349,7 @@ void LineParser::EvalDegToRad()
 /*************************************************************************************************/
 void LineParser::EvalRadToDeg()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = m_valueStack[ m_valueStackPtr - 1 ] * 180.0 / const_pi;
+	m_valueStack[ m_valueStackPtr - 1 ] = StackTopNumber() * 180.0 / const_pi;
 }
 
 
@@ -1243,12 +1361,7 @@ void LineParser::EvalRadToDeg()
 /*************************************************************************************************/
 void LineParser::EvalInt()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >(
-		static_cast< int >( m_valueStack[ m_valueStackPtr - 1 ] ) );
+	m_valueStack[ m_valueStackPtr - 1 ] = static_cast< double >( StackTopInt() );
 }
 
 
@@ -1260,11 +1373,7 @@ void LineParser::EvalInt()
 /*************************************************************************************************/
 void LineParser::EvalAbs()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-	m_valueStack[ m_valueStackPtr - 1 ] = abs( m_valueStack[ m_valueStackPtr - 1 ] );
+	m_valueStack[ m_valueStackPtr - 1 ] = abs( StackTopNumber() );
 }
 
 
@@ -1276,12 +1385,7 @@ void LineParser::EvalAbs()
 /*************************************************************************************************/
 void LineParser::EvalSgn()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-
-	double val = m_valueStack[ m_valueStackPtr - 1 ];
+	double val = StackTopNumber();
 	m_valueStack[ m_valueStackPtr - 1 ] = ( val < 0.0 ) ? -1.0 : ( ( val > 0.0 ) ? 1.0 : 0.0 );
 }
 
@@ -1294,12 +1398,7 @@ void LineParser::EvalSgn()
 /*************************************************************************************************/
 void LineParser::EvalRnd()
 {
-	if ( m_valueStackPtr < 1 )
-	{
-		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
-	}
-
-	double val = m_valueStack[ m_valueStackPtr - 1 ];
+	double val = StackTopNumber();
 	double result = 0.0;
 
 	if ( val < 1.0f )
@@ -1312,8 +1411,290 @@ void LineParser::EvalRnd()
 	}
 	else
 	{
-		result = static_cast< double >( static_cast< int >( beebasm_rand() / ( static_cast< double >( BEEBASM_RAND_MAX ) + 1.0 ) * val ) );
+		result = static_cast< double >( ConvertDoubleToInt( beebasm_rand() / ( static_cast< double >( BEEBASM_RAND_MAX ) + 1.0 ) * val ) );
 	}
 
 	m_valueStack[ m_valueStackPtr - 1 ] = result;
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalTime()
+*/
+/*************************************************************************************************/
+void LineParser::EvalTime()
+{
+	m_valueStack[ m_valueStackPtr - 1 ] = FormatAssemblyTime(StackTopString().Text());
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::FormatAssemblyTime()
+
+	Format the assembly time using the given strftime format string
+*/
+/*************************************************************************************************/
+Value LineParser::FormatAssemblyTime(const char* formatString)
+{
+	char timeString[256];
+	const time_t t = GlobalData::Instance().GetAssemblyTime();
+	const struct tm* t_tm = localtime( &t );
+	int length = strftime( timeString, sizeof( timeString ), formatString, t_tm );
+	if ( length == 0 )
+	{
+		throw AsmException_SyntaxError_TimeResultTooBig( m_line, m_column );
+	}
+	return String(timeString, length);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalStr()
+*/
+/*************************************************************************************************/
+void LineParser::EvalStr()
+{
+	ostringstream stream;
+	StringUtils::PrintNumber(stream, StackTopNumber());
+	string result = stream.str();
+
+	m_valueStack[ m_valueStackPtr - 1 ] = String(result.data(), result.length());
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalStrHex()
+*/
+/*************************************************************************************************/
+void LineParser::EvalStrHex()
+{
+	ostringstream stream;
+	stream << std::hex << std::uppercase << StackTopInt();
+	string result = stream.str();
+
+	m_valueStack[ m_valueStackPtr - 1 ] = String(result.data(), result.length());
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalVal()
+*/
+/*************************************************************************************************/
+void LineParser::EvalVal()
+{
+	String str = StackTopString();
+	char* end;
+	double value = strtod(str.Text(), &end);
+
+	m_valueStack[ m_valueStackPtr - 1 ] = value;
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalEval()
+*/
+/*************************************************************************************************/
+void LineParser::EvalEval()
+{
+	String expr = StackTopString();
+	LineParser parser(m_sourceCode, string(expr.Text(), expr.Length()));
+	Value result = parser.EvaluateExpression();
+	m_valueStack[ m_valueStackPtr - 1 ] = result;
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLen()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLen()
+{
+	String str = StackTopString();
+	m_valueStack[ m_valueStackPtr - 1 ] = str.Length();
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalChr()
+*/
+/*************************************************************************************************/
+void LineParser::EvalChr()
+{
+	int ascii = StackTopInt();
+	if ((ascii < 0) || (ascii > 255))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+	char buffer = ascii;
+	m_valueStack[ m_valueStackPtr - 1 ] = String(&buffer, 1);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalAsc()
+*/
+/*************************************************************************************************/
+void LineParser::EvalAsc()
+{
+	String str = StackTopString();
+	if (str.Length() == 0)
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = static_cast<unsigned char>(str[0]);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalMid()
+*/
+/*************************************************************************************************/
+void LineParser::EvalMid()
+{
+	if ( m_valueStackPtr < 3 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 3 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value3 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::StringValue) || (value2.GetType() != Value::NumberValue) || (value3.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 2;
+
+	String text = value1.GetString();
+	int index = ConvertDoubleToInt(value2.GetNumber()) - 1;
+	int length = ConvertDoubleToInt(value3.GetNumber());
+	if ((index < 0) || (static_cast<unsigned int>(index) > text.Length()) || (length < 0))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(index, length);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLeft()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLeft()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::StringValue) || (value2.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 1;
+
+	String text = value1.GetString();
+	int count = ConvertDoubleToInt(value2.GetNumber());
+	if ((count < 0) || (static_cast<unsigned int>(count) > text.Length()))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(0, count);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalRight()
+*/
+/*************************************************************************************************/
+void LineParser::EvalRight()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::StringValue) || (value2.GetType() != Value::NumberValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 1;
+
+	String text = value1.GetString();
+	int count = ConvertDoubleToInt(value2.GetNumber());
+	if ((count < 0) || (static_cast<unsigned int>(count) > text.Length()))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	unsigned int ucount = static_cast<unsigned int>(count);
+	m_valueStack[ m_valueStackPtr - 1 ] = text.SubString(text.Length() - ucount, ucount);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalString()
+*/
+/*************************************************************************************************/
+void LineParser::EvalString()
+{
+	if ( m_valueStackPtr < 2 )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+	Value value1 = m_valueStack[ m_valueStackPtr - 2 ];
+	Value value2 = m_valueStack[ m_valueStackPtr - 1 ];
+	if ((value1.GetType() != Value::NumberValue) || (value2.GetType() != Value::StringValue))
+	{
+		throw AsmException_SyntaxError_TypeMismatch( m_line, m_column );
+	}
+	m_valueStackPtr -= 1;
+
+	int count = ConvertDoubleToInt(value1.GetNumber());
+	String text = value2.GetString();
+	if ((count < 0) || (count >= 0x10000) || (text.Length() >= 0x10000) || (static_cast<unsigned int>(count) * text.Length() >= 0x10000))
+	{
+		throw AsmException_SyntaxError_IllegalOperation( m_line, m_column );
+	}
+
+	m_valueStack[ m_valueStackPtr - 1 ] = text.Repeat(count);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalUpper()
+*/
+/*************************************************************************************************/
+void LineParser::EvalUpper()
+{
+	m_valueStack[ m_valueStackPtr - 1 ] = StackTopString().Upper();
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::EvalLower()
+*/
+/*************************************************************************************************/
+void LineParser::EvalLower()
+{
+	m_valueStack[ m_valueStackPtr - 1 ] = StackTopString().Lower();
 }

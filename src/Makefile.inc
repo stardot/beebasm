@@ -145,9 +145,11 @@ CPUS			?=		1
 ifdef VERBOSE
 VB				:=
 VB_MAKE			:=
+VB_TEST			:=	-v
 else
 VB				:=		@@
 VB_MAKE			:=		-s
+VB_TEST			:=
 endif
 
 
@@ -168,6 +170,7 @@ help:
 	$(ECHO) make all .... Build and run code
 	$(ECHO) make code ... Build code
 	$(ECHO) make run .... Run code
+	$(ECHO) make test ... Run tests
 	$(ECHO) make clean .. Clean code
 	$(ECHO) make help ... Display this message again
 	$(ECHO)
@@ -192,7 +195,11 @@ run:
 	$(VB)$(TARGET) $(PARAMS)
 
 
-all: code run
+test:
+	$(VB)$(TEST) $(VB_TEST)
+
+
+all: code run test
 
 
 clean:

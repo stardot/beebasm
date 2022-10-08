@@ -22,11 +22,16 @@
 
 #include <cmath>
 #include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
+#include "globaldata.h"
+#include "objectcode.h"
 #include "symboltable.h"
 #include "constants.h"
+#include "asmexception.h"
+#include "literals.h"
 
 
 using namespace std;
@@ -76,6 +81,7 @@ void SymbolTable::Destroy()
 */
 /*************************************************************************************************/
 SymbolTable::SymbolTable()
+	:	m_labelScopes( 0 )
 {
 	// Add any constant symbols here
 
@@ -124,10 +130,10 @@ bool SymbolTable::IsSymbolDefined( const std::string& symbol ) const
 	Adds a symbol to the symbol table with the supplied value
 
 	@param		symbol			The symbol to add
-	@param		int				Its value
+	@param		value			Its value
 */
 /*************************************************************************************************/
-void SymbolTable::AddSymbol( const std::string& symbol, double value, bool isLabel )
+void SymbolTable::AddSymbol( const std::string& symbol, Value value, bool isLabel )
 {
 	assert( !IsSymbolDefined( symbol ) );
 	m_map.insert( make_pair( symbol, Symbol( value, isLabel ) ) );
@@ -178,76 +184,28 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 		return false;
 	}
 
-	bool readHex = false;
-	bool readBinary = false;
-
-	if ( !valueString.compare( 0, 1, "&" ) || !valueString.compare( 0, 1, "$" ) )
+	// Convert C-style hex prefix to beeb-style
+	if ( !valueString.compare( 0, 2, "0x" ) || !valueString.compare( 0, 2, "0X" ) )
 	{
-		readHex = true;
 		valueString = valueString.substr( 1 );
-	}
-	else if ( !valueString.compare( 0, 2, "0x" ) || !valueString.compare( 0, 2, "0X" ) )
-	{
-		readHex = true;
-		valueString = valueString.substr( 2 );
-	}
-	else if ( !valueString.compare( 0, 1, "%" ) )
-	{
-		readBinary = true;
-		valueString = valueString.substr( 1 );
+		valueString[0] = '&';
 	}
 
-	std::istringstream valueStream( valueString );
+	size_t index = 0;
 	double value;
-	char c;
-
-	valueStream >> noskipws;
-
-	if ( readHex )
+	try
 	{
-		int intValue;
-
-		if ( ! ( valueStream  >> hex >> intValue ) )
+		if ( !Literals::ParseNumeric(valueString, index, value) )
 		{
 			return false;
 		}
-
-		value = intValue;
 	}
-	else if ( readBinary )
-	{
-		unsigned int intValue = 0;
-
-		int charOrEof = valueStream.get();
-
-		if ( charOrEof == EOF )
-		{
-			return false;
-		}
-
-		while ( ( charOrEof == '0' ) || ( charOrEof == '1' ) )
-		{
-			if ( intValue & 0x80000000 )
-			{
-				return false;
-			}
-			intValue = 2 * intValue + (charOrEof - '0');
-			charOrEof = valueStream.get();
-		}
-
-		if ( charOrEof != EOF )
-		{
-			return false;
-		}
-
-		value = static_cast<double>(intValue);
-	}
-	else if ( ! ( valueStream >> value ) )
+	catch (AsmException_SyntaxError const&)
 	{
 		return false;
 	}
 
-	if ( valueStream.get( c ) )
+	if (index != valueString.length())
 	{
 		return false;
 	}
@@ -261,6 +219,42 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 
 /*************************************************************************************************/
 /**
+	SymbolTable::AddCommandLineStringSymbol()
+
+	Adds a string symbol to the symbol table using a command line 'FOO=BAR' expression
+
+	@param		expr			Symbol name and value
+	@returns	bool
+*/
+/*************************************************************************************************/
+bool SymbolTable::AddCommandLineStringSymbol( const std::string& expr )
+{
+	std::string::size_type equalsIndex = expr.find( '=' );
+	std::string symbol;
+	std::string valueString;
+	if ( equalsIndex == std::string::npos )
+	{
+		return false;
+	}
+
+	symbol = expr.substr( 0, equalsIndex );
+	valueString = expr.substr( equalsIndex + 1 );
+
+	if ( symbol.empty() )
+	{
+		return false;
+	}
+
+	String value = String(valueString.data(), valueString.length());
+
+	m_map.insert( make_pair( symbol, Symbol( value, false ) ) );
+
+	return true;
+}
+
+
+/*************************************************************************************************/
+/**
 	SymbolTable::GetSymbol()
 
 	Gets the value of a symbol which already exists in the symbol table
@@ -268,7 +262,7 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 	@param		symbol			The name of the symbol to look for
 */
 /*************************************************************************************************/
-double SymbolTable::GetSymbol( const std::string& symbol ) const
+Value SymbolTable::GetSymbol( const std::string& symbol ) const
 {
 	assert( IsSymbolDefined( symbol ) );
 	return m_map.find( symbol )->second.GetValue();
@@ -318,30 +312,106 @@ void SymbolTable::RemoveSymbol( const std::string& symbol )
 	Dumps all global symbols in the symbol table
 */
 /*************************************************************************************************/
-void SymbolTable::Dump() const
+void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 {
-	cout << "[{";
+	std::ofstream labels;
+	std::ostream & our_cout = (labels_file && (labels.open(labels_file), !labels.bad())) ? labels : std::cout;
+
+	our_cout << "[{";
 
 	bool bFirst = true;
 
-	for ( map<string, Symbol>::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
+	if (global)
 	{
-		const string&	symbolName = it->first;
-		const Symbol&	symbol = it->second;
+		for ( map<string, Symbol>::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
+		{
+			const string&	symbolName = it->first;
+			const Symbol&	symbol = it->second;
 
-		if ( symbol.IsLabel() &&
-			 symbolName.find_first_of( '@' ) == string::npos )
+			if ( symbol.IsLabel() &&
+				 symbolName.find_first_of( '@' ) == string::npos )
+			{
+				// This doesn't output string valued symbols
+				Value value = symbol.GetValue();
+				if (value.GetType() == Value::NumberValue)
+				{
+					if ( !bFirst )
+					{
+						our_cout << ",";
+					}
+
+					our_cout << "'" << symbolName << "':" << value.GetNumber() << "L";
+
+					bFirst = false;
+				}
+			}
+		}
+	}
+
+	if (all)
+	{
+		for ( std::vector<Label>::const_iterator it = m_labelList.begin(); it != m_labelList.end(); ++it )
 		{
 			if ( !bFirst )
 			{
-				cout << ",";
+				our_cout << ",";
 			}
 
-			cout << "'" << symbolName << "':" << symbol.GetValue() << "L";
+			our_cout << "'" << it->m_identifier << "':" << it->m_addr << "L";
 
 			bFirst = false;
 		}
 	}
 
-	cout << "}]" << endl;
+	our_cout << "}]" << endl;
+}
+
+void SymbolTable::PushBrace()
+{
+	if (GlobalData::Instance().IsSecondPass())
+	{
+		int addr = ObjectCode::Instance().GetPC();
+		if (m_lastLabel.m_addr != addr)
+		{
+			std::ostringstream label; label << "._" << (m_labelScopes - m_lastLabel.m_scope);
+			m_lastLabel.m_identifier = (m_labelStack.empty() ? "" : m_labelStack.back().m_identifier) + label.str();
+			m_lastLabel.m_addr = addr;
+		}
+		m_lastLabel.m_scope = m_labelScopes++;
+		m_labelStack.push_back(m_lastLabel);
+	}
+}
+
+void SymbolTable::PushFor(std::string symbol, double value)
+{
+	if (GlobalData::Instance().IsSecondPass())
+	{
+		int addr = ObjectCode::Instance().GetPC();
+		symbol = symbol.substr(0, symbol.find_first_of('@'));
+		std::ostringstream label; label << "._" << symbol << "_" << value;
+		m_lastLabel.m_identifier += label.str();
+		m_lastLabel.m_addr  = addr;
+		m_lastLabel.m_scope = m_labelScopes++;
+		m_labelStack.push_back(m_lastLabel);
+	}
+}
+
+void SymbolTable::AddLabel(const std::string& symbol)
+{
+	if (GlobalData::Instance().IsSecondPass())
+	{
+		int addr = ObjectCode::Instance().GetPC();
+		m_lastLabel.m_identifier = (m_labelStack.empty() ? "" : m_labelStack.back().m_identifier) + "." + symbol;
+		m_lastLabel.m_addr = addr;
+		m_labelList.push_back(m_lastLabel);
+	}
+}
+
+void SymbolTable::PopScope()
+{
+	if (GlobalData::Instance().IsSecondPass())
+	{
+		m_labelStack.pop_back();
+		m_lastLabel = m_labelStack.empty() ? Label() : m_labelStack.back();
+	}
 }

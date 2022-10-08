@@ -31,6 +31,7 @@
 #include "globaldata.h"
 #include "objectcode.h"
 #include "asmexception.h"
+#include "sourcecode.h"
 
 
 using namespace std;
@@ -117,6 +118,21 @@ const LineParser::OpcodeData	LineParser::m_gaOpcodeTable[] =
 
 #undef X
 
+/*************************************************************************************************/
+/**
+	LineParser::GetInstructionAndAdvanceColumn()
+
+	Searches for an instruction match in the current line, starting at the current column,
+	and moves the column pointer past the token
+
+	@return		The token number, or -1 for "not found"
+				column is modified to index the character after the token
+*/
+/*************************************************************************************************/
+int LineParser::GetInstructionAndAdvanceColumn()
+{
+	return GetInstructionAndAdvanceColumn(GlobalData::Instance().RequireDistinctOpcodes());
+}
 
 /*************************************************************************************************/
 /**
@@ -125,14 +141,13 @@ const LineParser::OpcodeData	LineParser::m_gaOpcodeTable[] =
 	Searches for an instruction match in the current line, starting at the current column,
 	and moves the column pointer past the token
 
-	@param		line			The string to parse
-	@param		column			The column to start from
+	@param		requireDistinctOpcodes	If true, check the opcode is a complete token
 
 	@return		The token number, or -1 for "not found"
 				column is modified to index the character after the token
 */
 /*************************************************************************************************/
-int LineParser::GetInstructionAndAdvanceColumn()
+int LineParser::GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes)
 {
 	for ( int i = 0; i < static_cast<int>( sizeof m_gaOpcodeTable / sizeof( OpcodeData ) ); i++ )
 	{
@@ -159,7 +174,7 @@ int LineParser::GetInstructionAndAdvanceColumn()
 		// The token matches so far, but (optionally) check there's nothing after it; this prevents 
 		// false matches where a macro name begins with an opcode, at the cost of disallowing 
 		// things like "foo=&70:stafoo".
-		if ( GlobalData::Instance().RequireDistinctOpcodes() && bMatch )
+		if ( requireDistinctOpcodes && bMatch )
 		{
 			std::string::size_type k = m_column + len;
 			if ( k < m_line.length() )
@@ -180,7 +195,6 @@ int LineParser::GetInstructionAndAdvanceColumn()
 
 	return -1;
 }
-
 
 
 /*************************************************************************************************/
@@ -220,7 +234,7 @@ void LineParser::Assemble1( int instructionIndex, ADDRESSING_MODE mode )
 {
 	assert( HasAddressingMode( instructionIndex, mode ) );
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( m_sourceCode->ShouldOutputAsm() )
 	{
 		cout << uppercase << hex << setfill( '0' ) << "     ";
 		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
@@ -259,7 +273,7 @@ void LineParser::Assemble2( int instructionIndex, ADDRESSING_MODE mode, unsigned
 	assert( value < 0x100 );
 	assert( HasAddressingMode( instructionIndex, mode ) );
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( m_sourceCode->ShouldOutputAsm() )
 	{
 		cout << uppercase << hex << setfill( '0' ) << "     ";
 		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
@@ -333,7 +347,7 @@ void LineParser::Assemble3( int instructionIndex, ADDRESSING_MODE mode, unsigned
 	assert( value < 0x10000 );
 	assert( HasAddressingMode( instructionIndex, mode ) );
 
-	if ( GlobalData::Instance().ShouldOutputAsm() )
+	if ( m_sourceCode->ShouldOutputAsm() )
 	{
 		cout << uppercase << hex << setfill( '0' ) << "     ";
 		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";

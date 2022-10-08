@@ -1,9 +1,9 @@
 # BeebAsm
-**Version V1.09**
+**Version V1.10**
 
 A portable 6502 assembler with BBC Micro style syntax
 
-Copyright (C) Rich Talbot-Watkins 2007-2012
+Copyright (C) Rich Talbot-Watkins and the contributors 2007-2022
 <richtw1@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
@@ -135,13 +135,22 @@ If specified, this sets the disc option of the generated disc image (i.e. the `*
 
 If specified, this sets the disc title of the generated disc image (i.e. the string set by `*TITLE`) to the value specified.
 
+`-cycle <n>`
+
+If specified, this sets the cycle for the generated disc image (i.e. the number shown next to the title in the disc catalogue) to the value specified.
+
 `-di <filename>`
 
 If specified, BeebAsm will use this disc image as a template for the new disc image, rather than creating a new blank one.  This is useful if you have a BASIC loader which you want to run before your executable.  Note this cannot be the same as the `-do` filename!
 
 `-v`
 
-Verbose output.  Assembled code will be output to the screen.
+Force verbose output.  Assembled code will be output to the screen.  The VERBOSE symbol will be ignored.
+
+`-q`
+
+Force quiet (non-verbose) output.  The VERBOSE symbol will be ignored.  If neither `-v` or `-q` is used then verbose
+output can be controlled by setting `VERBOSE=0` or `VERBOSE=1`.  The value can be changed only in a new scope.
 
 `-vc`
 
@@ -150,6 +159,14 @@ Use Visual C++-style error messages.
 `-d`
 
 Dumps all global symbols in Swift-compatible format after assembly. This is used internally by Swift, and is just documented for completeness.
+
+`-dd`
+
+Dumps all global and local symbols in Swift-compatible format after assembly.
+
+`-labels <file>`
+
+Write the output of `-d` or `-dd` to the specified file instead of standard output.
 
 `-w`
 
@@ -167,10 +184,12 @@ Things like `STA&4000` are permitted with or without `-w`.
 
 `-D <symbol>=<value>`
 
-Define `<symbol>` before starting to assemble. If `<value>` is not given, `-1` (`TRUE`)
-will be used by default. Note that there must be a space between `-D` and the symbol. `<value>` may be in decimal, hexadecimal (prefixed with $, & or 0x) or binary (prefixed with %).
+`-S <symbol>=<string>`
 
-`-D` can be used in conjunction with conditional assignment to provide default values within the source which can be overridden from the command line.
+Define `<symbol>` before starting to assemble. If `<value>` is not given, `-1` (`TRUE`)
+will be used by default. Note that there must be a space between `-D` or `-S` and the symbol. `<value>` may be in decimal, hexadecimal (prefixed with $, & or 0x) or binary (prefixed with %).  `<string>` may be quoted.
+
+`-D` and `-S` can be used in conjunction with conditional assignment to provide default values within the source which can be overridden from the command line.
 
 ## 5. SOURCE FILE SYNTAX
 
@@ -182,7 +201,7 @@ Instructions can be written one-per-line, or many on one line, separated by colo
 
 Comments are introduced by a semicolon or backslash.  Unlike the BBC Micro assembler, these continue to the end of the line, and are not terminated by a colon (because this BBC Micro feature is horrible!).
 
-Numeric literals are in decimal by default, and can be integers or reals. Hex literals are prefixed with `"&"`. A character in single quotes (e.g. `'A'`) returns its ASCII code.
+Numeric literals are in decimal by default, and can be integers or reals. Scientific notation can be used, e.g. `1.2E10` or `1e-7`.  Hex literals are prefixed with `"&"` or `"$"`, binary literals are prefixed with `"%"`. Digits can be separated with an underscore to improve readability, e.g. `1_000_000` or `$1_0000`. A character in single quotes (e.g. `'A'`) returns its ASCII code.
 
 BeebAsm can accept complex expressions, using a wide variety of operators and functions.  Here's a summary:
 
@@ -223,7 +242,28 @@ NOT(val)           Return the bitwise 1's complement of val
 LOG(val)           Return the base 10 log of val
 LN(val)            Return the natural log of val
 EXP(val)           Return e raised to the power of val
+VAL(str)           Return the value of a decimal number in a string
+EVAL(str)          Return the value of an expression in a string
+STR$(val)          Return the number val converted to a string
+STR$~(val)         Return the number val converted to a string in hexadecimal
+LEN(str)           Return the length of str
+CHR$(val)          Return a string with a single character with ASCII value val
+ASC(str)           Return the ASCII value of the first character of str
+MID$(str,index,length)
+                   Return length characters of str starting at (one-based) index
+LEFT$(str,length)  Return the first length characters of str
+RIGHT$(str,length) Return the last length characters of str
+STRING$(count,str)
+                   Return str repeated count times
+LOWER$(str)        Return str converted to lowercase
+UPPER$(str)        Return str converted to uppercase
+TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
+TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
+                   is the same format used by the C library strftime()
 ```
+
+The assembly date/time is constant throughout the assembly; every use of `TIME$`
+will return the same date/time.
 
 Also, some constants are defined:
 
@@ -236,25 +276,13 @@ TRUE               Returns -1
 CPU                The value set by the CPU assembler directive (see below)
 ```
 
-Within `EQUB/EQUS` only you can also use the expressions:
-
-```
-TIME$              Return assembly date/time in format "Day,DD Mon Year.HH:MM:SS"
-
-TIME$("fmt")       Return assembly date/time in a format determined by "fmt", which
-                   is the same format used by the C library strftime().
-```
-
-The assembly date/time is constant throughout the assembly; every use of `TIME$`
-will return the same date/time.
-
-Variables can be defined at any point using the BASIC syntax, i.e. `addr = &70`.
+Variables can be defined at any point using the BASIC syntax, i.e. `addr = &70` or `name = "Bob"`.  Quotes in strings are quoted by doubling, e.g. `"a""b"` for the string `a"b`.
 
 Note that it is not possible to reassign variables once defined. However `FOR...NEXT` blocks have their own scope (more on this later).
 
 Variables can be defined if they are not already defined using the conditional assignment syntax `=?`, e.g. `addr =? &70`. This is useful in conjunction with the `-D` command line option to provide default values for variables in the source while allowing them to be overridden on the command line. (Because variables cannot be reassigned once defined, it is not possible to define a variable with `-D` *and* with non-conditional assignment.)
 
-(Thanks to Stephen Harris <sweh@spuddy.org> and "ctr" for the `-D`/conditional assignment support.)
+(Thanks to Stephen Harris <sweh@spuddy.org> and Charles Reilly for the `-D`/conditional assignment support.)
 
 
 ## 6. ASSEMBLER DIRECTIVES
@@ -286,6 +314,11 @@ Moves the address pointer to the specified address.  An error is generated if th
 `ALIGN <alignment>`
 
 Used to align the address pointer to the next boundary, e.g. use `ALIGN &100` to move to the next page (useful perhaps for positioning a table at a page boundary so that index accesses don't incur a "page crossed" penalty.
+
+
+`COPYBLOCK <start>,<end>,<dest>`
+
+Copies a block of assembled data from one location to another.  This is useful to copy code assembled at one location into a program's data area for relocation at run-time.
 
 
 `INCLUDE "filename"`
@@ -358,9 +391,9 @@ Puts a 'guard' on the specified address which will cause an error if you attempt
 Clears all guards between the `<start>` and `<end`> addresses specified.  This can also be used to reset a section of memory which has had code assembled in it previously.  BeebAsm will complain if you attempt to assemble code over previously assembled code at the same address without having `CLEAR`ed it first.
 
 
-`SAVE "filename", start, end [, exec [, reload] ]`
+`SAVE ["filename"], start, end [, exec [, reload] ]`
 
-Saves out object code to either a DFS disc image (if one has been specified), or to the current directory as a standalone file.  A source file must have at least one SAVE statement in it, otherwise nothing will be output.  BeebAsm will warn if this is the case.
+Saves out object code to either a DFS disc image (if one has been specified), or to the current directory as a standalone file.  The filename is optional only if a name is specified with `-o` on the command line.  A source file must have at least one SAVE statement in it, otherwise nothing will be output.  BeebAsm will warn if this is the case.
 
 `'exec'` can be optionally specified as the execution address of the file when saved to a disc image.
 
@@ -378,6 +411,8 @@ Examples:
 PRINT "Value of label 'start' =", ~start
 PRINT "numdots =", numdots, "dottable size =", dotend-dotstart
 ```
+
+You can use `FILELINE$` in PRINT commands to show the current file and line number. `CALLSTACK$` will do the same but for all the parent macro and include files as well. See `examples/filelinecallstackdemo.6502` for an example of their use.
 			
 `ERROR "message"`
 
@@ -608,6 +643,10 @@ Abort assembly if any of the expressions is false.
 
 Seed the random number generator used by the RND() function.  If this is not used, the random number generator is seeded based on the current time and so each build of a program using `RND()` will be different.
 
+`ASM <str>`
+
+Assemble the supplied assembly language string.  For example `ASM "LDA #&41"`.
+
 ## 7. TIPS AND TRICKS
 
 BeebAsm's approach of treating memory as a canvas which can be written to, saved, and rewritten if desired makes it very easy to create certain types of applications.
@@ -693,20 +732,41 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
+09/10/2022  1.10  (Potentially breaking) Random number generator now uses 32-bit ints.
+                  Documented "$" and "%" as literal prefixes (thanks to cardboardguru76 for pointing this out).
+                  Fixed silently treating label references starting with "."
+                  as 0 (thanks to Charles Reilly for this fix).
+                  Allowed "-h" and "-help" options to see help.
+                  Fixed tokenisation of BASIC pseudo-variables in some cases. (Thanks to Richard Russell advice on this.)
+                  Fixed incorrect line number for errors inside macros with
+                  blank lines inside them.
+                  Fixed incorrect line numbers from PUTBASIC in some cases.
+                  Fixed crashes in PUTBASIC caused by edge cases in end-of-file handling.
+                  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
+                  Added -cycle, -dd and -labels options (thanks to tricky for these)
+                  Added CMake support and man page (thanks to Dave Lambley)
+                  Added string values and VAL, EVAL, STR$, LEN, CHR$, ASC, MID$,
+                  LEFT$, RIGHT$, STRING$, LOWER$, UPPER$, ASM. (Charles Reilly with
+                  thanks to Steven Flintham.)
+                  Support underscore separators in numeric literals. C++'s built-in
+                  parsing was used previously so beebasm's numeric syntax varied
+                  between compilers and platforms; this is fixed.
+                  Improved literal exponent parsing.
+                  Error on out of range integer conversions.
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
                   Added RANDOMIZE
                   Added TIME$
                   Added command line options: -title, -vc, -w, -D
-		  Added conditional assignment (=?)
+                  Added conditional assignment (=?)
                   Improved error handling in PUTFILE/PUTBASIC
                   Added optional automatic line numbering for PUTBASIC
                   Show a call stack when an error occurs inside a macro
                   Allow label scope-jumping using '.*label' and '.^label'
                   Allow high bits to be set on load/execution addresses
                   Show branch displacement when "Branch out of range" occurs
-                  Fixed bugs in duplicate filename direction on disc image
+                  Fixed bugs in duplicate filename detection on disc image
                   Fixed spurious "Branch out of range" error in rare case
 19/01/2012  1.08  Fixed makefile for GCC (MinGW) builds.
                   Added COPYBLOCK command to manage blocks of memory.

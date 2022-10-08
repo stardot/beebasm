@@ -1,0 +1,3 @@
+\ Ensure "no save" warning checks up to the end of memory
+ORG &FFFF
+BRK

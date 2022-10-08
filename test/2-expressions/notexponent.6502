@@ -1,0 +1,2 @@
+\ Don't mistake an EOR for an exponent
+ASSERT((252EOR63)=195)

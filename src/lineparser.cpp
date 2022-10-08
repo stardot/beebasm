@@ -73,8 +73,10 @@ LineParser::~LineParser()
 /*************************************************************************************************/
 void LineParser::Process()
 {
+	bool bProcessedSomething = false;
 	while ( AdvanceAndCheckEndOfLine() )	// keep going until we reach the end of the line
 	{
+		bProcessedSomething = true;
 //		cout << m_line << endl << string( m_column, ' ' ) << "^" << endl;
 
 		int oldColumn = m_column;
@@ -96,8 +98,10 @@ void LineParser::Process()
 					  ( isalpha( m_line[ m_column ] ) ||
 						isdigit( m_line[ m_column ] ) ||
 						m_line[ m_column ] == '_' ||
-						m_line[ m_column ] == '%' ) &&
-						m_line[ m_column - 1 ] != '%' );
+						m_line[ m_column ] == '%' ||
+						m_line[ m_column ] == '$' ) &&
+						m_line[ m_column - 1 ] != '%' &&
+						m_line[ m_column - 1 ] != '$' );
 
 			if ( AdvanceAndCheckEndOfStatement() )
 			{
@@ -174,7 +178,7 @@ void LineParser::Process()
 				m_column++;
 			}
 
-			double value = EvaluateExpression();
+			Value value = EvaluateExpression();
 
 			if ( GlobalData::Instance().IsFirstPass() )
 			{
@@ -210,7 +214,7 @@ void LineParser::Process()
 			const Macro* macro = MacroTable::Instance().Get( macroName );
 			if ( macro != NULL )
 			{
-				if ( GlobalData::Instance().ShouldOutputAsm() )
+				if ( m_sourceCode->ShouldOutputAsm() )
 				{
 					cout << "Macro " << macroName << ":" << endl;
 				}
@@ -225,7 +229,7 @@ void LineParser::Process()
 					{
 						if ( !SymbolTable::Instance().IsSymbolDefined( paramName ) )
 						{
-							double value = EvaluateExpression();
+							Value value = EvaluateExpression();
 							SymbolTable::Instance().AddSymbol( paramName, value );
 						}
 						else if ( GlobalData::Instance().IsSecondPass() )
@@ -236,7 +240,7 @@ void LineParser::Process()
 							// macro parameter rather than the new value of the outer macro
 							// parameter. See local-forward-branch-5.6502 for an example.
 							SymbolTable::Instance().RemoveSymbol( paramName );
-							double value = EvaluateExpression();
+							Value value = EvaluateExpression();
 							SymbolTable::Instance().AddSymbol( paramName, value );
 						}
 					}
@@ -269,7 +273,7 @@ void LineParser::Process()
 
 				HandleCloseBrace();
 
-				if ( GlobalData::Instance().ShouldOutputAsm() )
+				if ( m_sourceCode->ShouldOutputAsm() )
 				{
 					cout << "End macro " << macroName << endl;
 				}
@@ -281,6 +285,18 @@ void LineParser::Process()
 		// If we got this far, we didn't recognise anything, so throw an error
 
 		throw AsmException_SyntaxError_UnrecognisedToken( m_line, oldColumn );
+	}
+
+	// If we didn't process anything, i.e. this is a blank line, we must still call SkipStatement()
+	// if we're defining a macro, otherwise blank lines inside macro definitions cause incorrect
+	// line numbers to be reported for errors when expanding a macro definition.
+	if ( !bProcessedSomething )
+	{
+		if ( !m_sourceCode->IsIfConditionTrue() )
+		{
+			m_column = 0;
+			SkipStatement();
+		}
 	}
 }
 
@@ -314,6 +330,8 @@ void LineParser::SkipStatement()
 		{
 			if ( m_column < m_line.length() && m_line[ m_column ] == '\"' && !bInSingleQuotes )
 			{
+				// This handles quoted quotes in strings (like "a""b") because it views
+				// them as two adjacent strings.
 				bInQuotes = !bInQuotes;
 			}
 			else if ( m_column < m_line.length() && m_line[ m_column ] == '\'' )
@@ -357,22 +375,19 @@ void LineParser::SkipStatement()
 /*************************************************************************************************/
 void LineParser::SkipExpression( int bracketCount, bool bAllowOneMismatchedCloseBracket )
 {
-	while ( AdvanceAndCheckEndOfSubStatement() )
+	while ( AdvanceAndCheckEndOfSubStatement(bracketCount == 0) )
 	{
-		if ( bAllowOneMismatchedCloseBracket )
+		if ( m_line[ m_column ] == '(' )
 		{
-			if ( m_line[ m_column ] == '(' )
-			{
-				bracketCount++;
-			}
-			else if ( m_line[ m_column ] == ')' )
-			{
-				bracketCount--;
+			bracketCount++;
+		}
+		else if ( m_line[ m_column ] == ')' )
+		{
+			bracketCount--;
 
-				if ( bracketCount < 0 )
-				{
-					break;
-				}
+			if (bAllowOneMismatchedCloseBracket && ( bracketCount < 0 ) )
+			{
+				break;
 			}
 		}
 
@@ -500,9 +515,16 @@ bool LineParser::AdvanceAndCheckEndOfStatement()
 	@return		bool		true if we are not yet at the end of the substatement
 */
 /*************************************************************************************************/
-bool LineParser::AdvanceAndCheckEndOfSubStatement()
+bool LineParser::AdvanceAndCheckEndOfSubStatement(bool includeComma)
 {
-	return MoveToNextAtom( ";:\\,{}" );
+	if (includeComma)
+	{
+		return MoveToNextAtom( ";:\\,{}" );
+	}
+	else
+	{
+		return MoveToNextAtom( ";:\\{}" );
+	}
 }
 
 
@@ -529,8 +551,10 @@ string LineParser::GetSymbolName()
 			  ( isalpha( m_line[ m_column ] ) ||
 				isdigit( m_line[ m_column ] ) ||
 				m_line[ m_column ] == '_' ||
-				m_line[ m_column ] == '%' ) &&
-				m_line[ m_column - 1 ] != '%' );
+				m_line[ m_column ] == '%' ||
+				m_line[ m_column ] == '$' ) &&
+				m_line[ m_column - 1 ] != '%' &&
+				m_line[ m_column - 1 ] != '$' );
 
 	return symbolName;
 }

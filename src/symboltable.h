@@ -27,7 +27,9 @@
 #include <cstdlib>
 #include <map>
 #include <string>
+#include <vector>
 
+#include "value.h"
 
 class SymbolTable
 {
@@ -37,15 +39,20 @@ public:
 	static void Destroy();
 	static inline SymbolTable& Instance() { assert( m_gInstance != NULL ); return *m_gInstance; }
 
-	void AddSymbol( const std::string& symbol, double value, bool isLabel = false );
+	void AddSymbol( const std::string& symbol, Value value, bool isLabel = false );
 	bool AddCommandLineSymbol( const std::string& expr );
+	bool AddCommandLineStringSymbol( const std::string& expr );
 	void ChangeSymbol( const std::string& symbol, double value );
-	double GetSymbol( const std::string& symbol ) const;
+	Value GetSymbol( const std::string& symbol ) const;
 	bool IsSymbolDefined( const std::string& symbol ) const;
 	void RemoveSymbol( const std::string& symbol );
 
-	void Dump() const;
+	void Dump(bool global, bool all, const char * labels_file) const; // labels_file == nullptr -> stdout
 
+	void PushBrace();
+	void PushFor(std::string symbol, double value);
+	void AddLabel(const std::string & symbol);
+	void PopScope();
 
 private:
 
@@ -53,15 +60,15 @@ private:
 	{
 	public:
 
-		Symbol( double value, bool isLabel ) : m_value( value ), m_isLabel( isLabel ) {}
+		Symbol( Value value, bool isLabel ) : m_value( value ), m_isLabel( isLabel ) {}
 
-		void SetValue( double d ) { m_value = d; }
-		double GetValue() const { return m_value; }
+		void SetValue( Value value ) { m_value = value; }
+		Value GetValue() const { return m_value; }
 		bool IsLabel() const { return m_isLabel; }
 
 	private:
 
-		double	m_value;
+		Value	m_value;
 		bool	m_isLabel;
 	};
 
@@ -71,6 +78,17 @@ private:
 	std::map<std::string, Symbol>	m_map;
 
 	static SymbolTable*				m_gInstance;
+
+	int m_labelScopes;
+	struct Label
+	{
+		int         m_addr;
+		int         m_scope;
+		std::string m_identifier; // "" -> using label from parent scope
+		Label(int addr = 0, int scope = 0, const std::string & identifier = "") : m_addr(addr), m_scope(scope), m_identifier(identifier) {}
+	} m_lastLabel;
+	std::vector<Label> m_labelStack;
+	std::vector<Label> m_labelList;
 };
 
 

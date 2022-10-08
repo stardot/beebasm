@@ -12,15 +12,19 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{05CF19C4-5E11-22D4-C1AD-22BD997081FA}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -82,6 +86,7 @@
     <ClCompile Include="..\expression.cpp" />
     <ClCompile Include="..\globaldata.cpp" />
     <ClCompile Include="..\lineparser.cpp" />
+    <ClCompile Include="..\literals.cpp" />
     <ClCompile Include="..\macro.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\objectcode.cpp" />
@@ -98,6 +103,7 @@
     <ClInclude Include="..\discimage.h" />
     <ClInclude Include="..\globaldata.h" />
     <ClInclude Include="..\lineparser.h" />
+    <ClInclude Include="..\literals.h" />
     <ClInclude Include="..\macro.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\objectcode.h" />
@@ -106,6 +112,7 @@
     <ClInclude Include="..\sourcefile.h" />
     <ClInclude Include="..\stringutils.h" />
     <ClInclude Include="..\symboltable.h" />
+    <ClInclude Include="..\value.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

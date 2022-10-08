@@ -36,7 +36,7 @@ public:
 
 	// Constructor/destructor (RAII class)
 
-	explicit SourceFile( const std::string& filename );
+	SourceFile( const std::string& filename, const SourceCode* parent );
 	virtual ~SourceFile();
 
 	virtual void Process();

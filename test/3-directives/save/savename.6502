@@ -1,0 +1,27 @@
+\ beebasm -o test
+
+\ The "test" specified above should be ignored
+
+ORG &2000
+
+.start
+
+.f1
+LDA #'C'
+JMP &FFEE
+
+.f2
+LDA #'T'
+JMP &FFEE
+
+.f3
+LDA #'R'
+JMP &FFEE
+
+.end
+
+SAVE "test1", f1, f2
+SAVE "test2", f1, f3, f2
+base = &3000
+SAVE "test3", f1, end, base + f3 - start, base
+

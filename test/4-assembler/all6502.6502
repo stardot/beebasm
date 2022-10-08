@@ -1,0 +1,320 @@
+
+\ Every valid 6502 opcode.
+
+\ This file was generated once from the opcode data in beebasm and
+\ once from the data in another tool, and the files were identical.
+\ Additionally, this was assembled with beebasm, disassembled and
+\ successfully compared to this source.
+
+\ The gold ssd ensures nothing has changed since.
+
+ORG &2000
+
+.start
+
+\ &00
+BRK
+\ &01
+ORA (&12,X)
+\ &05
+ORA &12
+\ &06
+ASL &12
+\ &08
+PHP
+\ &09
+ORA #&12
+\ &0A
+ASL A
+\ &0D
+ORA &1234
+\ &0E
+ASL &1234
+\ &10
+BPL P%+2
+\ &11
+ORA (&12),Y
+\ &15
+ORA &12,X
+\ &16
+ASL &12,X
+\ &18
+CLC
+\ &19
+ORA &1234,Y
+\ &1D
+ORA &1234,X
+\ &1E
+ASL &1234,X
+\ &20
+JSR &1234
+\ &21
+AND (&12,X)
+\ &24
+BIT &12
+\ &25
+AND &12
+\ &26
+ROL &12
+\ &28
+PLP
+\ &29
+AND #&12
+\ &2A
+ROL A
+\ &2C
+BIT &1234
+\ &2D
+AND &1234
+\ &2E
+ROL &1234
+\ &30
+BMI P%+2
+\ &31
+AND (&12),Y
+\ &35
+AND &12,X
+\ &36
+ROL &12,X
+\ &38
+SEC
+\ &39
+AND &1234,Y
+\ &3D
+AND &1234,X
+\ &3E
+ROL &1234,X
+\ &40
+RTI
+\ &41
+EOR (&12,X)
+\ &45
+EOR &12
+\ &46
+LSR &12
+\ &48
+PHA
+\ &49
+EOR #&12
+\ &4A
+LSR A
+\ &4C
+JMP &1234
+\ &4D
+EOR &1234
+\ &4E
+LSR &1234
+\ &50
+BVC P%+2
+\ &51
+EOR (&12),Y
+\ &55
+EOR &12,X
+\ &56
+LSR &12,X
+\ &58
+CLI
+\ &59
+EOR &1234,Y
+\ &5D
+EOR &1234,X
+\ &5E
+LSR &1234,X
+\ &60
+RTS
+\ &61
+ADC (&12,X)
+\ &65
+ADC &12
+\ &66
+ROR &12
+\ &68
+PLA
+\ &69
+ADC #&12
+\ &6A
+ROR A
+\ &6C
+JMP (&1234)
+\ &6D
+ADC &1234
+\ &6E
+ROR &1234
+\ &70
+BVS P%+2
+\ &71
+ADC (&12),Y
+\ &75
+ADC &12,X
+\ &76
+ROR &12,X
+\ &78
+SEI
+\ &79
+ADC &1234,Y
+\ &7D
+ADC &1234,X
+\ &7E
+ROR &1234,X
+\ &81
+STA (&12,X)
+\ &84
+STY &12
+\ &85
+STA &12
+\ &86
+STX &12
+\ &88
+DEY
+\ &8A
+TXA
+\ &8C
+STY &1234
+\ &8D
+STA &1234
+\ &8E
+STX &1234
+\ &90
+BCC P%+2
+\ &91
+STA (&12),Y
+\ &94
+STY &12,X
+\ &95
+STA &12,X
+\ &96
+STX &12,Y
+\ &98
+TYA
+\ &99
+STA &1234,Y
+\ &9A
+TXS
+\ &9D
+STA &1234,X
+\ &A0
+LDY #&12
+\ &A1
+LDA (&12,X)
+\ &A2
+LDX #&12
+\ &A4
+LDY &12
+\ &A5
+LDA &12
+\ &A6
+LDX &12
+\ &A8
+TAY
+\ &A9
+LDA #&12
+\ &AA
+TAX
+\ &AC
+LDY &1234
+\ &AD
+LDA &1234
+\ &AE
+LDX &1234
+\ &B0
+BCS P%+2
+\ &B1
+LDA (&12),Y
+\ &B4
+LDY &12,X
+\ &B5
+LDA &12,X
+\ &B6
+LDX &12,Y
+\ &B8
+CLV
+\ &B9
+LDA &1234,Y
+\ &BA
+TSX
+\ &BC
+LDY &1234,X
+\ &BD
+LDA &1234,X
+\ &BE
+LDX &1234,Y
+\ &C0
+CPY #&12
+\ &C1
+CMP (&12,X)
+\ &C4
+CPY &12
+\ &C5
+CMP &12
+\ &C6
+DEC &12
+\ &C8
+INY
+\ &C9
+CMP #&12
+\ &CA
+DEX
+\ &CC
+CPY &1234
+\ &CD
+CMP &1234
+\ &CE
+DEC &1234
+\ &D0
+BNE P%+2
+\ &D1
+CMP (&12),Y
+\ &D5
+CMP &12,X
+\ &D6
+DEC &12,X
+\ &D8
+CLD
+\ &D9
+CMP &1234,Y
+\ &DD
+CMP &1234,X
+\ &DE
+DEC &1234,X
+\ &E0
+CPX #&12
+\ &E1
+SBC (&12,X)
+\ &E4
+CPX &12
+\ &E5
+SBC &12
+\ &E6
+INC &12
+\ &E8
+INX
+\ &E9
+SBC #&12
+\ &EA
+NOP
+\ &EC
+CPX &1234
+\ &ED
+SBC &1234
+\ &EE
+INC &1234
+\ &F0
+BEQ P%+2
+\ &F1
+SBC (&12),Y
+\ &F5
+SBC &12,X
+\ &F6
+INC &12,X
+\ &F8
+SED
+\ &F9
+SBC &1234,Y
+\ &FD
+SBC &1234,X
+\ &FE
+INC &1234,X
+
+.end
+
+SAVE "test", start, end

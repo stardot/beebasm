@@ -1,0 +1,3 @@
+\ SKIPTO backwards
+ORG &2000
+SKIPTO &1FFF

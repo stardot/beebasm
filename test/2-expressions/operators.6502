@@ -1,0 +1,90 @@
+\ Comparisons
+assert(1=1)
+assert(1==1)
+assert(1<>2)
+assert(1!=2)
+assert(1<=1)
+assert(1<=2)
+assert(1<2)
+assert(1>=1)
+assert(2>=1)
+assert(2>1)
+
+\ Arithmetic
+assert(2+3=5)
+assert(2-3=-1)
+assert(2*3=6)
+assert(5/2=2.5)
+assert(1+2*3=7)
+assert((1+2)*3=9)
+assert(2^3=8)
+assert(9.9 DIV 2.9=4)
+assert(9.9 MOD 2.9=1)
+
+\ Shifts
+assert(3 << 5=96)
+assert(96 << -5=3)
+assert(96 >> 5=3)
+assert(3 >> -5=96)
+
+assert(-1>>5=-1)
+assert(&80000000>>5=-&4000000)
+
+\ Logic
+assert((14 AND 28)=12)
+assert((14 OR 28)=30)
+assert((14 EOR 28)=18)
+assert(not(-1)=0)
+assert(not(0)=-1)
+assert(not(1)=-2)
+
+\ Bytes
+assert(hi(&1234)=&12)
+assert(>&1234=&12)
+assert(lo(&1234)=&34)
+assert(<&1234=&34)
+
+\ Maths
+assert(sqr(64)=8)
+assert(int(3.9)=3)
+assert(int(-3.9)=-3)
+assert(abs(2.5)=2.5)
+assert(abs(-2.5)=2.5)
+assert(sgn(0)=0)
+assert(sgn(-56)=-1)
+assert(sgn(56)=1)
+
+\ Integer conversions
+assert(int(&FFFFFFFF)=-1)
+assert(int(4294967295)=-1)
+assert(int(&80000000)=-2147483648)
+assert(int(-2147483648)=-2147483648)
+
+e=0.000000000001
+assert(sin(0)=0)
+assert(sin(PI/2)=1)
+for d, 1, 179, 2
+    r=rad(d)
+    assert(abs(deg(r)-d) < e)
+    c=cos(r)
+    s=sin(r)
+    t=tan(r)
+    r2=r-PI/2
+    s2=sin(r2)
+    t2=tan(r2)
+    assert(abs(acs(c)-r) < e)
+    assert(abs(asn(s2)-r2) < e)
+    assert(abs(atn(t2)-r2) < e)
+    assert(abs(c-sin(r+PI/2)) < e)
+    assert(abs(t-s/c) < e)
+next
+
+log10=ln(10)
+for d, 1, 20
+    natural=ln(d)
+    base10=log(d)
+    p=exp(natural)
+    assert(abs(p-d) < e)
+    assert(abs(base10-natural/log10) < e)
+    assert(abs(10^base10-d) < e)
+next

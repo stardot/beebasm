@@ -53,6 +53,9 @@ LDLIBS			:=		-lm
 
 PARAMS			:=		-i ../demo.6502 -do ../demo.ssd -boot Code -v
 
+# Command to run the tests
+
+TEST			:=		cd .. && python3 test/testrunner.py
 
 
 #--------------------------------------------------------------------------------------------------

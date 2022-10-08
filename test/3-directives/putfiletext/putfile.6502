@@ -1,0 +1,13 @@
+\ PUTFILE - simple test
+
+ORG &2000
+
+.start
+.end
+
+SAVE "test", start, end
+
+\ Two parameter case handled by puttext.6502
+PUTFILE "put.txt", &FEED, &BEAD
+PUTFILE "put.txt", "PUT", &BEEF
+PUTFILE "put.txt", "PUT2", &C0C0, &D0D0

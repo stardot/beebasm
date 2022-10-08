@@ -1,0 +1,24 @@
+\ In a list of parameters check that the parser skips to the
+\ next parameter after an error, not to the end of the list.
+
+\ This error only revealed itself when the list contained
+\ a function call.
+
+\ If this test fails then beebasm will report that the second
+\ pass has generated different code to the first.
+
+ORG &2000
+
+.start
+
+EQUB LO(undef1), HI(undef1), 5, 6
+.undef1
+EQUW LO(undef1), HI(undef1), undef2, 512
+.undef2
+EQUD undef2, HI(undef3), &20000, -1
+.undef3
+
+.end
+
+SAVE "test", start, end
+

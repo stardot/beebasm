@@ -1,0 +1,50 @@
+.TH BEEBASM "1" "June 2021" "beebasm 1.09" "User Commands"
+.SH NAME
+beebasm \- portable 6502 assembler with BBC Micro style syntax
+.SH SYNOPSIS
+.B beebasm
+.RI [ options ]
+.RI -i
+.RI <filename>
+.SH DESCRIPTION
+BeebAsm is a 6502 assembler designed specially for developing assembler programs for the BBC Micro.  It uses syntax reminiscent of BBC BASIC's built-in assembler, and is able to output its object code directly into emulator-ready DFS disc images.
+.SH OPTIONS
+.SS "Possible options:"
+.TP
+\fB\-i\fR <file>
+Specify source filename
+.TP
+\fB\-o\fR <file>
+Specify output filename (when not specified by SAVE command)
+.TP
+\fB\-di\fR <file>
+Specify a disc image file to be added to
+.TP
+\fB\-do\fR <file>
+Specify a disc image file to output
+.TP
+\fB\-boot\fR <file>
+Specify a filename to be run by !BOOT on a new disc image
+.TP
+\fB\-opt\fR <opt>
+Specify the *OPT 4,n for the generated disc image
+.HP
+\fB\-title\fR <title> Specify the title for the generated disc image
+.TP
+\fB\-v\fR
+Verbose output
+.TP
+\fB\-d\fR
+Dump all global symbols after assembly
+.TP
+\fB\-w\fR
+Require whitespace between opcodes and labels
+.TP
+\fB\-vc\fR
+Use Visual C++\-style error messages
+.HP
+\fB\-D\fR <sym>=<val> Define symbol prior to assembly
+.SH SEE ALSO
+The full documentation can be found at
+http://www.retrosoftware.co.uk/wiki/index.php/BeebAsm
+

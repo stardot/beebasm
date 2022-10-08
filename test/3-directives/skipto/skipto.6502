@@ -1,0 +1,16 @@
+\ Various SKIPTOs
+
+ORG &2000
+
+.start
+
+FOR s, 0, 300, 6
+    EQUW s
+    .block
+    SKIPTO P%+s
+    ASSERT(P%=block+s)
+NEXT
+
+.end
+
+SAVE "test", start, end
