@@ -732,16 +732,16 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
-??/??/????  1.10  Documented "$" and "%" as literal prefixes (thanks to
-                  cardboardguru76 for pointing this out).
-		  Fixed silently treating label references starting with "."
+08/10/2020  1.10  (Potentially breaking) Random number generator now uses 32-bit ints.
+      Documented "$" and "%" as literal prefixes (thanks to cardboardguru76 for pointing this out).
+      Fixed silently treating label references starting with "."
 		  as 0 (thanks to Charles Reilly for this fix).
 		  Allowed "-h" and "-help" options to see help.
-		  Fixed tokenisation of BASIC pseudo-variables in some cases.
-		  (Thanks to Richard Russell for advice on this.)
+		  Fixed tokenisation of BASIC pseudo-variables in some cases. (Thanks to Richard Russell advice on this.)
 		  Fixed incorrect line number for errors inside macros with
 		  blank lines inside them.
 		  Fixed incorrect line numbers from PUTBASIC in some cases.
+      Fixed crashes in PUTBASIC caused by edge cases in end-of-file handling.
 		  Added FILELINE$ and CALLSTACK$ (thanks to tricky for this)
 		  Added -cycle, -dd and -labels options (thanks to tricky for these)
 		  Added CMake support and man page (thanks to Dave Lambley)
@@ -751,6 +751,8 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 		  Support underscore separators in numeric literals. C++'s built-in
 		  parsing was used previously so beebasm's numeric syntax varied
 		  between compilers and platforms; this is fixed.
+      Improved literal exponent parsing.
+      Error on out of range integer conversions.
 12/05/2018  1.09  Added ASSERT
                   Added CPU (as a constant)
                   Added PUTTEXT
