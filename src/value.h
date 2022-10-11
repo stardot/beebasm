@@ -25,6 +25,7 @@
 
 #include <cassert>
 #include <string.h>
+#include <cstdlib>
 
 // A simple immutable string buffer with a length and a reference count.
 // This doesn't have constructors, etc. so it can be stuffed into a union.
