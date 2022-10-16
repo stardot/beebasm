@@ -80,7 +80,7 @@
   <ItemGroup>
     <ClCompile Include="..\asmexception.cpp" />
     <ClCompile Include="..\assemble.cpp" />
-    <ClCompile Include="..\BASIC.cpp" />
+    <ClCompile Include="..\basic_keywords.cpp" />
     <ClCompile Include="..\commands.cpp" />
     <ClCompile Include="..\discimage.cpp" />
     <ClCompile Include="..\expression.cpp" />
@@ -95,10 +95,11 @@
     <ClCompile Include="..\sourcefile.cpp" />
     <ClCompile Include="..\stringutils.cpp" />
     <ClCompile Include="..\symboltable.cpp" />
+    <ClCompile Include="..\basic_tokenize.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\asmexception.h" />
-    <ClInclude Include="..\BASIC.h" />
+    <ClInclude Include="..\basic_keywords.h" />
     <ClInclude Include="..\constants.h" />
     <ClInclude Include="..\discimage.h" />
     <ClInclude Include="..\globaldata.h" />
@@ -113,6 +114,7 @@
     <ClInclude Include="..\sourcefile.h" />
     <ClInclude Include="..\stringutils.h" />
     <ClInclude Include="..\symboltable.h" />
+    <ClInclude Include="..\basic_tokenize.h" />
     <ClInclude Include="..\value.h" />
     <ClInclude Include="..\version.h" />
   </ItemGroup>

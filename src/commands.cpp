@@ -28,6 +28,7 @@
 #include <string>
 #include <cstring>
 #include <ctime>
+#include <sstream>
 
 #include "lineparser.h"
 #include "globaldata.h"
@@ -37,7 +38,7 @@
 #include "sourcefile.h"
 #include "asmexception.h"
 #include "discimage.h"
-#include "BASIC.h"
+#include "basic_tokenize.h"
 #include "random.h"
 
 
@@ -1607,34 +1608,30 @@ void LineParser::HandlePutBasic()
 	if ( GlobalData::Instance().IsSecondPass() &&
 		 GlobalData::Instance().UsesDiscImage() )
 	{
-		Uint8* buffer = new Uint8[ 0x10000 ];
-		int fileSize;
-		bool bSuccess = ImportBASIC( hostFilename.c_str(), buffer, &fileSize );
-
-		if (!bSuccess)
+		FILE* basic_file = fopen(hostFilename.c_str(), "rb");
+		if (!basic_file)
 		{
-			if (GetBASICErrorNum() == 2)
-			{
-				AsmException_AssembleError_FileOpen e;
-				e.SetString( m_line );
-				e.SetColumn( m_column );
-				throw e;
-			}
-			else
-			{
-				std::string message = hostFilename + ": " + GetBASICError();
-				throw AsmException_UserError( m_line, m_column, message );
-			}
+			AsmException_AssembleError_FileOpen e;
+			e.SetString( m_line );
+			e.SetColumn( m_column );
+			throw e;
+		}
+		std::vector<unsigned char> tokenized;
+		TokenizeError err = tokenize_file(basic_file, tokenized);
+		fclose(basic_file);
+		if (err.IsError())
+		{
+			std::stringstream message;
+			message << hostFilename << ":" << err.lineNumber << ": " << err.messageText;
+			throw AsmException_UserError( m_line, m_column, message.str() );
 		}
 
 		// disc image version of the save
 		GlobalData::Instance().GetDiscImage()->AddFile( beebFilename.c_str(),
-														reinterpret_cast< unsigned char* >( buffer ),
+														tokenized.data(),
 														0xFFFF1900,
 														0xFFFF8023,
-														fileSize );
-
-		delete [] buffer;
+														tokenized.size() );
 	}
 
 }

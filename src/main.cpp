@@ -34,7 +34,6 @@
 #include "objectcode.h"
 #include "symboltable.h"
 #include "discimage.h"
-#include "BASIC.h"
 #include "macro.h"
 #include "random.h"
 #include "version.h"
@@ -311,7 +310,6 @@ int main( int argc, char* argv[] )
 
 	ObjectCode::Create();
 	MacroTable::Create();
-	SetupBASICTables();
 
 	time_t randomSeed = time( NULL );
 
