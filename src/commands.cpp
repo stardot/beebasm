@@ -1599,29 +1599,10 @@ void LineParser::HandlePutFileCommon( bool bText )
 /*************************************************************************************************/
 void LineParser::HandlePutBasic()
 {
-	string hostFilename = EvaluateExpressionAsString();
-	string beebFilename = hostFilename;
-
-	if ( AdvanceAndCheckEndOfStatement() )
-	{
-		// see if there's a second parameter
-
-		if ( m_line[ m_column ] != ',' )
-		{
-			throw AsmException_SyntaxError_MissingComma( m_line, m_column );
-		}
-
-		m_column++;
-
-		beebFilename = EvaluateExpressionAsString();
-	}
-
-	// check this is now the end
-
-	if ( AdvanceAndCheckEndOfStatement() )
-	{
-		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
-	}
+	ArgListParser args(*this);
+	string hostFilename = args.ParseString();
+	string beebFilename = args.ParseString().Default(hostFilename);
+	args.CheckComplete();
 
 	if ( GlobalData::Instance().IsSecondPass() &&
 		 GlobalData::Instance().UsesDiscImage() )
