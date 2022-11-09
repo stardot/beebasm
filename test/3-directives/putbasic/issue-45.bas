@@ -1,0 +1,8 @@
+10 REM Tokenizing of PAGE on RHS
+20 p=PAGE
+30 PRINT p
+40 ?&900=PAGE DIV 256
+50 PRINT FNpage
+60 END
+70 DEF FNpage
+80 =PAGE

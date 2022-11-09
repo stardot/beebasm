@@ -21,6 +21,7 @@
 /*************************************************************************************************/
 
 #include <cassert>
+#include <cstdlib>
 
 #include "asmexception.h"
 #include "literals.h"
