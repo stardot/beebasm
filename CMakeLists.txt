@@ -18,5 +18,5 @@ install(FILES ${CMAKE_SOURCE_DIR}/beebasm.1 DESTINATION share/man/man1)
 
 enable_testing()
 
-add_test(NAME Runs COMMAND ./beebasm -i demo.6502 -do demo.ssd -boot Code -v)
-add_test(NAME Tests COMMAND python3 test/testrunner.py -v)
+add_test(NAME Runs COMMAND ./beebasm -i ${CMAKE_SOURCE_DIR}/demo.6502 -do demo.ssd -boot Code -v)
+add_test(NAME Tests COMMAND python3 ${CMAKE_SOURCE_DIR}/test/testrunner.py -v)

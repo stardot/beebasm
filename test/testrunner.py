@@ -185,7 +185,7 @@ else:
     beebasm = 'beebasm'
 beebasm = os.path.join(os.getcwd(), beebasm)
 
-os.chdir('test')
+os.chdir(os.path.dirname(__file__))
 
 original_stdout = sys.stdout
 if not verbose:
