@@ -1,0 +1,2 @@
+\ Variable name cannot contain a dollar
+ASSIGN "a$b",13

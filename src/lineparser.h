@@ -164,6 +164,9 @@ private:
 	void			HandleCopyBlock();
 	void			HandleRandomize();
 	void			HandleAsm();
+	void			HandleDefineAssignCommon( bool bAllowRedefinition );
+	void			HandleDefine();
+	void			HandleAssign();
 
 	// expression evaluating methods
 

@@ -1,0 +1,2 @@
+\ Variable name can't start with a number
+ASSIGN "1a",13

@@ -1,0 +1,23 @@
+\ Define examples
+
+DEFINE "v1",27183
+ASSERT v1 = 27183
+
+DEFINE "v2",v1+1
+ASSERT v2 = 27184
+
+prefix = "v"
+DEFINE prefix + "3", "A string"
+ASSERT v3 = "A string"
+
+DEFINE "_a",1
+ASSERT _a = 1
+
+DEFINE "a_",2
+ASSERT a_ = 2
+
+DEFINE "a$","str"
+ASSERT a$ = "str"
+
+DEFINE "a%",3
+ASSERT a% = 3
