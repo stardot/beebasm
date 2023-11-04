@@ -663,7 +663,7 @@ ORG &1100
 GUARD &5800
 
 .mainstart
-  LDA #5:STA &FE30   ; page in RAM bank 2
+  LDA #2:STA &FE30   ; page in RAM bank 2
   JSR bank2routine
   ...
 .mainroutine
