@@ -817,7 +817,13 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 
 
-## 10. REPORTING BUGS
+## 10. BEEBASM ON WINDOWS
+
+BeebAsm for Windows is compiled with Microsoft Visual Studio and requires various support files such as MSVCP140.dll.  Most users will have these files already but if you receive an error you will need to download and install the Visual Studio 2015, 2017, 2019, and 2022 Redistributable Package for x86.  It can be downloaded from this url:
+
+https://aka.ms/vs/17/release/vc_redist.x86.exe
+
+## 11. REPORTING BUGS
 
 BeebAsm was writen by Rich Talbot-Watkins but is now maintained by the members of the 'stardot' forums. 
 
