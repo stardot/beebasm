@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(beebasm)
+project(beebasm LANGUAGES CXX)
 
 add_compile_options(-Wall -W -Wcast-qual -Wshadow -Wcast-align -Wold-style-cast -Woverloaded-virtual)
 
