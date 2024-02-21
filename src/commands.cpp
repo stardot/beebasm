@@ -1160,11 +1160,13 @@ void LineParser::HandleSave()
 	int reload = args.ParseInt().Default(start).Range(0, 0xFFFFFF);
 	args.CheckComplete();
 
-	if ( !saveParam.Found() )
+	string saveFile = saveParam.Found() ? static_cast<string>(saveParam) : "";
+
+	if ( saveFile.empty() )
 	{
 		if ( GlobalData::Instance().GetOutputFile() != NULL )
 		{
-			saveParam.Default(GlobalData::Instance().GetOutputFile());
+			saveFile = GlobalData::Instance().GetOutputFile();
 
 			if ( GlobalData::Instance().IsSecondPass() )
 			{
@@ -1183,8 +1185,6 @@ void LineParser::HandleSave()
 			throw AsmException_SyntaxError_NoAnonSave( m_line, saveParam.Column() );
 		}
 	}
-
-	string saveFile = saveParam;
 
 	if ( m_sourceCode->ShouldOutputAsm() )
 	{
