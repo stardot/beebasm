@@ -1149,7 +1149,7 @@ void LineParser::HandleAssert()
 /*************************************************************************************************/
 void LineParser::HandleSave()
 {
-	// syntax is SAVE ["filename"], start, end [, exec [, reload] ]
+	// syntax is SAVE ["filename",] start, end [, exec [, reload] ]
 
 	ArgListParser args(*this);
 
