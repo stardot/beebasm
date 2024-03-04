@@ -1,0 +1,2 @@
+\ Variable name can't start with a number
+DEFINE "1a",13

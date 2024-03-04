@@ -82,7 +82,9 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ "ERROR",		&LineParser::HandleError,				0 },
 	{ "COPYBLOCK",	&LineParser::HandleCopyBlock,			0 },
 	{ "RANDOMIZE",  &LineParser::HandleRandomize,			0 },
-	{ "ASM",		&LineParser::HandleAsm,					0 }
+	{ "ASM",		&LineParser::HandleAsm,					0 },
+	{ "DEFINE",		&LineParser::HandleDefine,				0 },
+	{ "ASSIGN",		&LineParser::HandleAssign,				0 }
 };
 
 
@@ -1875,4 +1877,75 @@ void LineParser::HandleAsm()
 	}
 
 	parser.HandleAssembler(instruction);
+}
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleDefineAssignCommon()
+	LineParser::HandleDefine()
+	LineParser::HandleAssign()
+*/
+/*************************************************************************************************/
+void LineParser::HandleDefineAssignCommon( bool bAllowRedefinition )
+{
+	string name = EvaluateExpressionAsString();
+
+	if ( name.empty() || ! ( isalpha( name[0] ) || name[0] == '_' ) )
+	{
+		throw AsmException_SyntaxError_InvalidSymbolName( m_line, m_column );
+	}
+	for (std::string::size_type i = 1, e = name.size(); i < e; ++i)
+	{
+		if ( ! ( ( isalpha( name[ i ] ) ||
+				   isdigit( name[ i ] ) ||
+				   name[ i ] == '_' ||
+				   name[ i ] == '%' ||
+				   name[ i ] == '$' ) &&
+				 name[ i - 1 ] != '%' &&
+				 name[ i - 1 ] != '$' ) )
+		{
+			throw AsmException_SyntaxError_InvalidSymbolName( m_line, m_column );
+		}
+	}
+
+	if ( ! ( AdvanceAndCheckEndOfStatement() && m_line[ m_column ] == ',' ) )
+	{
+		throw AsmException_SyntaxError_MissingComma( m_line, m_column );
+	}
+
+	++m_column;
+	if ( ! AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_MissingValue( m_line, m_column );
+	}
+
+	Value value = EvaluateExpression();
+
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
+	}
+
+	if ( GlobalData::Instance().IsFirstPass() )
+	{
+		if ( SymbolTable::Instance().IsSymbolDefined( name ) )
+		{
+			if ( !bAllowRedefinition )
+			{
+				throw AsmException_SyntaxError_LabelAlreadyDefined( m_line, m_column );
+			}
+			SymbolTable::Instance().RemoveSymbol( name );
+		}
+        SymbolTable::Instance().AddSymbol( name, value );
+	}
+}
+
+void LineParser::HandleDefine()
+{
+	HandleDefineAssignCommon( false );
+}
+
+void LineParser::HandleAssign()
+{
+	HandleDefineAssignCommon( true );
 }

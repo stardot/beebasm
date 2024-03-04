@@ -1,0 +1,23 @@
+\ Assign examples
+
+ASSIGN "v1",27183
+ASSERT v1 = 27183
+
+ASSIGN "v2",v1+1
+ASSERT v2 = 27184
+
+prefix = "v"
+ASSIGN prefix + "3", "A string"
+ASSERT v3 = "A string"
+
+ASSIGN "_a",1
+ASSERT _a = 1
+
+ASSIGN "a_",2
+ASSERT a_ = 2
+
+ASSIGN "a$","str"
+ASSERT a$ = "str"
+
+ASSIGN "a%",3
+ASSERT a% = 3

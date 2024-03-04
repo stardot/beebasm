@@ -1,0 +1,2 @@
+\ Variable name cannot contain a dollar
+DEFINE "a$b",13

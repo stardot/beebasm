@@ -1,0 +1,4 @@
+\ Can reassign variables
+a = 12
+ASSIGN "a",13
+ASSERT a = 13

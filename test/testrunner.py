@@ -123,7 +123,7 @@ def run_test(beebasm, path, file_names, file_name):
         # Duplicate captured data on stdout
         sys.stdout.write(capture)
         with open(gold_txt, 'r') as gold_file:
-            gold = gold_file.read()
+            gold = gold_file.read().strip()
         print('Comparing beebasm output to', gold_txt, end = '')
         if capture.find(gold) != -1:
             print(' succeeded')
@@ -199,4 +199,3 @@ try:
 except TestFailure as e:
     print("FAILURE: " + e.args[0], file = original_stdout)
     sys.exit(1)
-

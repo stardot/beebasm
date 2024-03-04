@@ -1,0 +1,2 @@
+\ Variable name cannot contain general punctuation
+DEFINE "a!b",13

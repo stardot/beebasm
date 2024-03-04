@@ -643,9 +643,38 @@ Abort assembly if any of the expressions is false.
 
 Seed the random number generator used by the RND() function.  If this is not used, the random number generator is seeded based on the current time and so each build of a program using `RND()` will be different.
 
+
 `ASM <str>`
 
 Assemble the supplied assembly language string.  For example `ASM "LDA #&41"`.
+
+
+`DEFINE <var-name> <expr>`
+
+Evaluates `<var-name>` as the name of a variable to define with value `<expr>`. The `<var-name>` expressison must be a string, for example `DEFINE "addr" &70`. It is not possible to re-assign variables.
+
+This must be used instead of `=` when the variable name needs to be generated dynamically such as from macro arguments, for example:
+
+```
+    MACRO VIA name, base_addr
+      DEFINE name, addr
+      DEFINE name + "_IOR_B", base_addr
+      DEFINE name + "_IOR_A", base_addr + 1
+      DEFINE name + "_DDR_B", base_addr + 2
+      DEFINE name + "_DDR_A", base_addr + 3
+      ; ...
+      ; ...
+    ENDMACRO
+
+    VIA SYSVIA, &FE40
+    VIA USERVIA, &FE60
+```
+
+
+`ASSIGN <var-name> <expr>`
+
+Does the same thing as `DEFINE <var-name> <expr>` except that it can be used to change the value of a variable.
+
 
 ## 7. TIPS AND TRICKS
 
