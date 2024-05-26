@@ -368,7 +368,8 @@ string SourceCode::GetSymbolNameSuffix( int level ) const
 
 	ostringstream suffix;
 
-	for ( int i = 0; i < level; i++ )
+	int i = level - 1;
+	if ( i >= 0 )
 	{
 		suffix << "@";
 		suffix << m_forStack[ i ].m_id;
