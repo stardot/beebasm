@@ -82,7 +82,7 @@ ObjectCode::ObjectCode()
 {
 	memset( m_aMemory, 0, sizeof m_aMemory );
 	memset( m_aFlags, 0, sizeof m_aFlags );
-	SymbolTable::Instance().AddSymbol( "CPU", m_CPU );
+	SymbolTable::Instance().AddBuiltInSymbol( "CPU", m_CPU );
 }
 
 
@@ -110,7 +110,7 @@ ObjectCode::~ObjectCode()
 void ObjectCode::SetCPU( int i )
 {
 	m_CPU = i;
-	SymbolTable::Instance().ChangeSymbol( "CPU", m_CPU );
+	SymbolTable::Instance().ChangeBuiltInSymbol( "CPU", m_CPU );
 }
 
 
@@ -128,7 +128,7 @@ void ObjectCode::InitialisePass()
 
 	SetCPU( 0 );
 	SetPC( 0 );
-	SymbolTable::Instance().ChangeSymbol( "P%", m_PC );
+	SymbolTable::Instance().ChangeBuiltInSymbol( "P%", m_PC );
 
 	// Clear flags between passes
 
@@ -173,7 +173,7 @@ void ObjectCode::PutByte( unsigned int byte )
 	m_aFlags[ m_PC ] |= USED;
 	m_aMemory[ m_PC++ ] = byte;
 
-	SymbolTable::Instance().ChangeSymbol( "P%", m_PC );
+	SymbolTable::Instance().ChangeBuiltInSymbol( "P%", m_PC );
 }
 
 
@@ -216,7 +216,7 @@ void ObjectCode::Assemble1( unsigned int opcode )
 	m_aFlags[ m_PC ] |= ( USED | CHECK );
 	m_aMemory[ m_PC++ ] = opcode;
 
-	SymbolTable::Instance().ChangeSymbol( "P%", m_PC );
+	SymbolTable::Instance().ChangeBuiltInSymbol( "P%", m_PC );
 }
 
 
@@ -264,7 +264,7 @@ void ObjectCode::Assemble2( unsigned int opcode, unsigned int val )
 	m_aFlags[ m_PC ] |= USED;
 	m_aMemory[ m_PC++ ] = val;
 
-	SymbolTable::Instance().ChangeSymbol( "P%", m_PC );
+	SymbolTable::Instance().ChangeBuiltInSymbol( "P%", m_PC );
 }
 
 
@@ -316,7 +316,7 @@ void ObjectCode::Assemble3( unsigned int opcode, unsigned int addr )
 	m_aFlags[ m_PC ] |= USED;
 	m_aMemory[ m_PC++ ] = ( addr & 0xFF00 ) >> 8;
 
-	SymbolTable::Instance().ChangeSymbol( "P%", m_PC );
+	SymbolTable::Instance().ChangeBuiltInSymbol( "P%", m_PC );
 }
 
 

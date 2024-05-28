@@ -108,6 +108,7 @@
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\objectcode.h" />
     <ClInclude Include="..\random.h" />
+    <ClInclude Include="..\scopedsymbolname.h" />
     <ClInclude Include="..\sourcecode.h" />
     <ClInclude Include="..\sourcefile.h" />
     <ClInclude Include="..\stringutils.h" />

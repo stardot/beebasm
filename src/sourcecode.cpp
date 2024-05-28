@@ -188,7 +188,7 @@ void SourceCode::Process()
 	SourceCode::AddFor()
 */
 /*************************************************************************************************/
-void SourceCode::AddFor( const string& varName,
+void SourceCode::AddFor( const ScopedSymbolName& varName,
 						 double start,
 						 double end,
 						 double step,
@@ -240,7 +240,7 @@ void SourceCode::OpenBrace( const string& line, int column )
 
 	// Fill in FOR block
 
-	m_forStack[ m_forStackPtr ].m_varName		= "";
+	m_forStack[ m_forStackPtr ].m_varName		= ScopedSymbolName();
 	m_forStack[ m_forStackPtr ].m_current		= 1.0;
 	m_forStack[ m_forStackPtr ].m_end			= 0.0;
 	m_forStack[ m_forStackPtr ].m_step			= 0.0;
@@ -354,30 +354,28 @@ void SourceCode::CopyForStack( const SourceCode* copyFrom )
 }
 
 
+
 /*************************************************************************************************/
 /**
-	SourceCode::GetSymbolNameSuffix()
+	SourceCode::GetScopedSymbolName()
 */
 /*************************************************************************************************/
-string SourceCode::GetSymbolNameSuffix( int level ) const
+ScopedSymbolName SourceCode::GetScopedSymbolName( const string& symbolName, int level ) const
 {
 	if ( level == -1 )
 	{
 		level = m_forStackPtr;
 	}
 
-	ostringstream suffix;
-
 	int i = level - 1;
 	if ( i >= 0 )
 	{
-		suffix << "@";
-		suffix << m_forStack[ i ].m_id;
-		suffix << "_";
-		suffix << m_forStack[ i ].m_count;
+		return ScopedSymbolName(symbolName, m_forStack[ i ].m_id, m_forStack[ i ].m_count);
 	}
-
-	return suffix.str();
+	else
+	{
+		return ScopedSymbolName(symbolName);
+	}
 }
 
 
@@ -586,7 +584,7 @@ bool SourceCode::GetSymbolValue(std::string name, Value& value)
 {
 	for ( int forLevel = GetForLevel(); forLevel >= 0; forLevel-- )
 	{
-		string fullSymbolName = name + GetSymbolNameSuffix( forLevel );
+		ScopedSymbolName fullSymbolName = GetScopedSymbolName( name, forLevel );
 
 		if ( SymbolTable::Instance().IsSymbolDefined( fullSymbolName ) )
 		{

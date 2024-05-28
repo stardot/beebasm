@@ -158,7 +158,7 @@ void LineParser::Process()
 			// Deal here with symbol assignment
 			bool bIsConditionalAssignment = false;
 
-			string symbolName = GetSymbolName() + m_sourceCode->GetSymbolNameSuffix();
+			ScopedSymbolName symbolName = m_sourceCode->GetScopedSymbolName( GetSymbolName() );
 
 			if ( !AdvanceAndCheckEndOfStatement() )
 			{
@@ -223,7 +223,7 @@ void LineParser::Process()
 
 				for ( int i = 0; i < macro->GetNumberOfParameters(); i++ )
 				{
-					string paramName = macro->GetParameter( i ) + m_sourceCode->GetSymbolNameSuffix();
+					ScopedSymbolName paramName = m_sourceCode->GetScopedSymbolName( macro->GetParameter( i ) );
 
 					try
 					{

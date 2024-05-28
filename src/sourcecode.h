@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 
+#include "scopedsymbolname.h"
 #include "value.h"
 
 class Macro;
@@ -67,7 +68,7 @@ protected:
 
 	struct For
 	{
-		std::string			m_varName;
+		ScopedSymbolName	m_varName;
 		double				m_current;
 		double				m_end;
 		double				m_step;
@@ -106,7 +107,7 @@ public:
 	void					OpenBrace( const std::string& line, int column );
 	void					CloseBrace( const std::string& line, int column );
 
-	void					AddFor( const std::string& varName,
+	void					AddFor( const ScopedSymbolName& varName,
 									double start,
 									double end,
 									double step,
@@ -123,7 +124,8 @@ public:
 	inline Macro*			GetCurrentMacro() { return m_currentMacro; }
 
 	bool					GetSymbolValue(std::string name, Value& value);
-	std::string				GetSymbolNameSuffix( int level = -1 ) const;
+	ScopedSymbolName		GetScopedSymbolName( const std::string& symbolName, int level = -1 ) const;
+
 	bool					ShouldOutputAsm();
 
 	bool					IsIfConditionTrue() const;

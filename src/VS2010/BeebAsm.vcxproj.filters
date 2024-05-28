@@ -116,5 +116,8 @@
     <ClInclude Include="..\literals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\scopedsymbolname.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

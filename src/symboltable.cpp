@@ -85,10 +85,10 @@ SymbolTable::SymbolTable()
 {
 	// Add any constant symbols here
 
-	AddSymbol( "PI", const_pi );
-	AddSymbol( "P%", 0 );
-	AddSymbol( "TRUE", -1 );
-	AddSymbol( "FALSE", 0 );
+	AddBuiltInSymbol( "PI", const_pi );
+	AddBuiltInSymbol( "P%", 0 );
+	AddBuiltInSymbol( "TRUE", -1 );
+	AddBuiltInSymbol( "FALSE", 0 );
 }
 
 
@@ -116,7 +116,7 @@ SymbolTable::~SymbolTable()
 	@returns	bool
 */
 /*************************************************************************************************/
-bool SymbolTable::IsSymbolDefined( const std::string& symbol ) const
+bool SymbolTable::IsSymbolDefined( const ScopedSymbolName& symbol ) const
 {
 	return ( m_map.count( symbol ) == 1 );
 }
@@ -125,15 +125,32 @@ bool SymbolTable::IsSymbolDefined( const std::string& symbol ) const
 
 /*************************************************************************************************/
 /**
-	SymbolTable::AddSymbol()
+	SymbolTable::AddBuiltInSymbol()
 
-	Adds a symbol to the symbol table with the supplied value
+	Adds a unscoped symbol to the symbol table with the supplied value
 
 	@param		symbol			The symbol to add
 	@param		value			Its value
 */
 /*************************************************************************************************/
-void SymbolTable::AddSymbol( const std::string& symbol, Value value, bool isLabel )
+void SymbolTable::AddBuiltInSymbol( const string& name, Value value )
+{
+	AddSymbol(ScopedSymbolName(name), value, false);
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SymbolTable::AddSymbol()
+
+	Adds a scoped symbol to the symbol table with the supplied value
+
+	@param		symbol			The symbol to add
+	@param		value			Its value
+*/
+/*************************************************************************************************/
+void SymbolTable::AddSymbol( const ScopedSymbolName& symbol, Value value, bool isLabel )
 {
 	assert( !IsSymbolDefined( symbol ) );
 	m_map.insert( make_pair( symbol, Symbol( value, isLabel ) ) );
@@ -179,7 +196,7 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 			return false;
 		}
 	}
-	if ( IsSymbolDefined( symbol ) )
+	if ( IsSymbolDefined( ScopedSymbolName(symbol) ) )
 	{
 		return false;
 	}
@@ -262,7 +279,7 @@ bool SymbolTable::AddCommandLineStringSymbol( const std::string& expr )
 	@param		symbol			The name of the symbol to look for
 */
 /*************************************************************************************************/
-Value SymbolTable::GetSymbol( const std::string& symbol ) const
+Value SymbolTable::GetSymbol( const ScopedSymbolName& symbol ) const
 {
 	assert( IsSymbolDefined( symbol ) );
 	return m_map.find( symbol )->second.GetValue();
@@ -272,15 +289,32 @@ Value SymbolTable::GetSymbol( const std::string& symbol ) const
 
 /*************************************************************************************************/
 /**
-	SymbolTable::ChangeSymbol()
+	SymbolTable::ChangeBuiltInSymbol()
 
-	Changes the value of a symbol which already exists in the symbol table
+	Changes the value of an unscoped symbol which already exists in the symbol table
 
-	@param		symbol			The name of the symbol to look for
+	@param		symbolName		The name of the symbol to look for
 	@param		value			Its new value
 */
 /*************************************************************************************************/
-void SymbolTable::ChangeSymbol( const std::string& symbol, double value )
+void SymbolTable::ChangeBuiltInSymbol( const std::string& symbolName, double value )
+{
+	ChangeSymbol(ScopedSymbolName(symbolName), value);
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SymbolTable::ChangeSymbol()
+
+	Changes the value of a scoped symbol which already exists in the symbol table
+
+	@param		symbol			The name and scope of the symbol to look for
+	@param		value			Its new value
+*/
+/*************************************************************************************************/
+void SymbolTable::ChangeSymbol( const ScopedSymbolName& symbol, double value )
 {
 	assert( IsSymbolDefined( symbol ) );
 	m_map.find( symbol )->second.SetValue( value );
@@ -297,7 +331,7 @@ void SymbolTable::ChangeSymbol( const std::string& symbol, double value )
 	@param		symbol			The name of the symbol to look for
 */
 /*************************************************************************************************/
-void SymbolTable::RemoveSymbol( const std::string& symbol )
+void SymbolTable::RemoveSymbol( const ScopedSymbolName& symbol )
 {
 	assert( IsSymbolDefined( symbol ) );
 	m_map.erase( symbol );
@@ -323,13 +357,13 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 
 	if (global)
 	{
-		for ( map<string, Symbol>::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
+		for ( map<ScopedSymbolName, Symbol>::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
 		{
-			const string&	symbolName = it->first;
+			const ScopedSymbolName&	symbolName = it->first;
 			const Symbol&	symbol = it->second;
 
 			if ( symbol.IsLabel() &&
-				 symbolName.find_first_of( '@' ) == string::npos )
+				 symbolName.TopLevel() )
 			{
 				// This doesn't output string valued symbols
 				Value value = symbol.GetValue();
@@ -340,7 +374,7 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 						our_cout << ",";
 					}
 
-					our_cout << "'" << symbolName << "':" << value.GetNumber() << "L";
+					our_cout << "'" << symbolName.Name() << "':" << value.GetNumber() << "L";
 
 					bFirst = false;
 				}
@@ -382,13 +416,12 @@ void SymbolTable::PushBrace()
 	}
 }
 
-void SymbolTable::PushFor(std::string symbol, double value)
+void SymbolTable::PushFor(const ScopedSymbolName& symbol, double value)
 {
 	if (GlobalData::Instance().IsSecondPass())
 	{
 		int addr = ObjectCode::Instance().GetPC();
-		symbol = symbol.substr(0, symbol.find_first_of('@'));
-		std::ostringstream label; label << "._" << symbol << "_" << value;
+		std::ostringstream label; label << "._" << symbol.Name() << "_" << value;
 		m_lastLabel.m_identifier += label.str();
 		m_lastLabel.m_addr  = addr;
 		m_lastLabel.m_scope = m_labelScopes++;

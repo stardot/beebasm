@@ -498,9 +498,9 @@ void LineParser::HandleDefineLabel()
 
 		string symbolName = GetSymbolName();
 
-		// ...and mangle it according to whether we are in a FOR loop
+		// ...and apply the current scope
 
-		string fullSymbolName = symbolName + m_sourceCode->GetSymbolNameSuffix( target_level );
+		ScopedSymbolName fullSymbolName = m_sourceCode->GetScopedSymbolName( symbolName, target_level );
 
 		if ( GlobalData::Instance().IsFirstPass() )
 		{
@@ -595,7 +595,7 @@ void LineParser::HandleOrg()
 	args.CheckComplete();
 
 	ObjectCode::Instance().SetPC( newPC );
-	SymbolTable::Instance().ChangeSymbol( "P%", newPC );
+	SymbolTable::Instance().ChangeBuiltInSymbol( "P%", newPC );
 }
 
 
@@ -1255,7 +1255,7 @@ void LineParser::HandleFor()
 	// Symbol starts with a valid character
 
 	int oldColumn = m_column;
-	string symbolName = GetSymbolName() + m_sourceCode->GetSymbolNameSuffix();
+	ScopedSymbolName symbolName = m_sourceCode->GetScopedSymbolName( GetSymbolName() );
 
 	// Check variable has not yet been defined
 

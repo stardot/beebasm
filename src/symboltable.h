@@ -29,7 +29,9 @@
 #include <string>
 #include <vector>
 
+#include "scopedsymbolname.h"
 #include "value.h"
+
 
 class SymbolTable
 {
@@ -39,18 +41,20 @@ public:
 	static void Destroy();
 	static inline SymbolTable& Instance() { assert( m_gInstance != NULL ); return *m_gInstance; }
 
-	void AddSymbol( const std::string& symbol, Value value, bool isLabel = false );
+	void AddBuiltInSymbol( const std::string& symbol, Value value );
+	void AddSymbol( const ScopedSymbolName& symbol, Value value, bool isLabel = false );
 	bool AddCommandLineSymbol( const std::string& expr );
 	bool AddCommandLineStringSymbol( const std::string& expr );
-	void ChangeSymbol( const std::string& symbol, double value );
-	Value GetSymbol( const std::string& symbol ) const;
-	bool IsSymbolDefined( const std::string& symbol ) const;
-	void RemoveSymbol( const std::string& symbol );
+	void ChangeBuiltInSymbol( const std::string& symbol, double value );
+	void ChangeSymbol( const ScopedSymbolName& symbol, double value );
+	Value GetSymbol( const ScopedSymbolName& symbol ) const;
+	bool IsSymbolDefined( const ScopedSymbolName& symbol ) const;
+	void RemoveSymbol( const ScopedSymbolName& symbol );
 
 	void Dump(bool global, bool all, const char * labels_file) const; // labels_file == nullptr -> stdout
 
 	void PushBrace();
-	void PushFor(std::string symbol, double value);
+	void PushFor(const ScopedSymbolName& symbol, double value);
 	void AddLabel(const std::string & symbol);
 	void PopScope();
 
@@ -75,7 +79,7 @@ private:
 	SymbolTable();
 	~SymbolTable();
 
-	std::map<std::string, Symbol>	m_map;
+	std::map<ScopedSymbolName, Symbol>	m_map;
 
 	static SymbolTable*				m_gInstance;
 
