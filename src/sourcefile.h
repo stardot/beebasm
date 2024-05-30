@@ -52,7 +52,7 @@ public:
 
 private:
 
-	std::ifstream			m_file;
+	std::istringstream		m_file;
 };
 
 

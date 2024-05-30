@@ -37,6 +37,47 @@
 using namespace std;
 
 
+/*************************************************************************************************/
+/**
+	ReadFile()
+
+	Read a file into a string
+
+	@param		filename		Filename of source file to open
+
+	The supplied file will be opened.  If there is a problem, an AsmException will be thrown.
+*/
+/*************************************************************************************************/
+static string ReadFile( string filename )
+{
+	// we have to open in binary, due to a bug in MinGW which means that calling
+	// tellg() on a text-mode file ruins the file pointer!
+	// http://www.mingw.org/MinGWiki/index.php/Known%20Problems
+	std::ifstream file;
+	file.open( filename.c_str(), ios_base::binary );
+
+	if ( !file )
+	{
+		throw AsmException_FileError_OpenSourceFile( filename );
+	}
+
+	file.seekg(0, std::ios_base::end);
+	unsigned int length = static_cast<unsigned int>(file.tellg());
+	file.seekg(0, std::ios_base::beg);
+
+	string blob;
+	blob.reserve(length + 2); // Extra 2 for trailing crlf
+
+	string line;
+	while (	getline( file, line ) )
+	{
+		blob.append(line);
+		// This appends \r\n on Windows
+		blob.append("\n");
+	}
+
+	return blob;
+}
 
 /*************************************************************************************************/
 /**
@@ -51,17 +92,9 @@ using namespace std;
 */
 /*************************************************************************************************/
 SourceFile::SourceFile( const string& filename, const SourceCode* parent )
-	:	SourceCode( filename, 1, parent )
+	:	SourceCode( filename, 1, parent ),
+		m_file( ReadFile( filename ) )
 {
-	// we have to open in binary, due to a bug in MinGW which means that calling
-	// tellg() on a text-mode file ruins the file pointer!
-	// http://www.mingw.org/MinGWiki/index.php/Known%20Problems
-	m_file.open( filename.c_str(), ios_base::binary );
-
-	if ( !m_file )
-	{
-		throw AsmException_FileError_OpenSourceFile( filename );
-	}
 }
 
 
@@ -77,7 +110,6 @@ SourceFile::SourceFile( const string& filename, const SourceCode* parent )
 /*************************************************************************************************/
 SourceFile::~SourceFile()
 {
-	m_file.close();
 }
 
 
