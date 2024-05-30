@@ -35,11 +35,12 @@ public:
 	// Constructor/destructor
 
 	LineParser( SourceCode* sourceCode, std::string line );
+	LineParser( SourceCode* sourceCode );
 	~LineParser();
 
-	// Process the line
+	// Process the given line
 
-	void Process();
+	void Process( std::string line );
 
 	// Accessors
 

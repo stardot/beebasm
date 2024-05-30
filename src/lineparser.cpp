@@ -49,6 +49,11 @@ LineParser::LineParser( SourceCode* sourceCode, string line )
 {
 }
 
+LineParser::LineParser( SourceCode* sourceCode )
+	:	m_sourceCode( sourceCode )
+{
+}
+
 
 
 /*************************************************************************************************/
@@ -71,8 +76,11 @@ LineParser::~LineParser()
 	Process one line of the file
 */
 /*************************************************************************************************/
-void LineParser::Process()
+void LineParser::Process( string line )
 {
+	m_line = line;
+	m_column = 0;
+
 	bool bProcessedSomething = false;
 	while ( AdvanceAndCheckEndOfLine() )	// keep going until we reach the end of the line
 	{

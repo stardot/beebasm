@@ -95,6 +95,9 @@ void SourceCode::Process()
 	m_initialForStackPtr = m_forStackPtr;
 	m_initialIfStackPtr = m_ifStackPtr;
 
+	// Reuse the parser because it's a big object and expensive to construct/destruct
+	LineParser parser( this );
+
 	// Iterate through the file line-by-line
 
 	string lineFromFile;
@@ -114,8 +117,7 @@ void SourceCode::Process()
 
 		try
 		{
-			LineParser thisLine( this, lineFromFile );
-			thisLine.Process();
+			parser.Process( lineFromFile );
 		}
 		catch ( AsmException_SyntaxError& e )
 		{
