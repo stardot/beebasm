@@ -1,0 +1,25 @@
+\ Symbols in loops and macros to test symbol dumping
+
+MACRO LOOP COUNT
+  .macro
+  EQUB 3
+  FOR J, 1, COUNT
+    .macrofor
+    EQUB I * 5 + J
+  NEXT
+ENDMACRO
+
+ORG 100
+
+.start
+{
+  \ No label before the loop because it creates a bogus local symbol dump
+  FOR I, 1, 2
+    EQUB 1
+    .forloop
+    EQUB 2
+    LOOP I
+  NEXT
+  .end
+}
+.endreally

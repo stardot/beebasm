@@ -1,0 +1,3 @@
+\ beebasm -dd
+\ Test the export of local symbols
+INCLUDE "symbols.inc.6502"
