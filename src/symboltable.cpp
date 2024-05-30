@@ -118,7 +118,7 @@ SymbolTable::~SymbolTable()
 /*************************************************************************************************/
 bool SymbolTable::IsSymbolDefined( const ScopedSymbolName& symbol ) const
 {
-	return ( m_map.count( symbol ) == 1 );
+	return m_map.find( symbol ) != m_map.cend();
 }
 
 
