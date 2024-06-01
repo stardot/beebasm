@@ -217,7 +217,7 @@ void MacroTable::Add( Macro* macro )
 /*************************************************************************************************/
 bool MacroTable::Exists( const string& name ) const
 {
-	return ( m_map.count( name ) > 0 );
+	return m_map.find( name ) != m_map.cend();
 }
 
 
@@ -230,9 +230,10 @@ bool MacroTable::Exists( const string& name ) const
 /*************************************************************************************************/
 const Macro* MacroTable::Get( const string& name ) const
 {
-	if ( Exists( name ) )
+	map<string, Macro*>::const_iterator it = m_map.find( name );
+	if (it != m_map.cend())
 	{
-		return m_map.find( name )->second;
+		return it->second;
 	}
 	else
 	{
