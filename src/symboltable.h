@@ -25,7 +25,7 @@
 
 #include <cassert>
 #include <cstdlib>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -79,7 +79,8 @@ private:
 	SymbolTable();
 	~SymbolTable();
 
-	std::map<ScopedSymbolName, Symbol>	m_map;
+	typedef std::unordered_map<ScopedSymbolName, Symbol> MapType;
+	MapType m_map;
 
 	static SymbolTable*				m_gInstance;
 

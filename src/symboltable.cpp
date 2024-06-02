@@ -357,7 +357,7 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 
 	if (global)
 	{
-		for ( map<ScopedSymbolName, Symbol>::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
+		for ( MapType::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
 		{
 			const ScopedSymbolName&	symbolName = it->first;
 			const Symbol&	symbol = it->second;

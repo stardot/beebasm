@@ -28,6 +28,8 @@
 
 class ScopedSymbolName
 {
+	friend class std::hash<ScopedSymbolName>;
+
 public:
 	explicit ScopedSymbolName(const std::string& name) : m_name(name), m_id(-1), m_count(-1)
 	{
@@ -49,6 +51,11 @@ public:
 	bool TopLevel() const
 	{
 		return m_id == -1;
+	}
+
+	bool operator== (const ScopedSymbolName& that) const
+	{
+		return m_name == that.m_name && m_id == that.m_id && m_count == that.m_count;
 	}
 
 	bool operator< (const ScopedSymbolName& that) const
@@ -86,6 +93,22 @@ private:
 	int m_count;
 
 };
+
+
+template<>
+struct std::hash<ScopedSymbolName>
+{
+	std::size_t operator()(const ScopedSymbolName& s) const
+	{
+		std::hash<string> hasher;
+		std::size_t h1 = hasher(s.m_name);
+		std::size_t h2 = s.m_id;
+		std::size_t h3 = s.m_count;
+		std::size_t h = h1 ^ (h2 * 3) ^ (h3 * 7);
+		return h;
+	}
+};
+
 
 
 
