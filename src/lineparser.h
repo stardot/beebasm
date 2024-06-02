@@ -82,6 +82,7 @@ private:
 	{
 		short			m_aOpcodes[NUM_ADDRESSING_MODES];
 		const char*		m_pName;
+		int             m_nameLength;
 		int				m_cpu;
 	};
 
@@ -91,6 +92,7 @@ private:
 	struct Operator
 	{
 		const char*			token;
+		int					m_tokenLength;
 		int					precedence;
 		int					parameterCount;
 		OperatorHandler		handler;

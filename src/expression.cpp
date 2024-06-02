@@ -44,81 +44,85 @@
 using namespace std;
 
 
+// Expand a string into the string and its length
+#define N(n) n,sizeof(n)-1
 
 const LineParser::Operator	LineParser::m_gaBinaryOperatorTable[] =
 {
-	{ ")",		-1,	0,	NULL },		// special case
-	{ "]",		-1,	0,	NULL },		// special case
-	{ ",",		-1,	0,	NULL },		// special case
+	{ N(")"),		-1,	0,	NULL },		// special case
+	{ N("]"),		-1,	0,	NULL },		// special case
+	{ N(","),		-1,	0,	NULL },		// special case
 
-	{ "^",		7,	0,	&LineParser::EvalPower },
-	{ "*",		6,	0,	&LineParser::EvalMultiply },
-	{ "/",		6,	0,	&LineParser::EvalDivide },
-	{ "%",		6,	0,	&LineParser::EvalMod },
-	{ "DIV",	6,	0,	&LineParser::EvalDiv },
-	{ "MOD",	6,	0,	&LineParser::EvalMod },
-	{ "<<",		6,	0,	&LineParser::EvalShiftLeft },
-	{ ">>",		6,	0,	&LineParser::EvalShiftRight },
-	{ "+",		5,	0,	&LineParser::EvalAdd },
-	{ "-",		5,	0,	&LineParser::EvalSubtract },
-	{ "==",		4,	0,	&LineParser::EvalEqual },
-	{ "=",		4,	0,	&LineParser::EvalEqual },
-	{ "<>",		4,	0,	&LineParser::EvalNotEqual },
-	{ "!=",		4,	0,	&LineParser::EvalNotEqual },
-	{ "<=",		4,	0,	&LineParser::EvalLessThanOrEqual },
-	{ ">=",		4,	0,	&LineParser::EvalMoreThanOrEqual },
-	{ "<",		4,	0,	&LineParser::EvalLessThan },
-	{ ">",		4,	0,	&LineParser::EvalMoreThan },
-	{ "AND",	3,	0,	&LineParser::EvalAnd },
-	{ "OR",		2,	0,	&LineParser::EvalOr },
-	{ "EOR",	2,	0,	&LineParser::EvalEor }
+	{ N("^"),		7,	0,	&LineParser::EvalPower },
+	{ N("*"),		6,	0,	&LineParser::EvalMultiply },
+	{ N("/"),		6,	0,	&LineParser::EvalDivide },
+	{ N("%"),		6,	0,	&LineParser::EvalMod },
+	{ N("DIV"),		6,	0,	&LineParser::EvalDiv },
+	{ N("MOD"),		6,	0,	&LineParser::EvalMod },
+	{ N("<<"),		6,	0,	&LineParser::EvalShiftLeft },
+	{ N(">>"),		6,	0,	&LineParser::EvalShiftRight },
+	{ N("+"),		5,	0,	&LineParser::EvalAdd },
+	{ N("-"),		5,	0,	&LineParser::EvalSubtract },
+	{ N("=="),		4,	0,	&LineParser::EvalEqual },
+	{ N("="),		4,	0,	&LineParser::EvalEqual },
+	{ N("<>"),		4,	0,	&LineParser::EvalNotEqual },
+	{ N("!="),		4,	0,	&LineParser::EvalNotEqual },
+	{ N("<="),		4,	0,	&LineParser::EvalLessThanOrEqual },
+	{ N(">="),		4,	0,	&LineParser::EvalMoreThanOrEqual },
+	{ N("<"),		4,	0,	&LineParser::EvalLessThan },
+	{ N(">"),		4,	0,	&LineParser::EvalMoreThan },
+	{ N("AND"),		3,	0,	&LineParser::EvalAnd },
+	{ N("OR"),		2,	0,	&LineParser::EvalOr },
+	{ N("EOR"),		2,	0,	&LineParser::EvalEor }
 };
 
 
 
 const LineParser::Operator	LineParser::m_gaUnaryOperatorTable[] =
 {
-	{ "(",		-1,	0, NULL },		// special case
-	{ "[",		-1,	0, NULL },		// special case
+	{ N("("),		-1,	0, NULL },		// special case
+	{ N("["),		-1,	0, NULL },		// special case
 
-	{ "-",		8,	0,	&LineParser::EvalNegate },
-	{ "+",		8,	0,	&LineParser::EvalPosate },
-	{ "HI(",	10,	1,	&LineParser::EvalHi },
-	{ "LO(",	10,	1,	&LineParser::EvalLo },
-	{ ">",		10,	0,	&LineParser::EvalHi },
-	{ "<",		10,	0,	&LineParser::EvalLo },
-	{ "SIN(",	10, 1,	&LineParser::EvalSin },
-	{ "COS(",	10, 1,	&LineParser::EvalCos },
-	{ "TAN(",	10, 1,	&LineParser::EvalTan },
-	{ "ASN(",	10, 1,	&LineParser::EvalArcSin },
-	{ "ACS(",	10, 1,	&LineParser::EvalArcCos },
-	{ "ATN(",	10, 1,	&LineParser::EvalArcTan },
-	{ "SQR(",	10, 1,	&LineParser::EvalSqrt },
-	{ "RAD(",	10, 1,	&LineParser::EvalDegToRad },
-	{ "DEG(",	10, 1,	&LineParser::EvalRadToDeg },
-	{ "INT(",	10,	1,	&LineParser::EvalInt },
-	{ "ABS(",	10, 1,	&LineParser::EvalAbs },
-	{ "SGN(",	10, 1,	&LineParser::EvalSgn },
-	{ "RND(",	10,	1,	&LineParser::EvalRnd },
-	{ "NOT(",	10, 1,	&LineParser::EvalNot },
-	{ "LOG(",	10, 1,	&LineParser::EvalLog },
-	{ "LN(",	10,	1,	&LineParser::EvalLn },
-	{ "EXP(",	10,	1,	&LineParser::EvalExp },
-	{ "TIME$(",	10,	1,	&LineParser::EvalTime },
-	{ "STR$(",	10,	1,	&LineParser::EvalStr },
-	{ "STR$~(",	10,	1,	&LineParser::EvalStrHex },
-	{ "VAL(",	10,	1,	&LineParser::EvalVal },
-	{ "EVAL(",	10,	1,	&LineParser::EvalEval },
-	{ "LEN(",	10,	1,	&LineParser::EvalLen },
-	{ "CHR$(",	10,	1,	&LineParser::EvalChr },
-	{ "ASC(",	10,	1,	&LineParser::EvalAsc },
-	{ "MID$(",	10,	3,	&LineParser::EvalMid },
-	{ "LEFT$(",	10,	2,	&LineParser::EvalLeft },
-	{ "RIGHT$(",	10,	2,	&LineParser::EvalRight },
-	{ "STRING$(",	10,	2,	&LineParser::EvalString },
-	{ "UPPER$(",	10,	1,	&LineParser::EvalUpper },
-	{ "LOWER$(",	10,	1,	&LineParser::EvalLower }
+	{ N("-"),		8,	0,	&LineParser::EvalNegate },
+	{ N("+"),		8,	0,	&LineParser::EvalPosate },
+	{ N("HI("),		10,	1,	&LineParser::EvalHi },
+	{ N("LO("),		10,	1,	&LineParser::EvalLo },
+	{ N(">"),		10,	0,	&LineParser::EvalHi },
+	{ N("<"),		10,	0,	&LineParser::EvalLo },
+	{ N("SIN("),	10, 1,	&LineParser::EvalSin },
+	{ N("COS("),	10, 1,	&LineParser::EvalCos },
+	{ N("TAN("),	10, 1,	&LineParser::EvalTan },
+	{ N("ASN("),	10, 1,	&LineParser::EvalArcSin },
+	{ N("ACS("),	10, 1,	&LineParser::EvalArcCos },
+	{ N("ATN("),	10, 1,	&LineParser::EvalArcTan },
+	{ N("SQR("),	10, 1,	&LineParser::EvalSqrt },
+	{ N("RAD("),	10, 1,	&LineParser::EvalDegToRad },
+	{ N("DEG("),	10, 1,	&LineParser::EvalRadToDeg },
+	{ N("INT("),	10,	1,	&LineParser::EvalInt },
+	{ N("ABS("),	10, 1,	&LineParser::EvalAbs },
+	{ N("SGN("),	10, 1,	&LineParser::EvalSgn },
+	{ N("RND("),	10,	1,	&LineParser::EvalRnd },
+	{ N("NOT("),	10, 1,	&LineParser::EvalNot },
+	{ N("LOG("),	10, 1,	&LineParser::EvalLog },
+	{ N("LN("),		10,	1,	&LineParser::EvalLn },
+	{ N("EXP("),	10,	1,	&LineParser::EvalExp },
+	{ N("TIME$("),	10,	1,	&LineParser::EvalTime },
+	{ N("STR$("),	10,	1,	&LineParser::EvalStr },
+	{ N("STR$~("),	10,	1,	&LineParser::EvalStrHex },
+	{ N("VAL("),	10,	1,	&LineParser::EvalVal },
+	{ N("EVAL("),	10,	1,	&LineParser::EvalEval },
+	{ N("LEN("),	10,	1,	&LineParser::EvalLen },
+	{ N("CHR$("),	10,	1,	&LineParser::EvalChr },
+	{ N("ASC("),	10,	1,	&LineParser::EvalAsc },
+	{ N("MID$("),	10,	3,	&LineParser::EvalMid },
+	{ N("LEFT$("),	10,	2,	&LineParser::EvalLeft },
+	{ N("RIGHT$("),	10,	2,	&LineParser::EvalRight },
+	{ N("STRING$("),10,	2,	&LineParser::EvalString },
+	{ N("UPPER$("),	10,	1,	&LineParser::EvalUpper },
+	{ N("LOWER$("),	10,	1,	&LineParser::EvalLower }
 };
+
+#undef N
 
 
 
@@ -273,8 +277,8 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 			for ( unsigned int i = 0; i < sizeof m_gaUnaryOperatorTable / sizeof(Operator); i++ )
 			{
 				const char*		token	= m_gaUnaryOperatorTable[ i ].token;
-				size_t			len		= strlen( token );
-
+				size_t			len		= m_gaUnaryOperatorTable[ i ].m_tokenLength;
+				assert(len == strlen( token ));
 				// see if token matches
 
 				bool bMatch = true;
@@ -388,14 +392,15 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 			for ( unsigned int i = 0; i < sizeof m_gaBinaryOperatorTable / sizeof(Operator); i++ )
 			{
 				const char*		token	= m_gaBinaryOperatorTable[ i ].token;
-				size_t			len		= strlen( token );
+				size_t			len		= m_gaBinaryOperatorTable[ i ].m_tokenLength;
+				assert(len == strlen( token ));
 
 				// see if token matches
 
 				bool bMatch = true;
 				for ( unsigned int j = 0; j < len; j++ )
 				{
-					if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+					if ( ( m_column + j >= m_line.length() ) || ( token[ j ] != toupper( m_line[ m_column + j ] ) ) )
 					{
 						bMatch = false;
 						break;

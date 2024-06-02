@@ -39,7 +39,7 @@ using namespace std;
 
 
 #define DATA( cpu, op, imp, acc, imm, zp, zpx, zpy, abs, absx, absy, ind, indx, indy, ind16, ind16x, rel )  \
-	{ { imp, acc, imm, zp, zpx, zpy, abs, absx, absy, ind, indx, indy, ind16, ind16x, rel }, op, cpu }
+	{ { imp, acc, imm, zp, zpx, zpy, abs, absx, absy, ind, indx, indy, ind16, ind16x, rel }, op, sizeof(op)-1, cpu }
 
 #define X -1
 
@@ -153,7 +153,8 @@ int LineParser::GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes)
 	{
 		int			cpu		= m_gaOpcodeTable[ i ].m_cpu;
 		const char*	token	= m_gaOpcodeTable[ i ].m_pName;
-		size_t		len		= strlen( token );
+		size_t		len		= m_gaOpcodeTable[ i ].m_nameLength;
+		assert(len == strlen( token ));
 
 		// ignore instructions not for current cpu
 		if ( cpu > ObjectCode::Instance().GetCPU() )
