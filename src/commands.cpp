@@ -43,48 +43,52 @@
 
 using namespace std;
 
+// Expand a string into the string and its length
+#define N(n) n,sizeof(n)-1
+
 const LineParser::Token	LineParser::m_gaTokenTable[] =
 {
-	{ ".",			&LineParser::HandleDefineLabel,			0 }, // Why is gcc forcing me to
-	{ "\\",			&LineParser::HandleDefineComment,		0 }, // put all these 0s in?
-	{ ";",			&LineParser::HandleDefineComment,		0 },
-	{ ":",			&LineParser::HandleStatementSeparator,	0 },
-	{ "PRINT",		&LineParser::HandlePrint,				0 },
-	{ "CPU",		&LineParser::HandleCpu,					0 },
-	{ "ORG",		&LineParser::HandleOrg,					0 },
-	{ "INCLUDE",	&LineParser::HandleInclude,				0 },
-	{ "EQUB",		&LineParser::HandleEqub,				0 },
-	{ "EQUD",		&LineParser::HandleEqud,				0 },
-	{ "EQUS",		&LineParser::HandleEqub,				0 },
-	{ "EQUW",		&LineParser::HandleEquw,				0 },
-	{ "ASSERT",		&LineParser::HandleAssert,				0 },
-	{ "SAVE",		&LineParser::HandleSave,				0 },
-	{ "FOR",		&LineParser::HandleFor,					0 },
-	{ "NEXT",		&LineParser::HandleNext,				0 },
-	{ "IF",			&LineParser::HandleIf,					&SourceFile::AddIfLevel },
-	{ "ELIF",		&LineParser::HandleIf,					&SourceFile::StartElif },
-	{ "ELSE",		&LineParser::HandleDirective,			&SourceFile::StartElse },
-	{ "ENDIF",		&LineParser::HandleDirective,			&SourceFile::RemoveIfLevel },
-	{ "ALIGN",		&LineParser::HandleAlign,				0 },
-	{ "SKIPTO",		&LineParser::HandleSkipTo,				0 },
-	{ "SKIP",		&LineParser::HandleSkip,				0 },
-	{ "GUARD",		&LineParser::HandleGuard,				0 },
-	{ "CLEAR",		&LineParser::HandleClear,				0 },
-	{ "INCBIN",		&LineParser::HandleIncBin,				0 },
-	{ "{",			&LineParser::HandleOpenBrace,			0 },
-	{ "}",			&LineParser::HandleCloseBrace,			0 },
-	{ "MAPCHAR",	&LineParser::HandleMapChar,				0 },
-	{ "PUTFILE",	&LineParser::HandlePutFile,				0 },
-	{ "PUTTEXT",	&LineParser::HandlePutText,				0 },
-	{ "PUTBASIC",	&LineParser::HandlePutBasic,			0 },
-	{ "MACRO",		&LineParser::HandleMacro,				&SourceFile::StartMacro },
-	{ "ENDMACRO",	&LineParser::HandleEndMacro,			&SourceFile::EndMacro },
-	{ "ERROR",		&LineParser::HandleError,				0 },
-	{ "COPYBLOCK",	&LineParser::HandleCopyBlock,			0 },
-	{ "RANDOMIZE",  &LineParser::HandleRandomize,			0 },
-	{ "ASM",		&LineParser::HandleAsm,					0 }
+	{ N("."),			&LineParser::HandleDefineLabel,			0 }, // Why is gcc forcing me to
+	{ N("\\"),			&LineParser::HandleDefineComment,		0 }, // put all these 0s in?
+	{ N(";"),			&LineParser::HandleDefineComment,		0 },
+	{ N(":"),			&LineParser::HandleStatementSeparator,	0 },
+	{ N("PRINT"),		&LineParser::HandlePrint,				0 },
+	{ N("CPU"),			&LineParser::HandleCpu,					0 },
+	{ N("ORG"),			&LineParser::HandleOrg,					0 },
+	{ N("INCLUDE"),		&LineParser::HandleInclude,				0 },
+	{ N("EQUB"),		&LineParser::HandleEqub,				0 },
+	{ N("EQUD"),		&LineParser::HandleEqud,				0 },
+	{ N("EQUS"),		&LineParser::HandleEqub,				0 },
+	{ N("EQUW"),		&LineParser::HandleEquw,				0 },
+	{ N("ASSERT"),		&LineParser::HandleAssert,				0 },
+	{ N("SAVE"),		&LineParser::HandleSave,				0 },
+	{ N("FOR"),			&LineParser::HandleFor,					0 },
+	{ N("NEXT"),		&LineParser::HandleNext,				0 },
+	{ N("IF"),			&LineParser::HandleIf,					&SourceFile::AddIfLevel },
+	{ N("ELIF"),		&LineParser::HandleIf,					&SourceFile::StartElif },
+	{ N("ELSE"),		&LineParser::HandleDirective,			&SourceFile::StartElse },
+	{ N("ENDIF"),		&LineParser::HandleDirective,			&SourceFile::RemoveIfLevel },
+	{ N("ALIGN"),		&LineParser::HandleAlign,				0 },
+	{ N("SKIPTO"),		&LineParser::HandleSkipTo,				0 },
+	{ N("SKIP"),		&LineParser::HandleSkip,				0 },
+	{ N("GUARD"),		&LineParser::HandleGuard,				0 },
+	{ N("CLEAR"),		&LineParser::HandleClear,				0 },
+	{ N("INCBIN"),		&LineParser::HandleIncBin,				0 },
+	{ N("{"),			&LineParser::HandleOpenBrace,			0 },
+	{ N("}"),			&LineParser::HandleCloseBrace,			0 },
+	{ N("MAPCHAR"),		&LineParser::HandleMapChar,				0 },
+	{ N("PUTFILE"),		&LineParser::HandlePutFile,				0 },
+	{ N("PUTTEXT"),		&LineParser::HandlePutText,				0 },
+	{ N("PUTBASIC"),	&LineParser::HandlePutBasic,			0 },
+	{ N("MACRO"),		&LineParser::HandleMacro,				&SourceFile::StartMacro },
+	{ N("ENDMACRO"),	&LineParser::HandleEndMacro,			&SourceFile::EndMacro },
+	{ N("ERROR"),		&LineParser::HandleError,				0 },
+	{ N("COPYBLOCK"),	&LineParser::HandleCopyBlock,			0 },
+	{ N("RANDOMIZE"),	&LineParser::HandleRandomize,			0 },
+	{ N("ASM"),			&LineParser::HandleAsm,					0 }
 };
 
+#undef N
 
 
 
@@ -109,7 +113,8 @@ int LineParser::GetTokenAndAdvanceColumn()
 	for ( int i = 0; i < static_cast<int>( sizeof m_gaTokenTable / sizeof( Token ) ); i++ )
 	{
 		const char*	token	= m_gaTokenTable[ i ].m_pName;
-		size_t		len		= strlen( token );
+		size_t		len		= m_gaTokenTable[ i ].m_nameLength;
+		assert( len == strlen( token ) );
 
 		if (len <= remaining)
 		{

@@ -53,6 +53,7 @@ private:
 	struct Token
 	{
 		const char*			m_pName;
+		int					m_nameLength;
 		TokenHandler		m_handler;
 		DirectiveHandler	m_directiveHandler;
 	};
