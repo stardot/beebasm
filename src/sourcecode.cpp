@@ -104,10 +104,6 @@ void SourceCode::Process()
 
 	while ( GetLine( lineFromFile ) )
 	{
-		// Convert tabs to spaces
-
-		StringUtils::ExpandTabsToSpaces( lineFromFile, 8 );
-
 //		// Display and process
 //
 //		if ( GlobalData::Instance().IsFirstPass() )

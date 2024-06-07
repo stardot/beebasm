@@ -41,7 +41,8 @@ using namespace std;
 /**
 	ReadFile()
 
-	Read a file into a string
+	Read a file into a string.  Convert tabs to spaces and
+	normalise line endings (\r, \r\n or \n) to \n.
 
 	@param		filename		Filename of source file to open
 
@@ -66,13 +67,37 @@ static string ReadFile( string filename )
 	file.seekg(0, std::ios_base::beg);
 
 	string blob;
-	blob.reserve(length + 2); // Extra 2 for trailing crlf
+	blob.reserve(length + 1); // Extra 1 for trailing '\n'
 
-	string line;
-	while (	getline( file, line ) )
+	std::istream::sentry sentry(file, true);
+	std::streambuf* sb = file.rdbuf();
+
+	while (true)
 	{
-		blob.append(line);
-		// This appends \r\n on Windows
+		std::ifstream::int_type c = sb->sbumpc();
+		if (c == '\t')
+		{
+			blob.push_back(' ');
+		}
+		else if (c == '\r')
+		{
+			std::ifstream::int_type next = sb->sgetc();
+			if (next != '\n')
+			{
+				blob.push_back('\n');
+			}
+		}
+		else if (c == std::ifstream::traits_type::eof())
+		{
+			break;
+		}
+		else
+		{
+			blob.push_back(c);
+		}
+	}
+	if (blob.length() == 0 || blob[blob.length() - 1] != '\n')
+	{
 		blob.append("\n");
 	}
 
