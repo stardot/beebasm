@@ -32,6 +32,7 @@
 #include "constants.h"
 #include "asmexception.h"
 #include "literals.h"
+#include "stringutils.h"
 
 
 using namespace std;
@@ -189,8 +190,8 @@ bool SymbolTable::AddCommandLineSymbol( const std::string& expr )
 	}
 	for ( std::string::size_type i = 0; i < symbol.length(); ++i )
 	{
-		bool valid = ( isalpha( symbol[ i ] ) || ( symbol[ i ] == '_' ) );
-		valid = valid || ( ( i > 0 ) && isdigit( symbol[ i ] ) );
+		bool valid = ( Ascii::IsAlpha( symbol[ i ] ) || ( symbol[ i ] == '_' ) );
+		valid = valid || ( ( i > 0 ) && Ascii::IsDigit( symbol[ i ] ) );
 		if ( !valid )
 		{
 			return false;

@@ -32,6 +32,7 @@
 #include "objectcode.h"
 #include "asmexception.h"
 #include "sourcecode.h"
+#include "stringutils.h"
 
 
 using namespace std;
@@ -165,7 +166,7 @@ int LineParser::GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes)
 		bool bMatch = true;
 		for ( unsigned int j = 0; j < len; j++ )
 		{
-			if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+			if ( token[ j ] != Ascii::ToUpper( m_line[ m_column + j ] ) )
 			{
 				bMatch = false;
 				break;
@@ -480,7 +481,7 @@ void LineParser::HandleAssembler( int instruction )
 
 	// see if it's accumulator mode
 
-	if ( m_column < m_line.length() && toupper( m_line[ m_column ] ) == 'A' && HasAddressingMode( instruction, ACC ) )
+	if ( m_column < m_line.length() && Ascii::ToUpper( m_line[ m_column ] ) == 'A' && HasAddressingMode( instruction, ACC ) )
 	{
 		// might be... but only if the next character is a separator or whitespace
 		// otherwise, we must assume a label beginning with A
@@ -591,7 +592,7 @@ void LineParser::HandleAssembler( int instruction )
 					throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
 				}
 
-				if ( toupper( m_line[ m_column ] ) != 'Y' )
+				if ( Ascii::ToUpper( m_line[ m_column ] ) != 'Y' )
 				{
 					// We were expecting an Y
 					throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
@@ -648,7 +649,7 @@ void LineParser::HandleAssembler( int instruction )
 				throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
 			}
 
-			if ( toupper( m_line[ m_column ] ) != 'X' )
+			if ( Ascii::ToUpper( m_line[ m_column ] ) != 'X' )
 			{
 				// We were expecting an X
 				throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
@@ -826,7 +827,7 @@ void LineParser::HandleAssembler( int instruction )
 		throw AsmException_SyntaxError_BadAbsolute( m_line, m_column );
 	}
 
-	if ( m_column < m_line.length() && toupper( m_line[ m_column ] ) == 'X' )
+	if ( m_column < m_line.length() && Ascii::ToUpper( m_line[ m_column ] ) == 'X' )
 	{
 		m_column++;
 
@@ -857,7 +858,7 @@ void LineParser::HandleAssembler( int instruction )
 		}
 	}
 
-	if ( m_column < m_line.length() && toupper( m_line[ m_column ] ) == 'Y' )
+	if ( m_column < m_line.length() && Ascii::ToUpper( m_line[ m_column ] ) == 'Y' )
 	{
 		m_column++;
 

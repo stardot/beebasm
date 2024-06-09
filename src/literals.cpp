@@ -25,12 +25,7 @@
 
 #include "asmexception.h"
 #include "literals.h"
-
-// Don't use isdigit because compilers can't agree on its locale dependence
-static bool is_decimal_digit(char c)
-{
-	return '0' <= c && c <= '9';
-}
+#include "stringutils.h"
 
 static int hex_digit_value(char c)
 {
@@ -119,7 +114,7 @@ static bool CopyDigitsSkippingUnderscores(const std::string& line, size_t& index
 	}
 
 	size_t start_index = index;
-	while ( index < line.length() && (is_decimal_digit(line[index]) || line[index] == '_') )
+	while ( index < line.length() && (Ascii::IsDigit(line[index]) || line[index] == '_') )
 	{
 		if (line[index] == '_')
 		{
@@ -165,7 +160,7 @@ bool Literals::ParseNumeric(const std::string& line, size_t& index, double& resu
 		return false;
 	}
 
-	if ( is_decimal_digit(line[index]) || line[index] == '.' || line[index] == '-' )
+	if ( Ascii::IsDigit(line[index]) || line[index] == '.' || line[index] == '-' )
 	{
 		// Copy the number without underscores to this buffer
 		std::string buffer;
@@ -198,7 +193,7 @@ bool Literals::ParseNumeric(const std::string& line, size_t& index, double& resu
 		// Copy exponent if it's followed by a sign or digit
 		if ( index + 1 < line.length() &&
 			( line[index] == 'e' || line[index] == 'E' ) &&
-			( line[index + 1] == '+' || line[index + 1] == '-' || is_decimal_digit(line[index + 1]) ) )
+			( line[index + 1] == '+' || line[index + 1] == '-' || Ascii::IsDigit(line[index + 1]) ) )
 		{
 			buffer.push_back('e');
 			index++;

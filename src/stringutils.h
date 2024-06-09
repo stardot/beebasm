@@ -34,4 +34,47 @@ namespace StringUtils
 }
 
 
+// Built-in char functions like isdigit, toupper, etc. are locale dependent and quite slow.
+struct Ascii
+{
+	static bool IsAlpha(char c)
+	{
+		unsigned int uc = static_cast<unsigned char>(c);
+		return (uc | 0x20) - 'a' < 26;
+	}
+
+	static bool IsDigit(char c)
+	{
+		unsigned int uc = static_cast<unsigned char>(c);
+		return (uc - '0') < 10;
+	}
+
+	static char ToLower(char c)
+	{
+		unsigned int uc = static_cast<unsigned char>(c);
+		if (uc - 'A' < 26)
+		{
+			return c | 0x20;
+		}
+		else
+		{
+			return c;
+		}
+	}
+
+	static char ToUpper(char c)
+	{
+		unsigned int uc = static_cast<unsigned char>(c);
+		if (uc - 'a' < 26)
+		{
+			return c & 0xDF;
+		}
+		else
+		{
+			return c;
+		}
+	}
+};
+
+
 #endif // STRINGUTILS_H_

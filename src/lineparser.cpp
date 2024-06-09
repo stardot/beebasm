@@ -96,15 +96,15 @@ void LineParser::Process( string line )
 
 		bool bIsSymbolAssignment = false;
 
-		if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+		if ( Ascii::IsAlpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
 		{
 			do
 			{
 				m_column++;
 
 			} while ( m_column < m_line.length() &&
-					  ( isalpha( m_line[ m_column ] ) ||
-						isdigit( m_line[ m_column ] ) ||
+					  ( Ascii::IsAlpha( m_line[ m_column ] ) ||
+						Ascii::IsDigit( m_line[ m_column ] ) ||
 						m_line[ m_column ] == '_' ||
 						m_line[ m_column ] == '%' ||
 						m_line[ m_column ] == '$' ) &&
@@ -216,7 +216,7 @@ void LineParser::Process( string line )
 
 		// Check macro matches
 
-		if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+		if ( Ascii::IsAlpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
 		{
 			string macroName = GetSymbolName();
 			const Macro* macro = MacroTable::Instance().Get( macroName );
@@ -547,7 +547,7 @@ bool LineParser::AdvanceAndCheckEndOfSubStatement(bool includeComma)
 /*************************************************************************************************/
 string LineParser::GetSymbolName()
 {
-	assert( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' );
+	assert( Ascii::IsAlpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' );
 
 	string symbolName;
 
@@ -556,8 +556,8 @@ string LineParser::GetSymbolName()
 		symbolName += m_line[ m_column++ ];
 
 	} while ( m_column < m_line.length() &&
-			  ( isalpha( m_line[ m_column ] ) ||
-				isdigit( m_line[ m_column ] ) ||
+			  ( Ascii::IsAlpha( m_line[ m_column ] ) ||
+				Ascii::IsDigit( m_line[ m_column ] ) ||
 				m_line[ m_column ] == '_' ||
 				m_line[ m_column ] == '%' ||
 				m_line[ m_column ] == '$' ) &&

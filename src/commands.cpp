@@ -123,7 +123,7 @@ int LineParser::GetTokenAndAdvanceColumn()
 			bool bMatch = true;
 			for ( unsigned int j = 0; j < len; j++ )
 			{
-				if ( token[ j ] != toupper( m_line[ m_column + j ] ) )
+				if ( token[ j ] != Ascii::ToUpper( m_line[ m_column + j ] ) )
 				{
 					bMatch = false;
 					break;
@@ -493,7 +493,7 @@ void LineParser::HandleDefineLabel()
                 }
         }
 
-	if ( ( m_column < m_line.length() ) && ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
+	if ( ( m_column < m_line.length() ) && ( Ascii::IsAlpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
 	{
 		// Symbol starts with a valid character
 
@@ -1252,7 +1252,7 @@ void LineParser::HandleFor()
 
 	// first look for the variable name
 
-	if ( !isalpha( m_line[ m_column ] ) && m_line[ m_column ] != '_' )
+	if ( !Ascii::IsAlpha( m_line[ m_column ] ) && m_line[ m_column ] != '_' )
 	{
 		throw AsmException_SyntaxError_InvalidSymbolName( m_line, m_column );
 	}
@@ -1677,7 +1677,7 @@ void LineParser::HandleMacro()
 
 	string macroName;
 
-	if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+	if ( Ascii::IsAlpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
 	{
 		macroName = GetSymbolName();
 
@@ -1713,7 +1713,7 @@ void LineParser::HandleMacro()
 				throw AsmException_SyntaxError_MissingComma( m_line, m_column );
 			}
 		}
-		else if ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
+		else if ( Ascii::IsAlpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
 		{
 			string param = GetSymbolName();
 

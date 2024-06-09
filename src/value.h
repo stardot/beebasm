@@ -27,6 +27,8 @@
 #include <string.h>
 #include <cstdlib>
 
+#include "stringutils.h"
+
 // A simple immutable string buffer with a length and a reference count.
 // This doesn't have constructors, etc. so it can be stuffed into a union.
 struct StringHeader
@@ -133,7 +135,7 @@ public:
 			char* pdata = StringBuffer(result);
 			for (unsigned int i = 0; i != length; ++i)
 			{
-				*pdata = ascii_upper(*pdata);
+				*pdata = Ascii::ToUpper(*pdata);
 				++pdata;
 			}
 		}
@@ -149,7 +151,7 @@ public:
 			char* pdata = StringBuffer(result);
 			for (unsigned int i = 0; i != length; ++i)
 			{
-				*pdata = ascii_lower(*pdata);
+				*pdata = Ascii::ToLower(*pdata);
 				++pdata;
 			}
 		}
@@ -189,24 +191,6 @@ private:
 			return -1;
 		else
 			return 1;
-	}
-
-	static char ascii_lower(char c)
-	{
-		if (('A' <= c) && (c <= 'Z'))
-		{
-			c += 'a' - 'A';
-		}
-		return c;
-	}
-
-	static char ascii_upper(char c)
-	{
-		if (('a' <= c) && (c <= 'z'))
-		{
-			c -= 'a' - 'A';
-		}
-		return c;
 	}
 
 };

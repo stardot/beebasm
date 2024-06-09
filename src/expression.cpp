@@ -204,7 +204,7 @@ Value LineParser::GetValue()
 		}
 		value = String(text.data(), text.size());
 	}
-	else if ( m_column < m_line.length() && ( isalpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
+	else if ( m_column < m_line.length() && ( Ascii::IsAlpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' ) )
 	{
 		// get a symbol
 
@@ -284,7 +284,7 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 				bool bMatch = true;
 				for ( unsigned int j = 0; j < len; j++ )
 				{
-					if ( ( m_column + j >= m_line.length() ) || ( token[ j ] != toupper( m_line[ m_column + j ] ) ) )
+					if ( ( m_column + j >= m_line.length() ) || ( token[ j ] != Ascii::ToUpper( m_line[ m_column + j ] ) ) )
 					{
 						bMatch = false;
 						break;
@@ -400,7 +400,7 @@ Value LineParser::EvaluateExpression( bool bAllowOneMismatchedCloseBracket )
 				bool bMatch = true;
 				for ( unsigned int j = 0; j < len; j++ )
 				{
-					if ( ( m_column + j >= m_line.length() ) || ( token[ j ] != toupper( m_line[ m_column + j ] ) ) )
+					if ( ( m_column + j >= m_line.length() ) || ( token[ j ] != Ascii::ToUpper( m_line[ m_column + j ] ) ) )
 					{
 						bMatch = false;
 						break;

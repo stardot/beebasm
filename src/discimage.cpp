@@ -26,6 +26,7 @@
 #include "discimage.h"
 #include "asmexception.h"
 #include "globaldata.h"
+#include "stringutils.h"
 
 using namespace std;
 
@@ -208,14 +209,14 @@ void DiscImage::AddFile( const char* pName, const unsigned char* pAddr, int load
 
 		for ( size_t j = 0; j < 7; j++ )
 		{
-			if ( toupper( pPaddedName[ j ] ) != toupper( m_aCatalog[ i + j ] ) )
+			if ( Ascii::ToUpper( pPaddedName[ j ] ) != Ascii::ToUpper( m_aCatalog[ i + j ] ) )
 			{
 				bTheSame = false;
 				break;
 			}
 		}
 
-		if ( bTheSame && ( toupper( m_aCatalog[ i + 7 ] & 0x7F ) ) == toupper( dirName ) )
+		if ( bTheSame && ( Ascii::ToUpper( m_aCatalog[ i + 7 ] & 0x7F ) ) == Ascii::ToUpper( dirName ) )
 		{
 			// File already exists
 			throw AsmException_FileError_FileExists( m_outputFilename );
