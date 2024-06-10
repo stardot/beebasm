@@ -27,7 +27,6 @@
 #include <cstdlib>
 #include <map>
 #include <string>
-#include <sstream>
 #include <vector>
 #include "sourcecode.h"
 
@@ -103,19 +102,6 @@ public:
 
 	MacroInstance( const Macro* macro, const SourceCode* parent );
 	virtual ~MacroInstance() {}
-
-	// Accessors
-
-	virtual int						GetFilePointer();
-	virtual void					SetFilePointer( int i );
-	virtual std::istream&			GetLine( std::string& lineFromFile );
-	virtual bool					IsAtEnd();
-
-
-private:
-
-	std::istringstream				m_stream;
-	//const Macro*					m_macro;
 };
 
 

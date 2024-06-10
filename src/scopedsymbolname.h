@@ -23,6 +23,7 @@
 #ifndef SCOPEDSYMBOLNAME_H_
 #define SCOPEDSYMBOLNAME_H_
 
+#include <functional>
 #include <string>
 
 
@@ -100,7 +101,7 @@ struct std::hash<ScopedSymbolName>
 {
 	std::size_t operator()(const ScopedSymbolName& s) const
 	{
-		std::hash<string> hasher;
+		std::hash<std::string> hasher;
 		std::size_t h1 = hasher(s.m_name);
 		std::size_t h2 = s.m_id;
 		std::size_t h3 = s.m_count;

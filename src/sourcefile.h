@@ -23,7 +23,6 @@
 #ifndef SOURCEFILE_H_
 #define SOURCEFILE_H_
 
-#include <fstream>
 #include <string>
 #include <vector>
 #include "sourcecode.h"
@@ -40,19 +39,6 @@ public:
 	virtual ~SourceFile();
 
 	virtual void Process();
-
-
-	// Accessors
-
-	virtual int				GetFilePointer();
-	virtual void			SetFilePointer( int i );
-	virtual std::istream&	GetLine( std::string& lineFromFile );
-	virtual bool			IsAtEnd();
-
-
-private:
-
-	std::istringstream		m_file;
 };
 
 

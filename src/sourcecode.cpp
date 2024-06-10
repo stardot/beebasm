@@ -22,10 +22,6 @@
 */
 /*************************************************************************************************/
 
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-
 #include "sourcecode.h"
 #include "asmexception.h"
 #include "stringutils.h"
@@ -51,7 +47,7 @@ using namespace std;
 	The supplied file will be opened.  If there is a problem, an AsmException will be thrown.
 */
 /*************************************************************************************************/
-SourceCode::SourceCode( const string& filename, int lineNumber, const SourceCode* parent )
+SourceCode::SourceCode( const string& filename, int lineNumber, const std::string& text, const SourceCode* parent )
 	:	m_forStackPtr( 0 ),
 		m_initialForStackPtr( 0 ),
 		m_ifStackPtr( 0 ),
@@ -60,8 +56,16 @@ SourceCode::SourceCode( const string& filename, int lineNumber, const SourceCode
 		m_filename( filename ),
 		m_lineNumber( lineNumber ),
 		m_parent( parent ),
-		m_lineStartPointer( 0 )
+		m_lineStartPointer( 0 ),
+		m_text( text ),
+		m_textPointer( 0 )
 {
+	// Double-check the supplied text came with a '\n' sentinel
+	if (m_text.empty() || m_text.back() != '\n')
+	{
+		assert(false);
+		m_text.push_back('\n');
+	}
 }
 
 
@@ -621,4 +625,50 @@ bool SourceCode::ShouldOutputAsm()
 	}
 
 	return false;
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SourceCode::GetLine()
+
+	Reads a line from the source code and returns it into lineFromFile
+*/
+/*************************************************************************************************/
+bool SourceCode::GetLine( string& lineFromFile )
+{
+	if (IsAtEnd())
+	{
+		return false;
+	}
+	// Check there is always a trailing '\n' (the constructor should ensure this)
+	assert(m_text.back() == '\n');
+	int begin = m_textPointer;
+	while (m_text[m_textPointer++] != '\n')
+	{
+	}
+	// Adding the line in one go rather than character by character is very much faster
+	lineFromFile.assign(m_text.cbegin() + begin, m_text.cbegin() + m_textPointer - 1);
+	return true;
+}
+
+
+
+/*************************************************************************************************/
+/**
+	SourceCode::SetFilePointer()
+
+	Sets the current file pointer
+*/
+/*************************************************************************************************/
+void SourceCode::SetFilePointer( int i )
+{
+	if (i > static_cast<int>(m_text.length()))
+	{
+		assert(false);
+		i = m_text.length();
+	}
+	m_lineStartPointer = i;
+	m_textPointer = i;
 }

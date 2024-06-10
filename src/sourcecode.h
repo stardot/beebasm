@@ -23,9 +23,7 @@
 #ifndef SOURCECODE_H_
 #define SOURCECODE_H_
 
-#include <fstream>
 #include <string>
-#include <vector>
 
 #include "scopedsymbolname.h"
 #include "value.h"
@@ -38,7 +36,7 @@ public:
 
 	// Constructor/destructor
 
-	SourceCode( const std::string& filename, int lineNumber, const SourceCode* parent );
+	SourceCode( const std::string& filename, int lineNumber, const std::string& text, const SourceCode* parent );
 	~SourceCode();
 
 	// Process the file
@@ -52,10 +50,10 @@ public:
 	inline const SourceCode*GetParent() const				{ return m_parent; }
 	inline int				GetLineStartPointer() const		{ return m_lineStartPointer; }
 
-	virtual std::istream&	GetLine( std::string& lineFromFile ) = 0;
-	virtual int				GetFilePointer() = 0;
-	virtual void			SetFilePointer( int i ) = 0;
-	virtual bool			IsAtEnd() = 0;
+	virtual bool			GetLine( std::string& lineFromFile );
+	virtual int				GetFilePointer() { return m_textPointer; }
+	virtual void			SetFilePointer( int i );
+	virtual bool			IsAtEnd() { return m_textPointer == static_cast<int>(m_text.length()); }
 
 
 	// For loop / if related stuff
@@ -147,6 +145,8 @@ protected:
 	int						m_lineNumber;
 	const SourceCode*		m_parent;
 	int						m_lineStartPointer;
+	std::string				m_text;
+	int						m_textPointer;
 };
 
 

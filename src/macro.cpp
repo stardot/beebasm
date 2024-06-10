@@ -20,8 +20,6 @@
 */
 /*************************************************************************************************/
 
-#include <cmath>
-#include <iostream>
 
 #include "macro.h"
 
@@ -60,8 +58,7 @@ Macro::Macro( const string& filename, int lineNumber )
 */
 /*************************************************************************************************/
 MacroInstance::MacroInstance( const Macro* macro, const SourceCode* sourceCode )
-	:	SourceCode( macro->GetFilename(), macro->GetLineNumber(), sourceCode ),
-		m_stream( macro->GetBody() )
+	:	SourceCode( macro->GetFilename(), macro->GetLineNumber(), macro->GetBody(), sourceCode )
 		//,m_macro( macro )
 {
 //	cout << "Instance macro: " << m_macro->GetName() << " (" << m_filename << ":" << m_lineNumber << ")" << endl;
@@ -69,63 +66,6 @@ MacroInstance::MacroInstance( const Macro* macro, const SourceCode* sourceCode )
 	// Copy FOR stack from the parent
 
 	CopyForStack( sourceCode );
-}
-
-
-
-/*************************************************************************************************/
-/**
-	MacroInstance::GetLine()
-
-	Reads a line from the source code and returns it into lineFromFile
-*/
-/*************************************************************************************************/
-istream& MacroInstance::GetLine( string& lineFromFile ) 
-{
-	return getline( m_stream, lineFromFile );
-}
-
-
-
-/*************************************************************************************************/
-/**
-	MacroInstance::GetFilePointer()
-
-	Returns the current file pointer
-*/
-/*************************************************************************************************/
-int MacroInstance::GetFilePointer()
-{
-	return static_cast< int >( m_stream.tellg() );
-}
-
-
-
-/*************************************************************************************************/
-/**
-	MacroInstance::SetFilePointer()
-
-	Sets the current file pointer
-*/
-/*************************************************************************************************/
-void MacroInstance::SetFilePointer( int i )
-{
-	m_lineStartPointer = i;
-	m_stream.seekg( i );
-}
-
-
-
-/*************************************************************************************************/
-/**
-	MacroInstance::IsAtEnd()
-
-	Returns whether the current stream is in an end-of-file state
-*/
-/*************************************************************************************************/
-bool MacroInstance::IsAtEnd()
-{
-	return m_stream.eof();
 }
 
 

@@ -22,9 +22,8 @@
 */
 /*************************************************************************************************/
 
+#include <fstream>
 #include <iostream>
-#include <iomanip>
-#include <sstream>
 
 #include "sourcefile.h"
 #include "asmexception.h"
@@ -117,8 +116,7 @@ static string ReadFile( string filename )
 */
 /*************************************************************************************************/
 SourceFile::SourceFile( const string& filename, const SourceCode* parent )
-	:	SourceCode( filename, 1, parent ),
-		m_file( ReadFile( filename ) )
+	:	SourceCode( filename, 1, ReadFile( filename ), parent )
 {
 }
 
@@ -155,61 +153,4 @@ void SourceFile::Process()
 	{
 		cerr << "Processed file '" << m_filename << "' ok" << endl;
 	}
-}
-
-
-
-/*************************************************************************************************/
-/**
-	SourceFile::GetLine()
-
-	Reads a line from the source code and returns it into lineFromFile
-*/
-/*************************************************************************************************/
-istream& SourceFile::GetLine( string& lineFromFile ) 
-{
-	return getline( m_file, lineFromFile );
-}
-
-
-
-/*************************************************************************************************/
-/**
-	SourceFile::GetFilePointer()
-
-	Returns the current file pointer
-*/
-/*************************************************************************************************/
-int SourceFile::GetFilePointer()
-{
-	return static_cast< int >( m_file.tellg() );
-}
-
-
-
-/*************************************************************************************************/
-/**
-	SourceFile::SetFilePointer()
-
-	Sets the current file pointer
-*/
-/*************************************************************************************************/
-void SourceFile::SetFilePointer( int i )
-{
-	m_lineStartPointer = i;
-	m_file.seekg( i );
-}
-
-
-
-/*************************************************************************************************/
-/**
-	SourceFile::IsAtEnd()
-
-	Returns whether the current stream is in an end-of-file state
-*/
-/*************************************************************************************************/
-bool SourceFile::IsAtEnd()
-{
-	return m_file.eof();
 }
