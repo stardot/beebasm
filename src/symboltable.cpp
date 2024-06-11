@@ -25,6 +25,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 #include "globaldata.h"
 #include "objectcode.h"
@@ -358,6 +359,9 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 
 	if (global)
 	{
+		typedef vector< pair<double, ScopedSymbolName> > ListType;
+		ListType list;
+
 		for ( MapType::const_iterator it = m_map.begin(); it != m_map.end(); ++it )
 		{
 			const ScopedSymbolName&	symbolName = it->first;
@@ -370,16 +374,19 @@ void SymbolTable::Dump(bool global, bool all, const char * labels_file) const
 				Value value = symbol.GetValue();
 				if (value.GetType() == Value::NumberValue)
 				{
-					if ( !bFirst )
-					{
-						our_cout << ",";
-					}
-
-					our_cout << "'" << symbolName.Name() << "':" << value.GetNumber() << "L";
-
-					bFirst = false;
+					list.push_back( ListType::value_type(value.GetNumber(), symbolName) );
 				}
 			}
+		}
+		sort(list.begin(), list.end());
+		for ( ListType::const_iterator it = list.begin(); it != list.end(); ++it )
+		{
+			if ( it != list.begin() )
+			{
+				our_cout << ",";
+			}
+
+			our_cout << "'" << it->second.Name() << "':" << it->first << "L";
 		}
 	}
 
