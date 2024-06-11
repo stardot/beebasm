@@ -35,7 +35,7 @@ TARGET			:=		../beebasm
 # Define compiler switches
 
 WARNFLAGS		:=		-Wall -W -Wcast-qual -Werror -Wshadow -Wcast-align -Wold-style-cast -Woverloaded-virtual
-CXXFLAGS		:=		-O3 -pedantic $(WARNFLAGS)
+CXXFLAGS		:=		-O3 -pedantic -DNDEBUG $(WARNFLAGS)
 
 # Define linker switches
 

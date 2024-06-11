@@ -86,11 +86,13 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 			endSectorAddr = 2;
 		}
 
+#ifndef NDEBUG
 		m_inputFile.seekg( 0, ios::end );
 		int length = static_cast< int >( m_inputFile.tellg() );
 		m_inputFile.seekg( 0, ios::beg );
 
 		assert( length >= endSectorAddr * 0x100 );
+#endif
 
 		char sector[ 0x100 ];
 
