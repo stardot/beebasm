@@ -81,7 +81,7 @@ protected:
 class AsmException_FileError_##a : public AsmException_FileError			\
 {																			\
 public:																		\
-	explicit AsmException_FileError_##a( const std::string filename )			\
+	explicit AsmException_FileError_##a( const std::string& filename )		\
 		:	AsmException_FileError( filename ) {}							\
 																			\
 	virtual ~AsmException_FileError_##a() {}								\
@@ -120,13 +120,13 @@ public:
 	{
 	}
 
-	AsmException_SyntaxError( std::string line, int column )
+	AsmException_SyntaxError( const std::string& line, int column )
 		:	m_line( line ),
 			m_column( column )
 	{
 	}
 
-	AsmException_SyntaxError( std::string line, int column, std::string extra )
+	AsmException_SyntaxError( const std::string& line, int column, const std::string& extra )
 		:	m_line( line ),
 			m_column( column ),
 			m_extra( extra )
@@ -161,7 +161,7 @@ protected:
 class AsmException_SyntaxError_##a : public AsmException_SyntaxError		\
 {																			\
 public:																		\
-	AsmException_SyntaxError_##a( std::string line, int column )			\
+	AsmException_SyntaxError_##a( const std::string& line, int column )		\
 		:	AsmException_SyntaxError( line, column ) {}						\
 																			\
 	virtual ~AsmException_SyntaxError_##a() {}								\
@@ -174,7 +174,7 @@ public:																		\
 class AsmException_SyntaxError_##a : public AsmException_SyntaxError		\
 {																			\
 public:																		\
-	AsmException_SyntaxError_##a( std::string line, int column, std::string extra )			\
+	AsmException_SyntaxError_##a( const std::string& line, int column, const std::string& extra )	\
 		:	AsmException_SyntaxError( line, column, extra ) {}				\
 																			\
 	virtual ~AsmException_SyntaxError_##a() {}								\
@@ -270,7 +270,7 @@ public:
 
 	virtual ~AsmException_AssembleError() {}
 
-	void SetString( std::string line )			{ m_line = line; }
+	void SetString( const std::string& line )	{ m_line = line; }
 	void SetColumn( int column )				{ m_column = column; }
 
 	virtual const char* Message() const
@@ -309,7 +309,7 @@ class AsmException_UserError : public AsmException_SyntaxError
 {
 public:
 
-	AsmException_UserError( std::string line, int column, std::string message )
+	AsmException_UserError( const std::string& line, int column, const std::string& message )
 		:	AsmException_SyntaxError( line, column ),
 			m_message( message )
 	{

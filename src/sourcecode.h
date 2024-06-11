@@ -121,7 +121,7 @@ public:
 	inline int 				GetInitialForStackPtr() const { return m_initialForStackPtr; }
 	inline Macro*			GetCurrentMacro() { return m_currentMacro; }
 
-	bool					GetSymbolValue(std::string name, Value& value);
+	bool					GetSymbolValue(const std::string& name, Value& value);
 	ScopedSymbolName		GetScopedSymbolName( const std::string& symbolName, int level = -1 ) const;
 
 	bool					ShouldOutputAsm();

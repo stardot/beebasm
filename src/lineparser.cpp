@@ -42,7 +42,7 @@ using namespace std;
 	Constructor for LineParser
 */
 /*************************************************************************************************/
-LineParser::LineParser( SourceCode* sourceCode, string line )
+LineParser::LineParser( SourceCode* sourceCode, const string& line )
 	:	m_sourceCode( sourceCode ),
 		m_line( line ),
 		m_column( 0 )
@@ -76,7 +76,7 @@ LineParser::~LineParser()
 	Process one line of the file
 */
 /*************************************************************************************************/
-void LineParser::Process( string line )
+void LineParser::Process( const string& line )
 {
 	m_line = line;
 	m_column = 0;

@@ -582,7 +582,7 @@ bool SourceCode::IsRealForLevel( int level ) const
 	Search up the stack for a value for a symbol.  N.B. This is dynamic scoping.
 */
 /*************************************************************************************************/
-bool SourceCode::GetSymbolValue(std::string name, Value& value)
+bool SourceCode::GetSymbolValue(const std::string& name, Value& value)
 {
 	for ( int forLevel = GetForLevel(); forLevel >= 0; forLevel-- )
 	{

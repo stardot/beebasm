@@ -164,21 +164,17 @@ public:
 		// No value was available (i.e. the end of the parameters)
 		StateMissing
 	};
-	Argument(string line, int column, State state) :
+	Argument(const string& line, int column, State state) :
 		m_line(line), m_column(column), m_state(state)
 	{
 	}
-	Argument(string line, int column, T value) :
+	Argument(const string& line, int column, const T& value) :
 		m_line(line), m_column(column), m_state(StateFound), m_value(value)
 	{
 	}
 	Argument(const Argument<T>& that) :
 		m_line(that.m_line), m_column(that.m_column), m_state(that.m_state), m_value(that.m_value)
 	{
-		m_line = that.m_line;
-		m_column = that.m_column;
-		m_state = that.m_state;
-		m_value = that.m_value;
 	}
 	// Is a value available?
 	bool Found() const
@@ -226,7 +222,7 @@ public:
 	}
 	// Set a default value for optional parameters.
 	// This is overloaded for strings below.
-	Argument<T>& Default(T value)
+	Argument<T>& Default(const T& value)
 	{
 		if ( !Found() )
 		{
@@ -265,7 +261,7 @@ typedef Argument<double> DoubleArg;
 typedef Argument<string> StringArg;
 typedef Argument<Value> ValueArg;
 
-template<> StringArg& StringArg::Default(string value)
+template<> StringArg& StringArg::Default(const string& value)
 {
 	if ( !Found() )
 	{
@@ -1218,12 +1214,12 @@ void LineParser::HandleSave()
 
 			if ( !objFile )
 			{
-				throw AsmException_FileError_OpenObj( saveFile.c_str() );
+				throw AsmException_FileError_OpenObj( saveFile );
 			}
 
 			if ( !objFile.write( reinterpret_cast< const char* >( ObjectCode::Instance().GetAddr( start ) ), end - start ) )
 			{
-				throw AsmException_FileError_WriteObj( saveFile.c_str() );
+				throw AsmException_FileError_WriteObj( saveFile );
 			}
 
 			objFile.close();

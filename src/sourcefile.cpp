@@ -48,7 +48,7 @@ using namespace std;
 	The supplied file will be opened.  If there is a problem, an AsmException will be thrown.
 */
 /*************************************************************************************************/
-static string ReadFile( string filename )
+static string ReadFile( const string& filename )
 {
 	// we have to open in binary, due to a bug in MinGW which means that calling
 	// tellg() on a text-mode file ruins the file pointer!
