@@ -211,6 +211,10 @@ public:
 	String(const char* text, unsigned int length)
 	{
 		m_header = StringHeader::Allocate(text, length);
+		if (!m_header)
+		{
+			throw std::bad_alloc();
+		}
 		StringHeader::AddRef(m_header);
 	}
 	String& operator=(const String& that)
