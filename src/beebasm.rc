@@ -1,0 +1,77 @@
+/*************************************************************************************************/
+/**
+	beebasm.rc
+
+
+	Copyright (C) Charles Reilly 2024
+
+	This file is part of BeebAsm.
+
+	BeebAsm is free software: you can redistribute it and/or modify it under the terms of the GNU
+	General Public License as published by the Free Software Foundation, either version 3 of the
+	License, or (at your option) any later version.
+
+	BeebAsm is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with BeebAsm, as
+	COPYING.txt.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/*************************************************************************************************/
+
+#include <verrsrc.h>
+#include "version.h"
+
+// This is the source charset.  String resources are stored in utf-16 in the exe.
+// (This whole file is actually ASCII but it contains a copyright symbol escaped
+// in the Windows-1252 encoding.)
+#pragma code_page(1252)
+
+LANGUAGE 9, 1
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+#ifdef _DEBUG
+    #define DLL_FLAGS VS_FF_DEBUG
+#else
+    #define DLL_FLAGS 0x0L
+#endif
+
+1 VERSIONINFO
+ FILEVERSION MAJOR_VERSION,MINOR_VERSION,RELEASE_NUMBER,BUILD_NUMBER
+ PRODUCTVERSION MAJOR_VERSION,MINOR_VERSION,RELEASE_NUMBER,BUILD_NUMBER
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+ FILEFLAGS DLL_FLAGS
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        // 0x0809 = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK)
+        // 0x04B0 = CP_WINUNICODE
+        BLOCK "080904b0"
+        BEGIN
+            //VALUE "Comments", "\0"
+            //VALUE "CompanyName", "beebasm\0"
+            VALUE "FileDescription", "beebasm\0"
+            VALUE "FileVersion", VERSION "\0"
+            VALUE "InternalName", "beebasm\0"
+            VALUE "LegalCopyright", "Copyright \xA9 " EXPAND_TO_STRING(COPYRIGHT_YEAR) " The beebasm contributors\0"
+            VALUE "LegalTrademarks", "\0"
+            //VALUE "OriginalFilename", "beebasm.exe\0"
+            //VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "beebasm\0"
+            VALUE "ProductVersion", VERSION "\0"
+            //VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0809, 0x04B0
+    END
+END

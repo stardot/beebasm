@@ -37,12 +37,10 @@
 #include "BASIC.h"
 #include "macro.h"
 #include "random.h"
+#include "version.h"
 
 
 using namespace std;
-
-
-#define VERSION "1.10"
 
 
 /*************************************************************************************************/

@@ -114,6 +114,13 @@
     <ClInclude Include="..\stringutils.h" />
     <ClInclude Include="..\symboltable.h" />
     <ClInclude Include="..\value.h" />
+    <ClInclude Include="..\version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\beebasm.rc">
+      <Culture Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">0x0809</Culture>
+      <Culture Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">0x0809</Culture>
+    </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

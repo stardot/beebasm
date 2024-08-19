@@ -119,5 +119,13 @@
     <ClInclude Include="..\scopedsymbolname.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\beebasm.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
