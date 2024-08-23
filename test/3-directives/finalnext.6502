@@ -1,0 +1,5 @@
+\ Issue 96
+\ "FOR without NEXT" error if file has no trailing CR/LF.
+FOR i, 1, 10
+    NOP
+NEXT
