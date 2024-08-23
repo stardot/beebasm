@@ -378,7 +378,7 @@ void ObjectCode::Clear( int start, int end, bool bAll )
 	ObjectCode::IncBin()
 */
 /*************************************************************************************************/
-void ObjectCode::IncBin( const char* filename )
+void ObjectCode::IncBin( const char* filename, std::vector<unsigned char>& firstFour )
 {
 	ifstream binfile;
 
@@ -394,7 +394,12 @@ void ObjectCode::IncBin( const char* filename )
 	while ( binfile.get( c ) )
 	{
 		assert( binfile.gcount() == 1 );
-		Assemble1( static_cast< unsigned char >( c ) );
+		unsigned char uc = static_cast< unsigned char >( c );
+		if ( firstFour.size() < 4 )
+		{
+			firstFour.push_back(uc);
+		}
+		Assemble1( uc );
 	}
 
 	if ( !binfile.eof() )

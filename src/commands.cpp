@@ -851,15 +851,47 @@ void LineParser::HandleIncBin()
 {
 	string filename = EvaluateExpressionAsString();
 
+	if ( m_sourceCode->ShouldOutputAsm() )
+	{
+		cout << uppercase << hex << setfill( '0' ) << "     ";
+		cout << setw(4) << ObjectCode::Instance().GetPC() << "   ";
+	}
+
+	std::vector<unsigned char> firstFour;
 	try
 	{
-		ObjectCode::Instance().IncBin( filename.c_str() );
+		ObjectCode::Instance().IncBin( filename.c_str(), firstFour );
 	}
 	catch ( AsmException_AssembleError& e )
 	{
 		e.SetString( m_line );
 		e.SetColumn( m_column );
 		throw;
+	}
+
+	if ( m_sourceCode->ShouldOutputAsm() )
+	{
+		size_t count = 0;
+		for ( size_t i = 0; i < firstFour.size(); i++ )
+		{
+			if ( i < 3 )
+			{
+				cout << setw(2) << static_cast<int>(firstFour[i]) << " ";
+				count += 3;
+			}
+			else if ( i == 3 )
+			{
+				cout << "... ";
+				count += 4;
+			}
+		}
+		while (count < 11)
+		{
+			cout << " ";
+			++count;
+		}
+		cout << "INCBIN \"" << filename << '"';
+		cout << endl << nouppercase << dec << setfill( ' ' );
 	}
 
 	if ( AdvanceAndCheckEndOfStatement() )
