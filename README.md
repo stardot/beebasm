@@ -647,6 +647,10 @@ Seed the random number generator used by the RND() function.  If this is not use
 
 Assemble the supplied assembly language string.  For example `ASM "LDA #&41"`.
 
+`SOURCELINE <line number> [,<filename>]`
+
+For error reporting act as if the following lines started at `<line number>` in `<filename>`.  This is similar to `#line` in C/C++.
+
 ## 7. TIPS AND TRICKS
 
 BeebAsm's approach of treating memory as a canvas which can be written to, saved, and rewritten if desired makes it very easy to create certain types of applications.

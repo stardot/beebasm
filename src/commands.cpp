@@ -28,6 +28,7 @@
 #include <string>
 #include <cstring>
 #include <ctime>
+#include <climits>
 
 #include "lineparser.h"
 #include "globaldata.h"
@@ -85,7 +86,8 @@ const LineParser::Token	LineParser::m_gaTokenTable[] =
 	{ N("ERROR"),		&LineParser::HandleError,				0 },
 	{ N("COPYBLOCK"),	&LineParser::HandleCopyBlock,			0 },
 	{ N("RANDOMIZE"),	&LineParser::HandleRandomize,			0 },
-	{ N("ASM"),			&LineParser::HandleAsm,					0 }
+	{ N("ASM"),			&LineParser::HandleAsm,					0 },
+	{ N("SOURCELINE"),  &LineParser::HandleSourceLine,          0 }
 };
 
 #undef N
@@ -1876,4 +1878,29 @@ void LineParser::HandleAsm()
 	}
 
 	parser.HandleAssembler(instruction);
+}
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleSourceLine()
+*/
+/*************************************************************************************************/
+void LineParser::HandleSourceLine()
+{
+	ArgListParser args(*this);
+	int line = args.ParseInt().Range(0, INT_MAX);
+	StringArg fileParam = args.ParseString();
+	args.CheckComplete();
+
+	if (m_column != m_line.length())
+	{
+		// This must be the last thing on the line
+		throw AsmException_SyntaxError_SourceLineNotLast( m_line, m_column );
+	}
+
+	m_sourceCode->SetLineNumber(line - 1);
+	if (fileParam.Found())
+	{
+		m_sourceCode->SetFileName(static_cast<string>(fileParam));
+	}
 }
