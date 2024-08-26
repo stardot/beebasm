@@ -28,11 +28,9 @@
 #include <vector>
 
 
-class AnonymousLabels
+class AnonymousLabelsData
 {
 public:
-	static inline AnonymousLabels& Instance() { return m_gInstance; }
-
 	// Get PC of last '-' label
 	int GetBackReference() { return m_backReference; }
 	// Set PC of '-' label
@@ -47,6 +45,45 @@ public:
 private:
 	int m_backReference;
 	std::vector<ScopedSymbolName> m_forwardReferences;
+};
+
+
+class AnonymousLabels
+{
+public:
+	static inline AnonymousLabelsData& Instance() { return m_gInstance.Current(); }
+
+	AnonymousLabels() : m_level(0)
+	{
+	}
+
+	static void EnterMacro() { m_gInstance.Enter(); }
+	static void LeaveMacro() { m_gInstance.Leave(); }
+
+private:
+	void Enter()
+	{
+		m_level++;
+	}
+	void Leave()
+	{
+		if ( m_level < m_data.size() )
+		{
+			m_data[m_level].Clear();
+		}
+		m_level--;
+	}
+	AnonymousLabelsData& Current()
+	{
+		if ( m_level >= m_data.size() )
+		{
+			m_data.resize(m_level + 1);
+		}
+		return m_data[m_level];
+	}
+
+	unsigned int m_level;
+	std::vector<AnonymousLabelsData> m_data;
 
 	static AnonymousLabels m_gInstance;
 };

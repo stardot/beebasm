@@ -29,7 +29,7 @@ AnonymousLabels AnonymousLabels::m_gInstance;
 
 
 // Update the forward references when a '+' label is seen
-void AnonymousLabels::UpdateForwardReferences(int pc)
+void AnonymousLabelsData::UpdateForwardReferences(int pc)
 {
 	for (std::vector<ScopedSymbolName>::iterator it = m_forwardReferences.begin(); it != m_forwardReferences.end(); ++it)
 	{

@@ -1,0 +1,22 @@
+MACRO anon N
+LDY #N
+- JSR &FFEE
+DEY
+BNE -
+ENDMACRO
+
+ORG &2000
+.start
+LDX #0
+-
+LDA text,X
+BEQ +
+anon 2
+INX
+BNE -
++ RTS
+.text
+EQUS "Hello", 0
+.end
+
+SAVE "hello",start,end
