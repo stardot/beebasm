@@ -1,0 +1,4 @@
+FOR I, 1, 2
+- LDA #65
+NEXT
+JMP -
