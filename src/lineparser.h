@@ -124,6 +124,7 @@ private:
 	// assembler generating methods
 
 	void			HandleAssembler( int tokenNumber );
+	bool			HandleAnonymousLabelReference( int& value );
 	bool			HasAddressingMode( int opcodeIndex, ADDRESSING_MODE mode );
 	unsigned int	GetOpcode( int opcodeIndex, ADDRESSING_MODE mode );
 	void			Assemble1( int instructionIndex, ADDRESSING_MODE mode );
@@ -168,6 +169,7 @@ private:
 	void			HandleCopyBlock();
 	void			HandleRandomize();
 	void			HandleAsm();
+	void			HandleAnonymousLabel();
 
 	// expression evaluating methods
 

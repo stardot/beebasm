@@ -39,6 +39,7 @@
 #include "discimage.h"
 #include "BASIC.h"
 #include "random.h"
+#include "anonymouslabels.h"
 
 
 using namespace std;
@@ -1876,4 +1877,29 @@ void LineParser::HandleAsm()
 	}
 
 	parser.HandleAssembler(instruction);
+}
+
+
+/*************************************************************************************************/
+/**
+	LineParser::HandleAnonymousLabel()
+*/
+/*************************************************************************************************/
+void LineParser::HandleAnonymousLabel()
+{
+	char c = m_line[ m_column ];
+	assert( c == '+' || c == '-' );
+
+	if ( c == '-' )
+	{
+		// Remember PC so later code can refer back to this label
+		AnonymousLabels::Instance().SetBackReference(ObjectCode::Instance().GetPC());
+	}
+	else if (c == '+')
+	{
+		// Update previous forward references to equal this PC
+		AnonymousLabels::Instance().UpdateForwardReferences(ObjectCode::Instance().GetPC());
+	}
+
+	m_column++;
 }

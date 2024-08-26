@@ -124,6 +124,17 @@ void LineParser::Process( const string& line )
 
 		m_column = oldColumn;
 
+		// Check for an anonymous label declaration, + or -
+		// Must be followed by a newline or space.
+		if ( !bIsSymbolAssignment )
+		{
+			if (( m_line[ m_column ] == '+' || m_line[ m_column ] == '-' ) && (m_column + 1 == m_line.length() || m_line[ m_column + 1 ] == ' '))
+			{
+				HandleAnonymousLabel();
+				continue;
+			}
+		}
+
 		// first check tokens - they have priority over opcodes, so that they can have names
 		// like INCLUDE (which would otherwise be interpreted as INC LUDE)
 

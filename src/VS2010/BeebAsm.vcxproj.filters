@@ -66,6 +66,9 @@
     <ClCompile Include="..\literals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\anonymouslabels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\asmexception.h">
@@ -120,6 +123,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\anonymouslabels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

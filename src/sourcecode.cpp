@@ -29,6 +29,7 @@
 #include "lineparser.h"
 #include "symboltable.h"
 #include "macro.h"
+#include "anonymouslabels.h"
 
 using namespace std;
 
@@ -221,6 +222,7 @@ void SourceCode::AddFor( const ScopedSymbolName& varName,
 	m_forStack[ m_forStackPtr ].m_lineNumber	= m_lineNumber;
 
 	SymbolTable::Instance().PushFor(m_forStack[ m_forStackPtr ].m_varName, m_forStack[ m_forStackPtr ].m_current);
+	AnonymousLabels::Instance().Clear();
 	m_forStackPtr++;
 }
 
@@ -254,6 +256,7 @@ void SourceCode::OpenBrace( const string& line, int column )
 	m_forStack[ m_forStackPtr ].m_lineNumber	= m_lineNumber;
 
 	SymbolTable::Instance().PushBrace();
+	AnonymousLabels::Instance().Clear();
 	m_forStackPtr++;
 }
 
@@ -300,6 +303,7 @@ void SourceCode::UpdateFor( const string& line, int column )
 		thisFor.m_count++;
 		m_lineNumber = thisFor.m_lineNumber - 1;
 	}
+	AnonymousLabels::Instance().Clear();
 }
 
 
@@ -336,6 +340,7 @@ void SourceCode::CloseBrace( const string& line, int column )
 	}
 
 	SymbolTable::Instance().PopScope();
+	AnonymousLabels::Instance().Clear();
 	m_forStackPtr--;
 }
 
@@ -422,6 +427,7 @@ void SourceCode::AddIfLevel( const string& line, int column )
 	m_ifStack[ m_ifStackPtr ].m_column				= column;
 	m_ifStack[ m_ifStackPtr ].m_lineNumber			= m_lineNumber;
 	m_ifStackPtr++;
+	AnonymousLabels::Instance().Clear();
 }
 
 
@@ -471,6 +477,7 @@ void SourceCode::StartElse( const string& line, int column )
 	m_ifStack[ m_ifStackPtr - 1 ].m_hadElse = true;
 
 	m_ifStack[ m_ifStackPtr - 1 ].m_condition = !m_ifStack[ m_ifStackPtr - 1 ].m_passed;
+	AnonymousLabels::Instance().Clear();
 }
 
 
@@ -488,6 +495,7 @@ void SourceCode::StartElif( const string& line, int column )
 	}
 
 	m_ifStack[ m_ifStackPtr - 1 ].m_condition = !m_ifStack[ m_ifStackPtr - 1 ].m_passed;
+	AnonymousLabels::Instance().Clear();
 }
 
 
@@ -504,6 +512,7 @@ void SourceCode::RemoveIfLevel( const string& line, int column )
 		throw AsmException_SyntaxError_EndifWithoutIf( line, column );
 	}
 
+	AnonymousLabels::Instance().Clear();
 	m_ifStackPtr--;
 }
 

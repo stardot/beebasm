@@ -1,0 +1,15 @@
+ORG &2000
+.start
+LDX #0
+-
+LDA text,X
+BEQ +
+JSR &FFEE
+INX
+BNE -
++ RTS
+.text
+EQUS "Hello", 0
+.end
+
+SAVE "hello",start,end

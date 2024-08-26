@@ -33,6 +33,7 @@
 #include "asmexception.h"
 #include "sourcecode.h"
 #include "stringutils.h"
+#include "anonymouslabels.h"
 
 
 using namespace std;
@@ -181,6 +182,7 @@ int LineParser::GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes)
 			std::string::size_type k = m_column + len;
 			if ( k < m_line.length() )
 			{
+				// TODO: This should allow all the AdvanceAndCheckEndOfStatement stuff
 				if ( !isspace( m_line[ k ] ) && m_line[ k ] != ':' )
 				{
 					bMatch = false;
@@ -726,7 +728,10 @@ void LineParser::HandleAssembler( int instruction )
 
 	try
 	{
-		value = EvaluateExpressionAsInt();
+		if (!HandleAnonymousLabelReference( value ))
+		{
+			value = EvaluateExpressionAsInt();
+		}
 		
 		// If this is relative addressing and we're on the first pass, we don't
 		// use the value we just calculated. This is because we may have
@@ -892,4 +897,61 @@ void LineParser::HandleAssembler( int instruction )
 	// If we got here, we received a weird index, like LDA addr,Z
 
 	throw AsmException_SyntaxError_BadIndexed( m_line, m_column );
+}
+
+bool LineParser::HandleAnonymousLabelReference( int& value )
+{
+	if ( m_column == m_line.length() )
+	{
+		return false;
+	}
+
+	char c = m_line[ m_column ];
+	if ( c != '+' && c != '-' )
+	{
+		return false;
+	}
+
+	// If there is anything after the + or - bail out
+	int startColumn = m_column++;
+	if ( AdvanceAndCheckEndOfStatement() )
+	{
+		m_column = startColumn;
+		return false;
+	}
+
+	if ( c == '-' )
+	{
+		value = AnonymousLabels::Instance().GetBackReference();
+		if (value == -1)
+		{
+			throw AsmException_SyntaxError_SymbolNotDefined( m_line, m_column );
+		}
+	}
+	else if ( c == '+' )
+	{
+		// Define a symbol to hold the value
+		ostringstream stream;
+		stream << std::hex << std::uppercase << std::setw(4) << "+_" << ObjectCode::Instance().GetPC();
+		string name = stream.str();
+		ScopedSymbolName symbolName = m_sourceCode->GetScopedSymbolName( name );
+		if ( GlobalData::Instance().IsFirstPass() )
+		{
+			// First pass: add a forward reference to be filled in later
+			AnonymousLabels::Instance().AddForwardReference(symbolName);
+		}
+		else
+		{
+			// Second pass: lookup the filled in value
+			Value v;
+			if ( !m_sourceCode->GetSymbolValue(name, v) )
+			{
+				// symbol not known
+				throw AsmException_SyntaxError_SymbolNotDefined( m_line, startColumn );
+			}
+			// If the value exists it must be a number
+			value = static_cast<int>(v.GetNumber());
+		}
+	}
+	return true;
 }

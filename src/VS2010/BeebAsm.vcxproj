@@ -78,6 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\anonymouslabels.cpp" />
     <ClCompile Include="..\asmexception.cpp" />
     <ClCompile Include="..\assemble.cpp" />
     <ClCompile Include="..\BASIC.cpp" />
@@ -97,6 +98,7 @@
     <ClCompile Include="..\symboltable.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\anonymouslabels.h" />
     <ClInclude Include="..\asmexception.h" />
     <ClInclude Include="..\BASIC.h" />
     <ClInclude Include="..\constants.h" />
