@@ -168,6 +168,7 @@ private:
 	void			HandleCopyBlock();
 	void			HandleRandomize();
 	void			HandleAsm();
+	void			HandleSourceLine();
 
 	// expression evaluating methods
 

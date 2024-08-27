@@ -1,0 +1,9 @@
+MACRO SL pass
+IF pass=2
+  LDZ #1
+ENDIF
+SOURCELINE 1,"random.asm"
+ENDMACRO
+
+SL 1
+SL 2

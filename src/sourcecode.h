@@ -137,6 +137,9 @@ public:
 	void					StartMacro( const std::string& line, int column );
 	void					EndMacro( const std::string& line, int column );
 	bool					IsRealForLevel( int level ) const;
+	// For SOURCELINE
+	void					SetLineNumber(int line) { m_lineNumber = line; }
+	void					SetFileName(const std::string& name) { m_filename = name; }
 
 
 protected:

@@ -1,0 +1,1 @@
+random.asm:21: error: Unrecognised token.

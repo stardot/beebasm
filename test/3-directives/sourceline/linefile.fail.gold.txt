@@ -1,0 +1,1 @@
+other.asm:5: error: Unrecognised token.
