@@ -1,0 +1,10 @@
+MACRO SHOW x, y
+PRINT x, y
+ASSERT(x=5)
+ASSERT(y=5)
+ENDMACRO
+
+\ Check that macro parameters are evaluated in the outer scope
+x=2
+y=3
+SHOW x+y, x+y

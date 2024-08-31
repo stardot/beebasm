@@ -316,7 +316,7 @@ void SymbolTable::ChangeBuiltInSymbol( const std::string& symbolName, double val
 	@param		value			Its new value
 */
 /*************************************************************************************************/
-void SymbolTable::ChangeSymbol( const ScopedSymbolName& symbol, double value )
+void SymbolTable::ChangeSymbol( const ScopedSymbolName& symbol, Value value )
 {
 	assert( IsSymbolDefined( symbol ) );
 	m_map.find( symbol )->second.SetValue( value );

@@ -1,0 +1,23 @@
+MACRO LOAD address
+LDA address
+ENDMACRO
+
+ORG &2000
+\ On the first pass LOAD is called with an undefined symbol.
+\ Test that the undefinedness propagates to the macro so
+\ that the LDA has the correct width (i.e. not zero page).
+LOAD data
+RTS
+.data
+EQUB 2
+
+\ This example fails because zp moves out of zero page between
+\ passes.  It would be better if scopes couldn't override symbols
+\ from outer scopes.
+\zp=&70
+\{
+\    LDA zp
+\    RTS
+\    .zp
+\    EQUB 3
+\}

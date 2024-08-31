@@ -227,30 +227,18 @@ void LineParser::Process( const string& line )
 					cout << "Macro " << macroName << ":" << endl;
 				}
 
-				HandleOpenBrace();
-
+				// Evaluate parameters at outer scope.
+				std::vector<Value> parameterValues;
+				std::vector<bool> parameterDefined;
+				parameterValues.resize( macro->GetNumberOfParameters() );
+				parameterDefined.resize( macro->GetNumberOfParameters() );
 				for ( int i = 0; i < macro->GetNumberOfParameters(); i++ )
 				{
-					ScopedSymbolName paramName = m_sourceCode->GetScopedSymbolName( macro->GetParameter( i ) );
-
 					try
 					{
-						if ( !SymbolTable::Instance().IsSymbolDefined( paramName ) )
-						{
-							Value value = EvaluateExpression();
-							SymbolTable::Instance().AddSymbol( paramName, value );
-						}
-						else if ( GlobalData::Instance().IsSecondPass() )
-						{
-							// We must remove the symbol before evaluating the expression,
-							// otherwise nested macros which share the same parameter name can
-							// evaluate the inner macro parameter using the old value of the inner
-							// macro parameter rather than the new value of the outer macro
-							// parameter. See local-forward-branch-5.6502 for an example.
-							SymbolTable::Instance().RemoveSymbol( paramName );
-							Value value = EvaluateExpression();
-							SymbolTable::Instance().AddSymbol( paramName, value );
-						}
+						Value value = EvaluateExpression();
+						parameterValues[i] = value;
+						parameterDefined[i] = true;
 					}
 					catch ( AsmException_SyntaxError_SymbolNotDefined& )
 					{
@@ -270,15 +258,39 @@ void LineParser::Process( const string& line )
 						m_column++;
 					}
 				}
-				
+
 				if ( AdvanceAndCheckEndOfStatement() )
 				{
 					throw AsmException_SyntaxError_InvalidCharacter( m_line, m_column );
 				}
 
+				// Enter the scope
+				HandleOpenBrace();
+
+				// Create symbols for the parameters
+				for ( int i = 0; i < macro->GetNumberOfParameters(); i++ )
+				{
+					// If the parameter is not defined then don't give it a default value.  We want the
+					// undefinedness to propagate to the macro so that the assembler uses PC as a default.
+					if ( parameterDefined[i] )
+					{
+						ScopedSymbolName paramName = m_sourceCode->GetScopedSymbolName( macro->GetParameter( i ) );
+						if ( !SymbolTable::Instance().IsSymbolDefined( paramName ) )
+						{
+							SymbolTable::Instance().AddSymbol( paramName, parameterValues[i] );
+						}
+						else
+						{
+							// The value may come from an outer scope on the first pass and the current scope on
+							// the second pass so it may need updating.
+							SymbolTable::Instance().ChangeSymbol( paramName, parameterValues[i] );
+						}
+					}
+				}
+
+				// Run the macro and tidy up
 				MacroInstance macroInstance( macro, m_sourceCode );
 				macroInstance.Process();
-
 				HandleCloseBrace();
 
 				if ( m_sourceCode->ShouldOutputAsm() )

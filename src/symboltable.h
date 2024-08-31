@@ -46,7 +46,7 @@ public:
 	bool AddCommandLineSymbol( const std::string& expr );
 	bool AddCommandLineStringSymbol( const std::string& expr );
 	void ChangeBuiltInSymbol( const std::string& symbol, double value );
-	void ChangeSymbol( const ScopedSymbolName& symbol, double value );
+	void ChangeSymbol( const ScopedSymbolName& symbol, Value value );
 	Value GetSymbol( const ScopedSymbolName& symbol ) const;
 	bool IsSymbolDefined( const ScopedSymbolName& symbol ) const;
 	void RemoveSymbol( const ScopedSymbolName& symbol );
