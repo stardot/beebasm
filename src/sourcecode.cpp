@@ -551,7 +551,15 @@ void SourceCode::EndMacro( const string& line, int column )
 
 	if ( GlobalData::Instance().IsFirstPass() )
 	{
-		MacroTable::Instance().Add( m_currentMacro );
+		if ( m_currentMacro->GetName().empty() )
+		{
+			// This is a placeholder used to skip a macro definition in an IF FALSE block
+			delete m_currentMacro;
+		}
+		else
+		{
+			MacroTable::Instance().Add( m_currentMacro );
+		}
 		m_currentMacro = NULL;
 	}
 }
