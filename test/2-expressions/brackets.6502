@@ -1,0 +1,5 @@
+\ Parentheses and brackets can both be used to group expressions
+assert((1+2)*3=9)
+assert(1+(2*3)=7)
+assert([1+2]*3=9)
+assert(1+[2*3]=7)
