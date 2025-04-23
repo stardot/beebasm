@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'macos-14', 'ubuntu-20.04']
+        os: ['ubuntu-22.04', 'macos-14']
     name: Compile via Makefile on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
