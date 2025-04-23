@@ -41,8 +41,10 @@ public:
 	static StringHeader* Allocate(const char* text, unsigned int length)
 	{
 		StringHeader* header = Allocate(length);
-		char* buffer = StringBuffer(header);
-		memcpy(buffer, text, length);
+		if (header) {
+			char* buffer = StringBuffer(header);
+			memcpy(buffer, text, length);
+		}
 		return header;
 	}
 
