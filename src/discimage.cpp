@@ -33,6 +33,55 @@ using namespace std;
 
 /*************************************************************************************************/
 /**
+	BuildInputFileErrorMessage()
+
+	Helper function to build detailed diagnostic message for input file read failures.
+	Examines stream state to provide actionable information about what went wrong.
+
+	@param		description			What was being read (e.g., "catalogue", "sector 5")
+	@param		expectedBytes		Number of bytes attempted to read
+	@param		inputStream			The input stream that failed
+	@return		A detailed error message string
+*/
+/*************************************************************************************************/
+static string BuildInputFileErrorMessage(
+	const string& description,
+	size_t expectedBytes,
+	ifstream& inputStream )
+{
+	ostringstream msg;
+
+	streamsize actualBytes = inputStream.gcount();
+	bool hitEof = inputStream.eof();
+	streampos currentPos = inputStream.tellg();
+
+	msg << "Problem reading from disc image.";
+
+	// Add specific context about what was being read
+	msg << " Failed to read " << description;
+	msg << ": attempted " << expectedBytes << " bytes";
+	msg << ", got " << actualBytes;
+
+	// Add EOF information if applicable
+	if ( hitEof )
+	{
+		msg << " (unexpected end of file)";
+	}
+
+	// Add current position if available
+	if ( currentPos != static_cast<streampos>(-1) )
+	{
+		msg << ". Position: " << currentPos;
+	}
+
+	msg << ".";
+
+	return msg.str();
+}
+
+
+/*************************************************************************************************/
+/**
 	DiscImage::DiscImage()
 
 	DiscImage constructor
@@ -100,7 +149,11 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 		{
 			if ( !m_inputFile.read( sector, 0x100 ) )
 			{
-				throw AsmException_FileError_ReadDiscSource( pInput );
+				// Build detailed diagnostic message
+				ostringstream desc;
+				desc << "sector " << sect;
+				string errorMsg = BuildInputFileErrorMessage( desc.str(), 0x100, m_inputFile );
+				throw AsmException_FileError_ReadDiscSource( pInput, errorMsg );
 			}
 
 			if ( !m_outputFile.write( sector, 0x100 ) )

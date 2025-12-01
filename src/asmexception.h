@@ -58,7 +58,14 @@ class AsmException_FileError : public AsmException
 public:
 
 	explicit AsmException_FileError( const std::string& filename )
-		:	m_filename( filename )
+		:	m_filename( filename ),
+			m_detail()
+	{
+	}
+
+	AsmException_FileError( const std::string& filename, const std::string& detail )
+		:	m_filename( filename ),
+			m_detail( detail )
 	{
 	}
 
@@ -68,12 +75,17 @@ public:
 
 	virtual const char* Message() const
 	{
+		if ( !m_detail.empty() )
+		{
+			return m_detail.c_str();
+		}
 		return "Unspecified file error.";
 	}
 
 protected:
 
 	std::string			m_filename;
+	std::string			m_detail;
 };
 
 
@@ -84,9 +96,19 @@ public:																		\
 	explicit AsmException_FileError_##a( const std::string& filename )		\
 		:	AsmException_FileError( filename ) {}							\
 																			\
+	AsmException_FileError_##a( const std::string& filename, const std::string& detail )	\
+		:	AsmException_FileError( filename, detail ) {}					\
+																			\
 	virtual ~AsmException_FileError_##a() {}								\
 																			\
-	virtual const char* Message() const { return msg; }						\
+	virtual const char* Message() const										\
+	{																		\
+		if ( !m_detail.empty() )											\
+		{																	\
+			return m_detail.c_str();										\
+		}																	\
+		return msg;															\
+	}																		\
 }
 
 
