@@ -110,6 +110,7 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 			throw AsmException_FileError_OpenDiscSource( pInput );
 		}
 
+		// Read the catalogue
 		if ( !m_inputFile.read( reinterpret_cast< char* >( m_aCatalog ), 0x200 ) )
 		{
 			throw AsmException_FileError_ReadDiscSource( pInput );
@@ -135,17 +136,38 @@ DiscImage::DiscImage( const char* pOutput, const char* pInput )
 			endSectorAddr = 2;
 		}
 
-#ifndef NDEBUG
+		// Validate that the input file is large enough for the expected sectors
 		m_inputFile.seekg( 0, ios::end );
 		int length = static_cast< int >( m_inputFile.tellg() );
-		m_inputFile.seekg( 0, ios::beg );
 
-		assert( length >= endSectorAddr * 0x100 );
-#endif
+		if ( length < endSectorAddr * 0x100 )
+		{
+			ostringstream errorMsg;
+			errorMsg << "Disc image is too small. Expected at least "
+			         << (endSectorAddr * 0x100) << " bytes, but file is "
+			         << length << " bytes.";
+			throw AsmException_FileError_ReadDiscSource( pInput, errorMsg.str() );
+		}
+
+		// Seek to position 0x200 to read the remaining data sectors
+		m_inputFile.seekg( 0x200, ios::beg );
+
+		// Write the catalogue (sectors 0-1) directly from the in-memory buffer.
+		// This avoids redundant I/O and is consistent with the destructor
+		// which also writes the catalogue from m_aCatalog.
+
+		if ( !m_outputFile.write( reinterpret_cast< char* >( m_aCatalog ), 0x200 ) )
+		{
+			throw AsmException_FileError_WriteDiscDest( pOutput );
+		}
+
+		// Copy the remaining file data sectors (2 onwards) from the input disc image.
+		// The input file pointer is correctly positioned at offset 0x200 (start of sector 2)
+		// after the initial catalogue read
 
 		char sector[ 0x100 ];
 
-		for ( int sect = 0; sect < endSectorAddr; sect++ )
+		for ( int sect = 2; sect < endSectorAddr; sect++ )
 		{
 			if ( !m_inputFile.read( sector, 0x100 ) )
 			{
