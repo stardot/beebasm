@@ -1,0 +1,11 @@
+\ beebasm -di template.ssd
+
+\ Test using -di option with a template disc image that has a !BOOT file.
+
+ORG &8000
+
+.start
+    RTS
+.end
+
+SAVE "tester", start, end
