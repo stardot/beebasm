@@ -1,0 +1,21 @@
+\ beebasm -S TEXT=Hello!
+
+ORG &2000
+osasci=&FFE3
+
+.start
+LDY #&00
+.loop
+LDA text,Y
+INY
+JSR osasci
+CMP #&0D
+BNE loop
+RTS
+
+.text
+EQUS TEXT,13
+
+.end
+
+SAVE "code",start,end

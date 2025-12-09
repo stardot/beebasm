@@ -1,0 +1,1 @@
+distinctopcodes.fail.6502:6: error: Unrecognised token.

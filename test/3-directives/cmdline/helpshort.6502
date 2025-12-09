@@ -1,0 +1,2 @@
+\ beebasm -h
+\ This test just checks that "-h" is accepted; it doesn't check the output

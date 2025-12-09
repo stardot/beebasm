@@ -1,0 +1,11 @@
+\beebasm -w
+
+.start
+
+foo=&70
+STAfoo
+RTS
+
+.end
+
+SAVE "code",start,end
