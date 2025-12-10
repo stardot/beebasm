@@ -7,14 +7,14 @@
 #ifndef VERSION_H_
 #define VERSION_H_
 
-#define COPYRIGHT_YEAR 2024
+#define COPYRIGHT_YEAR 2025
 
 // The version numbers
 #define MAJOR_VERSION 1
-#define MINOR_VERSION 10
+#define MINOR_VERSION 11
 
 // Something appended to the version, e.g. "rc2" for a release candidate
-#define SPECIAL_VERSION ""
+#define SPECIAL_VERSION "rc1"
 
 // Currently unused, though they are displayed in Explorer by some versions of Windows
 #define RELEASE_NUMBER 0

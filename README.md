@@ -1,9 +1,9 @@
 # BeebAsm
-**Version V1.10**
+**Version V1.11**
 
 A portable 6502 assembler with BBC Micro style syntax
 
-Copyright (C) Rich Talbot-Watkins and the contributors 2007-2022
+Copyright (C) Rich Talbot-Watkins and the contributors 2007-2025
 <richtw1@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
@@ -177,8 +177,6 @@ If specified, there must be whitespace between opcodes and their labels. This in
         PHA:TXA:PHA:TYA:PHA
     ENDMACRO
 ```
-
-Things like `STA&4000` are permitted with or without `-w`.
 
 `-D <symbol> `
 
@@ -573,7 +571,7 @@ This command is the same as `PUTFILE`, except that the host file is assumed to b
   
 `PUTBASIC <host filename> [,<beeb filename>]`
 
-This takes a BASIC program as a plain text file on the host OS, tokenises it,and outputs it to the disc image as a native BASIC file.  Credit to Thomas Harte for the BASIC tokenising routine.  Line numbers can be provided in the text file if desired, but if not present they will be automatically generated. 
+This takes a BASIC program as a plain text file on the host OS, tokenises it,and outputs it to the disc image as a native BASIC file.  Line numbers can be provided in the text file if desired, but if not present they will be automatically generated.
 
 See `autolinenumdemo.bas` for an example.
   
@@ -736,6 +734,15 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
+10/12/2025  1.11  (Potentially breaking) When using the -w option mnemonics must be followed by a space or colon (thanks Homo-carbonis).
+                  (Potentially breaking) When not using the -w option macro names may not begin with an assembler mnemonic.
+                  Various CMake fixes (thanks Cameron Crawley).
+                  Significant performance improvements, especially for macro-heavy code.
+                  New PUTBASIC implementation supports abbreviations and fixes many tokeniser bugs.
+                  Added SOURCELINE.
+                  Added INCBIN verbose output.
+                  Version resource added (to show the beebasm version in Windows Explorer).
+                  Improved error messages with -di option (thanks Robert Smallshire).
 09/10/2022  1.10  (Potentially breaking) Random number generator now uses 32-bit ints.
                   Documented "$" and "%" as literal prefixes (thanks to cardboardguru76 for pointing this out).
                   Fixed silently treating label references starting with "."
