@@ -1,0 +1,15 @@
+\ beebasm
+MACRO DEC16 a
+LDA a
+BNE skip
+DEC a+1
+.skip
+DEC a
+ENDMACRO
+
+.start
+DEC16 &70
+RTS
+.end
+
+SAVE "code",start,end
