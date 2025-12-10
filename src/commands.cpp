@@ -615,7 +615,7 @@ void LineParser::HandleCpu()
 	int newCpu = args.ParseInt().Range(0, 1);
 	args.CheckComplete();
 
-	ObjectCode::Instance().SetCPU( newCpu );
+	ObjectCode::Instance().SetCPU( static_cast<CPU_TYPE>(newCpu) );
 }
 
 
@@ -1687,6 +1687,17 @@ void LineParser::HandleMacro()
 
 	if ( Ascii::IsAlpha( m_line[ m_column ] ) || m_line[ m_column ] == '_' )
 	{
+		if ( !GlobalData::Instance().RequireDistinctOpcodes() )
+		{
+			// If opcodes are not distinct (i.e. no -w option) then the macro name should not start with an instruction
+			int opcode = GetInstructionAndAdvanceColumn( false, CPU_65C02 );
+			if ( opcode != -1 )
+			{
+				m_column -= m_gaOpcodeTable[ opcode ].m_nameLength;
+				throw AsmException_SyntaxError_InvalidMacroNameMnemonic( m_line, m_column );
+			}
+		}
+
 		macroName = GetSymbolName();
 
 		if ( GlobalData::Instance().IsFirstPass() )
@@ -1881,7 +1892,7 @@ void LineParser::HandleAsm()
 	LineParser parser(m_sourceCode, assembly);
 
 	// Parse the mnemonic, don't require a non-alpha after it.
-	int instruction = parser.GetInstructionAndAdvanceColumn(false);
+	int instruction = parser.GetInstructionAndAdvanceColumn(false, ObjectCode::Instance().GetCPU());
 	if (instruction < 0)
 	{
 		throw AsmException_SyntaxError_MissingAssemblyInstruction( parser.m_line, parser.m_column );

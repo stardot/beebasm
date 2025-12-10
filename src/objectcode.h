@@ -28,6 +28,13 @@
 #include <vector>
 
 
+
+enum CPU_TYPE
+{
+	CPU_6502,
+	CPU_65C02
+};
+
 class ObjectCode
 {
 public:
@@ -39,8 +46,8 @@ public:
 	inline void SetPC( int i )		{ m_PC = i; }
 	inline int GetPC() const		{ return m_PC; }
 
-	void SetCPU( int i );
-	inline int GetCPU() const		{ return m_CPU; }
+	void SetCPU( CPU_TYPE cpu );
+	inline CPU_TYPE GetCPU() const		{ return m_CPU; }
 
 	inline const unsigned char* GetAddr( int i ) const { return m_aMemory + i; }
 
@@ -84,7 +91,7 @@ private:
 	unsigned char				m_aMemory[ 0x10000 ];
 	unsigned char				m_aFlags[ 0x10000 ];
 	int							m_PC;
-	int							m_CPU;
+	CPU_TYPE					m_CPU;
 
 	unsigned char				m_aMapChar[ 96 ];
 

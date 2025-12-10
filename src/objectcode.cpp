@@ -78,7 +78,7 @@ void ObjectCode::Destroy()
 /*************************************************************************************************/
 ObjectCode::ObjectCode()
 	:	m_PC( 0 ),
-	 	m_CPU( 0 )
+		m_CPU( CPU_6502 )
 {
 	memset( m_aMemory, 0, sizeof m_aMemory );
 	memset( m_aFlags, 0, sizeof m_aFlags );
@@ -107,9 +107,9 @@ ObjectCode::~ObjectCode()
 	Set the CPU type
 */
 /*************************************************************************************************/
-void ObjectCode::SetCPU( int i )
+void ObjectCode::SetCPU( CPU_TYPE cpu )
 {
-	m_CPU = i;
+	m_CPU = cpu;
 	SymbolTable::Instance().ChangeBuiltInSymbol( "CPU", m_CPU );
 }
 
@@ -126,7 +126,7 @@ void ObjectCode::InitialisePass()
 {
 	// Reset CPU type and PC
 
-	SetCPU( 0 );
+	SetCPU( CPU_6502 );
 	SetPC( 0 );
 	SymbolTable::Instance().ChangeBuiltInSymbol( "P%", m_PC );
 

@@ -249,6 +249,7 @@ DEFINE_SYNTAX_EXCEPTION( SymbolScopeOutsideMacro, "Symbol scope cannot promote o
 DEFINE_SYNTAX_EXCEPTION( SymbolScopeOutsideFor, "Symbol scope cannot promote outside current FOR loop." );
 DEFINE_SYNTAX_EXCEPTION( SecondPassProblem, "Fatal error: the second assembler pass has generated different code to the first." );
 DEFINE_SYNTAX_EXCEPTION( InvalidMacroName, "Invalid macro name; must start with a letter and contain only letters, numbers and underscore." );
+DEFINE_SYNTAX_EXCEPTION( InvalidMacroNameMnemonic, "Macro name cannot start with an assembler mnemonic.  Use the -w command-line option to allow this." );
 DEFINE_SYNTAX_EXCEPTION( NoNestedMacros, "Cannot define one macro inside another." );
 DEFINE_SYNTAX_EXCEPTION( EndMacroUnexpected, "ENDMACRO encountered without a matching MACRO directive." );
 DEFINE_SYNTAX_EXCEPTION( NoEndMacro, "Unterminated macro (ENDMACRO not found)." );

@@ -132,7 +132,7 @@ const LineParser::OpcodeData	LineParser::m_gaOpcodeTable[] =
 /*************************************************************************************************/
 int LineParser::GetInstructionAndAdvanceColumn()
 {
-	return GetInstructionAndAdvanceColumn(GlobalData::Instance().RequireDistinctOpcodes());
+	return GetInstructionAndAdvanceColumn( GlobalData::Instance().RequireDistinctOpcodes(), ObjectCode::Instance().GetCPU() );
 }
 
 /*************************************************************************************************/
@@ -148,7 +148,7 @@ int LineParser::GetInstructionAndAdvanceColumn()
 				column is modified to index the character after the token
 */
 /*************************************************************************************************/
-int LineParser::GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes)
+int LineParser::GetInstructionAndAdvanceColumn( bool requireDistinctOpcodes,  CPU_TYPE effectiveCPU )
 {
 	for ( int i = 0; i < static_cast<int>( sizeof m_gaOpcodeTable / sizeof( OpcodeData ) ); i++ )
 	{
@@ -158,7 +158,7 @@ int LineParser::GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes)
 		assert(len == strlen( token ));
 
 		// ignore instructions not for current cpu
-		if ( cpu > ObjectCode::Instance().GetCPU() )
+		if ( cpu > effectiveCPU )
 			continue;
 
 		// see if token matches

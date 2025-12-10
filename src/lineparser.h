@@ -24,6 +24,7 @@
 #define LINEPARSER_H_
 
 #include <string>
+#include "objectcode.h"
 #include "value.h"
 
 class SourceCode;
@@ -105,13 +106,12 @@ private:
 		BINARY
 	};
 
-
 	// line parsing methods
 
 	int				GetTokenAndAdvanceColumn();
 	void			HandleToken( int i, int oldColumn );
 	int				GetInstructionAndAdvanceColumn();
-	int				GetInstructionAndAdvanceColumn(bool requireDistinctOpcodes);
+	int				GetInstructionAndAdvanceColumn( bool requireDistinctOpcodes, CPU_TYPE effectiveCPU );
 	int				CheckMacroMatches();
 	bool			MoveToNextAtom( const char* pTerminators = NULL );
 	bool			AdvanceAndCheckEndOfLine();
