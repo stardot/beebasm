@@ -1,0 +1,2 @@
+\ beebasm -help
+\ This test just checks that "-help" is accepted; it doesn't check the output
