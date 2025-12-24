@@ -14,7 +14,7 @@
 #define MINOR_VERSION 11
 
 // Something appended to the version, e.g. "rc2" for a release candidate
-#define SPECIAL_VERSION "rc1"
+#define SPECIAL_VERSION ""
 
 // Currently unused, though they are displayed in Explorer by some versions of Windows
 #define RELEASE_NUMBER 0

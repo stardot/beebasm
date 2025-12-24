@@ -734,7 +734,7 @@ There is also a demo called `"relocdemo.asm"`, which shows how the 'reload addre
 
 ## 9. VERSION HISTORY
 ```
-10/12/2025  1.11  (Potentially breaking) When using the -w option mnemonics must be followed by a space or colon (thanks Homo-carbonis).
+24/12/2025  1.11  (Potentially breaking) When using the -w option mnemonics must be followed by a space or colon (thanks Homo-carbonis).
                   (Potentially breaking) When not using the -w option macro names may not begin with an assembler mnemonic.
                   Various CMake fixes (thanks Cameron Crawley).
                   Significant performance improvements, especially for macro-heavy code.
