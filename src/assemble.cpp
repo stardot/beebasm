@@ -617,6 +617,11 @@ void LineParser::HandleAssembler( int instruction )
 						return;
 					}
 				}
+				else
+				{
+					// Found comma but not Y, e.g. "lda (&70),x" which is invalid
+					throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
+				}
 
 				// Didn't match (ind),Y cleanly - not an indirect form, fall through
 				m_column = oldColumn;
@@ -693,8 +698,8 @@ void LineParser::HandleAssembler( int instruction )
 			}
 			else
 			{
-				// Not (ind,X) - reset and fall through
-				m_column = oldColumn;
+				// Found comma but not X, e.g. "lda (&70,Y)" which is invalid
+				throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
 			}
 		}
 		else
