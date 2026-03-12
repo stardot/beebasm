@@ -1,0 +1,30 @@
+org &2000
+
+.start
+    ; test 1
+    ldx #5
+.loop
+    lda (message + 1)-1,x
+    jsr &ffee
+    dex
+    bne loop
+    
+    ; test 2 - issue 103
+    ldy #0
+    lda (P% + 7) AND &FF00,y
+    
+    ; test 3 - test indirect addressing modes still work ok
+    lda (&70),y
+    sta (&70),y
+    lda (&70,x)
+	rts
+
+	jmp (&2000)
+
+.message
+    equb 0
+    equs "olleH"
+
+.end
+
+save "test", start, end

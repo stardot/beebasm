@@ -586,134 +586,127 @@ void LineParser::HandleAssembler( int instruction )
 			{
 				m_column++;
 
+				if ( AdvanceAndCheckEndOfStatement() && Ascii::ToUpper( m_line[ m_column ] ) == 'Y' )
+				{
+					m_column++;
+
+					if ( !AdvanceAndCheckEndOfStatement() )
+					{
+						// It is definitely (ind),Y - check we can use it
+
+						if ( !HasAddressingMode( instruction, INDY ) )
+						{
+							// addressing mode not allowed
+							throw AsmException_SyntaxError_NoIndirect( m_line, oldColumn );
+						}
+
+						// assemble (ind),Y instruction
+
+						if ( value > 0xFF )
+						{
+							// it's not ZP and it must be
+							throw AsmException_SyntaxError_NotZeroPage( m_line, oldColumn + 1 );
+						}
+
+						if ( value < 0 )
+						{
+							throw AsmException_SyntaxError_BadAddress( m_line, oldColumn + 1 );
+						}
+
+						Assemble2( instruction, INDY, value );
+						return;
+					}
+				}
+				else
+				{
+					// Found comma but not Y, e.g. "lda (&70),x" which is invalid
+					throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
+				}
+
+				// Didn't match (ind),Y cleanly - not an indirect form, fall through
+				m_column = oldColumn;
+			}
+			else
+			{
+				// Something follows ')' that isn't ',' or end-of-statement.
+				// This means the opening '(' was part of a sub-expression like (label+1)-1
+				// Reset and fall through to absolute addressing.
+				m_column = oldColumn;
+			}
+		}
+		else if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
+		{
+			// check (ind,X) or (ind16,X)
+
+			m_column++;
+
+			if ( AdvanceAndCheckEndOfStatement() && Ascii::ToUpper( m_line[ m_column ] ) == 'X' )
+			{
+				m_column++;
+	
 				if ( !AdvanceAndCheckEndOfStatement() )
 				{
 					// We expected more characters but there were none
-					throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
+					throw AsmException_SyntaxError_MismatchedParentheses( m_line, m_column );
 				}
-
-				if ( Ascii::ToUpper( m_line[ m_column ] ) != 'Y' )
+	
+				if ( m_line[ m_column ] != ')' )
 				{
-					// We were expecting an Y
-					throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
+					// We were expecting a close bracket
+					throw AsmException_SyntaxError_MismatchedParentheses( m_line, m_column );
 				}
-
+	
 				m_column++;
-
+	
 				if ( AdvanceAndCheckEndOfStatement() )
 				{
 					// We were not expecting any more characters
 					throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
 				}
-
-				// It is definitely (ind),Y - check we can use it
-
-				if ( !HasAddressingMode( instruction, INDY ) )
+	
+				if ( HasAddressingMode( instruction, IND16X ) )
+				{
+					// It is definitely ind16,x mode
+	
+					Assemble3( instruction, IND16X, value );
+					return;
+				}
+	
+				// It is definitely (ind,X) - check we can use it
+	
+				if ( !HasAddressingMode( instruction, INDX ) )
 				{
 					// addressing mode not allowed
 					throw AsmException_SyntaxError_NoIndirect( m_line, oldColumn );
 				}
-
-				// assemble (ind),Y instruction
-
+	
+				// It is definitely (ind,X) - assemble this instruction
+	
 				if ( value > 0xFF )
 				{
 					// it's not ZP and it must be
 					throw AsmException_SyntaxError_NotZeroPage( m_line, oldColumn + 1 );
 				}
-
+	
 				if ( value < 0 )
 				{
 					throw AsmException_SyntaxError_BadAddress( m_line, oldColumn + 1 );
 				}
-
-				Assemble2( instruction, INDY, value );
+	
+				Assemble2( instruction, INDX, value );
 				return;
 			}
-
-			// If we got here, we identified neither (ind16) nor (ind),Y
-			// Therefore we throw a syntax error
-
-			throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
+			else
+			{
+				// Found comma but not X, e.g. "lda (&70,Y)" which is invalid
+				throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
+			}
 		}
-
-		// check (ind,X) or (ind16,X)
-
-		if ( m_column < m_line.length() && m_line[ m_column ] == ',' )
+		else
 		{
-			m_column++;
-
-			if ( !AdvanceAndCheckEndOfStatement() )
-			{
-				// We expected more characters but there were none
-				throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
-			}
-
-			if ( Ascii::ToUpper( m_line[ m_column ] ) != 'X' )
-			{
-				// We were expecting an X
-				throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
-			}
-
-			m_column++;
-
-			if ( !AdvanceAndCheckEndOfStatement() )
-			{
-				// We expected more characters but there were none
-				throw AsmException_SyntaxError_MismatchedParentheses( m_line, m_column );
-			}
-
-			if ( m_line[ m_column ] != ')' )
-			{
-				// We were expecting a close bracket
-				throw AsmException_SyntaxError_MismatchedParentheses( m_line, m_column );
-			}
-
-			m_column++;
-
-			if ( AdvanceAndCheckEndOfStatement() )
-			{
-				// We were not expecting any more characters
-				throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
-			}
-
-			if ( HasAddressingMode( instruction, IND16X ) )
-			{
-				// It is definitely ind16,x mode
-
-				Assemble3( instruction, IND16X, value );
-				return;
-			}
-
-			// It is definitely (ind,X) - check we can use it
-
-			if ( !HasAddressingMode( instruction, INDX ) )
-			{
-				// addressing mode not allowed
-				throw AsmException_SyntaxError_NoIndirect( m_line, oldColumn );
-			}
-
-			// It is definitely (ind,X) - assemble this instruction
-
-			if ( value > 0xFF )
-			{
-				// it's not ZP and it must be
-				throw AsmException_SyntaxError_NotZeroPage( m_line, oldColumn + 1 );
-			}
-
-			if ( value < 0 )
-			{
-				throw AsmException_SyntaxError_BadAddress( m_line, oldColumn + 1 );
-			}
-
-			Assemble2( instruction, INDX, value );
-			return;
+			// Neither ) nor , found after expression - not an indirect form at all
+			m_column = oldColumn;
 		}
-
-		// If we got here, we identified none of (ind), (ind16), (ind,X), (ind16,X) or (ind),Y
-		// Therefore we throw a syntax error
-
-		throw AsmException_SyntaxError_BadIndirect( m_line, m_column );
 	}
 
 	// if we got here, it must be abs abs,X abs,Y zp zp,X or zp,Y
