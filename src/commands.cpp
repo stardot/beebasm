@@ -1817,9 +1817,9 @@ void LineParser::HandleCopyBlock()
 {
 	ArgListParser args(*this);
 
-	int start = args.ParseInt().Range(0, 0xFFFF);
-	int end = args.ParseInt().Range(0, 0xFFFF);
-	int dest = args.ParseInt().Range(0, 0xFFFF);
+	int start = args.ParseInt().Range(0, 0x10000);
+	int end = args.ParseInt().Range(0, 0x10000);
+	int dest = args.ParseInt().Range(0, 0x10000);
 
 	args.CheckComplete();
 

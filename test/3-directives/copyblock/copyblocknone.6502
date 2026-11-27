@@ -1,0 +1,3 @@
+\ COPYBLOCK - check parameter parsing accepts &10000
+
+COPYBLOCK &10000,&10000,&10000

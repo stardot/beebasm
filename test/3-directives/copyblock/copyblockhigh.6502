@@ -1,0 +1,22 @@
+\ COPYBLOCK - copy including final byte of memory at &FFFF
+
+ORG &FFEE
+
+.start
+
+SKIP 9
+
+.startcode
+LDY #&00
+.loop
+LDA (&70),Y
+STA (&72),Y
+DEY
+BNE loop
+.end
+
+ASSERT(end=&10000)
+
+COPYBLOCK startcode,end,start
+
+SAVE "test", start, end
