@@ -40,7 +40,7 @@ public:
 	{
 	}
 
-	ScopedSymbolName()
+	ScopedSymbolName() : m_id(-1), m_count(-1)
 	{
 	}
 
