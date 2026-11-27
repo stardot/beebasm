@@ -217,14 +217,14 @@ clean:
 
 $(BUILD_DIR)/%.d : %.cpp
 	$(ECHO) Generating dependencies for ... $<
-	$(VB)$(CXX) $(CXXFLAGS) -MM -MF $@ -MT $@ -MT $(@:.d=.o) -c $<
+	$(VB)$(CXX) $(CXXFLAGS) -MM -MF $@ -MT $@ -MT $(@:.d=.o) $<
 
 
 # Build dep file from C file
 
 $(BUILD_DIR)/%.d : %.c
 	$(ECHO) Generating dependencies for ... $<
-	$(VB)$(CC) $(CFLAGS) -MM -MF $@ -MT $@ -MT $(@:.d=.o) -c $<
+	$(VB)$(CC) $(CFLAGS) -MM -MF $@ -MT $@ -MT $(@:.d=.o) $<
 
 
 # Build object from C++ file
